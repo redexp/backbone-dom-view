@@ -27,6 +27,7 @@ helpers = DOMView.helpers = do
     class:   classHelper
     attr:    attrHelper
     prop:    propHelper
+    style:   styleHelper
     on:      onHelper
     connect: connectHelper
 
@@ -41,6 +42,9 @@ helpers = DOMView.helpers = do
 !function propHelper(selector, options)
     prepareNode.call this, @find(selector), 'prop', options
 
+!function styleHelper(selector, options)
+    prepareNode.call this, @find(selector), 'css', options
+
 !function onHelper(selector, options)
     node = @find(selector)
     for own event, func of options
@@ -53,7 +57,9 @@ helpers = DOMView.helpers = do
         if propEvent = prop.match dividedField
             [x, prop, event] = propEvent
         node.on event, ~> this.model.set field, node.prop(prop)
-        this.model.on \change: + field, (model, value) -> node.prop prop, value
+        @model.on \change: + field, (model, value) -> node.prop prop, value
+
+        node.prop prop, @model.get field
 
 #endregion
 

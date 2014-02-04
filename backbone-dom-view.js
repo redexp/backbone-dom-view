@@ -40,6 +40,7 @@
       'class': classHelper,
       attr: attrHelper,
       prop: propHelper,
+      style: styleHelper,
       on: onHelper,
       connect: connectHelper
     };
@@ -53,6 +54,9 @@
     }
     function propHelper(selector, options){
       prepareNode.call(this, this.find(selector), 'prop', options);
+    }
+    function styleHelper(selector, options){
+      prepareNode.call(this, this.find(selector), 'css', options);
     }
     function onHelper(selector, options){
       var node, event, func, own$ = {}.hasOwnProperty, this$ = this;
@@ -83,6 +87,7 @@
         this.model.on('change:' + field, function(model, value){
           return node.prop(prop, value);
         });
+        node.prop(prop, this.model.get(field));
       }
     }
     dividedField = /^(.+)\|(.+)/;
