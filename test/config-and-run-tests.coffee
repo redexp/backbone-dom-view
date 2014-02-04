@@ -1,4 +1,4 @@
-require.config do
+require.config
     shim:
         jquery:
             exports: 'jQuery'
@@ -7,16 +7,16 @@ require.config do
             exports: '_'
 
         backbone:
-            deps: [\underscore \jquery]
+            deps: ['underscore', 'jquery']
             exports: 'Backbone'
 
-        'chai-jquery': [\jquery \chai]
+        'chai-jquery': ['jquery', 'chai']
 
         mocha:
             exports: 'mocha'
 
     paths:
-        jquery:        '../libs/jquery/jquery.min'
+        jquery:        '../libs/jquery/jquery'
         underscore:    '../libs/underscore/underscore-min'
         backbone:      '../libs/backbone/backbone'
         'dom-view':    '../backbone-dom-view'
@@ -25,16 +25,15 @@ require.config do
         'chai-jquery': '../libs/chai-jquery/chai-jquery'
 
 
-(require, chai, chaiJquery, mocha) <- require ['require', 'chai', 'chai-jquery', 'mocha']
+require ['require', 'chai', 'chai-jquery', 'mocha'], (require, chai, chaiJquery, mocha) ->
 
-chai.use chaiJquery
+    chai.use chaiJquery
 
-mocha.setup \bdd
+    mocha.setup 'bdd'
 
-tests = [
-    'main'
-]
+    tests = [
+        'main'
+    ]
 
-<- require tests
-
-mocha.run!
+    require tests, ->
+        mocha.run()

@@ -13,7 +13,9 @@ DOMView = Backbone.DOMView = Backbone.View.extend do
 
         Backbone.View.apply(this, arguments)
 
-        for own selector, helps of this.template
+        return if typeof @template is not \object
+
+        for own selector, helps of @template
             for own helper, options of helps
                 helpers[helper].call(this, selector, options)
 
@@ -28,22 +30,43 @@ helpers = DOMView.helpers = do
     attr:    attrHelper
     prop:    propHelper
     style:   styleHelper
+    html:    htmlHelper
     on:      onHelper
     connect: connectHelper
+    each:    eachHelper
 
 #region =============== Helpers =============================
 
 !function classHelper(selector, options)
-    prepareNode.call this, @find(selector), 'toggleClass', options, (v) -> !!v
+    callJquerySetterMethod.call this, do
+        node:    @find(selector)
+        method: 'toggleClass'
+        options: options
+        wrapper: (v) -> !!v
 
 !function attrHelper(selector, options)
-    prepareNode.call this, @find(selector), 'attr', options
+    callJquerySetterMethod.call this, do
+        node:    @find(selector)
+        method: 'attr'
+        options: options
 
 !function propHelper(selector, options)
-    prepareNode.call this, @find(selector), 'prop', options
+    callJquerySetterMethod.call this, do
+        node:    @find(selector)
+        method: 'prop'
+        options: options
 
 !function styleHelper(selector, options)
-    prepareNode.call this, @find(selector), 'css', options
+    callJquerySetterMethod.call this, do
+        node:    @find(selector)
+        method: 'css'
+        options: options
+
+!function htmlHelper(selector, options)
+    callJqueryMethod.call this, do
+        node:    @find(selector)
+        method: 'html'
+        options: options
 
 !function onHelper(selector, options)
     node = @find(selector)
@@ -70,51 +93,75 @@ fieldEvent =  /@([\w-]+)/
 viewEvent = /#([\w-:\.]+)/
 argSelector = /\|arg\((\d+)\)/
 
-!function prepareNode(node, method, options, wrapper)
+!function callJqueryMethod({node, method, options, wrapper, fieldName})
     model = @model
     view = this
 
-    for own let name, value of options
-        switch typeof value
-        case \string
-            events = value.split /\s+/
-            for let event in events
-                target = model
-                argNum = 0
+    switch typeof options
+    case \string
+        events = options.split /\s+/
+        for let event in events
+            target = model
+            argNum = 0
 
-                event = event.replace argSelector, (x, num)->
-                    argNum := num
-                    return ''
+            event = event.replace argSelector, (x, num)->
+                argNum := num
+                return ''
 
-                func = if wrapper then wrappedHandler else handler
+            event = event.replace fieldEvent, (x, field)->
+                target := model
+                argNum := 1
+                helperHandler target, model.get field
+                return 'change:' + field
 
-                event = event.replace fieldEvent, (x, field)->
-                    target := model
-                    argNum := 1
-                    func target, model.get field
-                    return 'change:' + field
+            event = event.replace viewEvent, (x, event)->
+                target := view
+                helperHandler!
+                return event
 
-                event = event.replace viewEvent, (x, event)->
-                    target := view
-                    func!
-                    return event
+            target.on event, helperHandler
 
-                target.on event, func
-
-                !function handler()
-                    node[method] name, arguments[argNum]
-
-                !function wrappedHandler()
-                    node[method] name, wrapper arguments[argNum]
-
-        case \object
-            for own let event, func of value
-                handler = if wrapper
-                    -> node[method] name, wrapper func.apply view, arguments
+            !function helperHandler()
+                value = arguments[argNum]
+                if wrapper then value = wrapper value
+                if fieldName
+                    node[method] fieldName, value
                 else
-                    -> node[method] name, func.apply view, arguments
+                    node[method] value
 
-                model.on event, handler
+    case \object
+        for own let event, func of options
+            model.on event, helperHandler
+
+            !function helperHandler()
+                value = func.apply view, arguments
+                if wrapper then value = wrapper value
+                if fieldName
+                    node[method] fieldName, value
+                else
+                    node[method] value
+
+    case \function
+        value = options.apply view, arguments
+        if wrapper then value = wrapper value
+        if fieldName
+            node[method] fieldName, value
+        else
+            node[method] value
+
+!function callJquerySetterMethod(ops)
+    {options} = ops
+    for own name, value of options
+        ops.fieldName = name
+        ops.options = value
+        callJqueryMethod.call this, ops
+
+#endregion
+
+#region =============== Each helper =========================
+
+!function eachHelper(selector, options)
+    asd!
 
 #endregion
 

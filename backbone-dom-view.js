@@ -20,6 +20,9 @@
           }].concat(rest));
         }
         Backbone.View.apply(this, arguments);
+        if (typeof this.template !== 'object') {
+          return;
+        }
         for (selector in ref$ = this.template) if (own$.call(ref$, selector)) {
           helps = ref$[selector];
           for (helper in helps) if (own$.call(helps, helper)) {
@@ -41,22 +44,48 @@
       attr: attrHelper,
       prop: propHelper,
       style: styleHelper,
+      html: htmlHelper,
       on: onHelper,
-      connect: connectHelper
+      connect: connectHelper,
+      each: eachHelper
     };
     function classHelper(selector, options){
-      prepareNode.call(this, this.find(selector), 'toggleClass', options, function(v){
-        return !!v;
+      callJquerySetterMethod.call(this, {
+        node: this.find(selector),
+        method: 'toggleClass',
+        options: options,
+        wrapper: function(v){
+          return !!v;
+        }
       });
     }
     function attrHelper(selector, options){
-      prepareNode.call(this, this.find(selector), 'attr', options);
+      callJquerySetterMethod.call(this, {
+        node: this.find(selector),
+        method: 'attr',
+        options: options
+      });
     }
     function propHelper(selector, options){
-      prepareNode.call(this, this.find(selector), 'prop', options);
+      callJquerySetterMethod.call(this, {
+        node: this.find(selector),
+        method: 'prop',
+        options: options
+      });
     }
     function styleHelper(selector, options){
-      prepareNode.call(this, this.find(selector), 'css', options);
+      callJquerySetterMethod.call(this, {
+        node: this.find(selector),
+        method: 'css',
+        options: options
+      });
+    }
+    function htmlHelper(selector, options){
+      callJqueryMethod.call(this, {
+        node: this.find(selector),
+        method: 'html',
+        options: options
+      });
     }
     function onHelper(selector, options){
       var node, event, func, own$ = {}.hasOwnProperty, this$ = this;
@@ -94,67 +123,95 @@
     fieldEvent = /@([\w-]+)/;
     viewEvent = /#([\w-:\.]+)/;
     argSelector = /\|arg\((\d+)\)/;
-    function prepareNode(node, method, options, wrapper){
-      var model, view, i$, own$ = {}.hasOwnProperty;
+    function callJqueryMethod(arg$){
+      var node, method, options, wrapper, fieldName, model, view, events, i$, len$, value, own$ = {}.hasOwnProperty;
+      node = arg$.node, method = arg$.method, options = arg$.options, wrapper = arg$.wrapper, fieldName = arg$.fieldName;
       model = this.model;
       view = this;
-      for (i$ in options) if (own$.call(options, i$)) {
-        (fn$.call(this, i$, options[i$]));
-      }
-      function fn$(name, value){
-        var events, i$, len$, own$ = {}.hasOwnProperty;
-        switch (typeof value) {
-        case 'string':
-          events = value.split(/\s+/);
-          for (i$ = 0, len$ = events.length; i$ < len$; ++i$) {
-            (fn$.call(this, events[i$]));
-          }
-          break;
-        case 'object':
-          for (i$ in value) if (own$.call(value, i$)) {
-            (fn1$.call(this, i$, value[i$]));
-          }
+      switch (typeof options) {
+      case 'string':
+        events = options.split(/\s+/);
+        for (i$ = 0, len$ = events.length; i$ < len$; ++i$) {
+          (fn$.call(this, events[i$]));
         }
-        function fn$(event){
-          var target, argNum, func;
+        break;
+      case 'object':
+        for (i$ in options) if (own$.call(options, i$)) {
+          (fn1$.call(this, i$, options[i$]));
+        }
+        break;
+      case 'function':
+        value = options.apply(view, arguments);
+        if (wrapper) {
+          value = wrapper(value);
+        }
+        if (fieldName) {
+          node[method](fieldName, value);
+        } else {
+          node[method](value);
+        }
+      }
+      function fn$(event){
+        var target, argNum;
+        target = model;
+        argNum = 0;
+        event = event.replace(argSelector, function(x, num){
+          argNum = num;
+          return '';
+        });
+        event = event.replace(fieldEvent, function(x, field){
           target = model;
-          argNum = 0;
-          event = event.replace(argSelector, function(x, num){
-            argNum = num;
-            return '';
-          });
-          func = wrapper ? wrappedHandler : handler;
-          event = event.replace(fieldEvent, function(x, field){
-            target = model;
-            argNum = 1;
-            func(target, model.get(field));
-            return 'change:' + field;
-          });
-          event = event.replace(viewEvent, function(x, event){
-            target = view;
-            func();
-            return event;
-          });
-          target.on(event, func);
-          function handler(){
-            node[method](name, arguments[argNum]);
+          argNum = 1;
+          helperHandler(target, model.get(field));
+          return 'change:' + field;
+        });
+        event = event.replace(viewEvent, function(x, event){
+          target = view;
+          helperHandler();
+          return event;
+        });
+        target.on(event, helperHandler);
+        function helperHandler(){
+          var value;
+          value = arguments[argNum];
+          if (wrapper) {
+            value = wrapper(value);
           }
-          function wrappedHandler(){
-            node[method](name, wrapper(arguments[argNum]));
+          if (fieldName) {
+            node[method](fieldName, value);
+          } else {
+            node[method](value);
           }
-        }
-        function fn1$(event, func){
-          var handler;
-          handler = wrapper
-            ? function(){
-              return node[method](name, wrapper(func.apply(view, arguments)));
-            }
-            : function(){
-              return node[method](name, func.apply(view, arguments));
-            };
-          model.on(event, handler);
         }
       }
+      function fn1$(event, func){
+        model.on(event, helperHandler);
+        function helperHandler(){
+          var value;
+          value = func.apply(view, arguments);
+          if (wrapper) {
+            value = wrapper(value);
+          }
+          if (fieldName) {
+            node[method](fieldName, value);
+          } else {
+            node[method](value);
+          }
+        }
+      }
+    }
+    function callJquerySetterMethod(ops){
+      var options, name, value, own$ = {}.hasOwnProperty;
+      options = ops.options;
+      for (name in options) if (own$.call(options, name)) {
+        value = options[name];
+        ops.fieldName = name;
+        ops.options = value;
+        callJqueryMethod.call(this, ops);
+      }
+    }
+    function eachHelper(selector, options){
+      asd();
     }
     return DOMView;
   });
