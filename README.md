@@ -113,4 +113,6 @@ Predefined methods:
 * fadeOut
 * slideOut
 
+To add more methods just add them to `Backbone.DOMView.helpers.each.delHandlers` object
+
 [Example](test/main.coffee#L237-L262)
