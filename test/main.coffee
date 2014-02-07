@@ -224,13 +224,13 @@ define ['chai', 'backbone', 'dom-view'], ({expect}, Backbone, DomView) ->
                 listView = new ListView list
                 el = listView.$el
 
-                expect(el.find 'li').to.be.of.length 2
+                expect(el.find('li').length).to.equal 2
 
                 list.add {name: 'Max'}
 
-                expect(el.find 'li').to.be.of.length 3
+                expect(el.find('li').length).to.equal 3
 
-                list.at(1).remove()
+                list.at(1).destroy()
 
                 expect(el).to.have.text 'JackMax'
 
@@ -245,14 +245,10 @@ define ['chai', 'backbone', 'dom-view'], ({expect}, Backbone, DomView) ->
                     template: '':
                         each:
                             view: View
-                            addHandler: (ul, li, item) ->
+                            addHandler: 'prepend'
+                            delHandler: (ul, view) ->
                                 expect(this).to.be.instanceOf ListView
-                                expect(item).to.be.instanceOf Backbone.Model
-                                ul.prepend li
-
-                            delHandler: (ul, li, item) ->
-                                expect(this).to.be.instanceOf ListView
-                                expect(item).to.be.instanceOf Backbone.Model
+                                expect(view).to.be.instanceOf View
 
                 list = new Backbone.Collection [{name: 'Jack'}, {name: 'Bob'}]
 
@@ -261,6 +257,28 @@ define ['chai', 'backbone', 'dom-view'], ({expect}, Backbone, DomView) ->
 
                 expect(el).to.have.text 'BobJack'
 
-                list.at(0).remove()
+                list.at(0).destroy()
 
                 expect(el).to.have.text 'BobJack'
+
+            it 'should run custom view function', ->
+                LiView = DomView.extend
+                    tagName: 'li'
+
+                DivView = DomView.extend
+                    tagName: 'div'
+
+                ListView = DomView.extend
+                    tagName: 'ul'
+                    template: '':
+                        each:
+                            view: (model)->
+                                if model.get('type') is 'li' then LiView else DivView
+
+                list = new Backbone.Collection [{type: 'li'}, {type: 'div'}]
+
+                listView = new ListView list
+                el = listView.$el
+
+                expect(el.find('li').length).to.be.equal 1
+                expect(el.find('div').length).to.be.equal 1

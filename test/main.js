@@ -311,15 +311,15 @@
           ]);
           listView = new ListView(list);
           el = listView.$el;
-          expect(el.find('li')).to.be.of.length(2);
+          expect(el.find('li').length).to.equal(2);
           list.add({
             name: 'Max'
           });
-          expect(el.find('li')).to.be.of.length(3);
-          list.at(1).remove();
+          expect(el.find('li').length).to.equal(3);
+          list.at(1).destroy();
           return expect(el).to.have.text('JackMax');
         });
-        return it('should run custom insertion/remove function', function() {
+        it('should run custom insertion/remove function', function() {
           var ListView, View, el, list, listView;
           View = DomView.extend({
             tagName: 'li',
@@ -335,14 +335,10 @@
               '': {
                 each: {
                   view: View,
-                  addHandler: function(ul, li, item) {
+                  addHandler: 'prepend',
+                  delHandler: function(ul, view) {
                     expect(this).to.be.instanceOf(ListView);
-                    expect(item).to.be.instanceOf(Backbone.Model);
-                    return ul.prepend(li);
-                  },
-                  delHandler: function(ul, li, item) {
-                    expect(this).to.be.instanceOf(ListView);
-                    return expect(item).to.be.instanceOf(Backbone.Model);
+                    return expect(view).to.be.instanceOf(View);
                   }
                 }
               }
@@ -358,8 +354,44 @@
           listView = new ListView(list);
           el = listView.$el;
           expect(el).to.have.text('BobJack');
-          list.at(0).remove();
-          return expect(el).to.have.text('Max');
+          list.at(0).destroy();
+          return expect(el).to.have.text('BobJack');
+        });
+        return it('should run custom view function', function() {
+          var DivView, LiView, ListView, el, list, listView;
+          LiView = DomView.extend({
+            tagName: 'li'
+          });
+          DivView = DomView.extend({
+            tagName: 'div'
+          });
+          ListView = DomView.extend({
+            tagName: 'ul',
+            template: {
+              '': {
+                each: {
+                  view: function(model) {
+                    if (model.get('type') === 'li') {
+                      return LiView;
+                    } else {
+                      return DivView;
+                    }
+                  }
+                }
+              }
+            }
+          });
+          list = new Backbone.Collection([
+            {
+              type: 'li'
+            }, {
+              type: 'div'
+            }
+          ]);
+          listView = new ListView(list);
+          el = listView.$el;
+          expect(el.find('li').length).to.be.equal(1);
+          return expect(el.find('div').length).to.be.equal(1);
         });
       });
     });

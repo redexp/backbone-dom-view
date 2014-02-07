@@ -8,10 +8,10 @@ Backbone <- def ['backbone']
 
 DOMView = Backbone.DOMView = Backbone.View.extend do
     constructor: (ops, ...rest) !->
-        if ops instanceof Backbone.Model
+        if ops instanceof Backbone.Model or ops instanceof Backbone.Collection
             Backbone.View.apply(this, [model: ops].concat rest)
-
-        Backbone.View.apply(this, arguments)
+        else
+            Backbone.View.apply(this, arguments)
 
         return if typeof @template is not \object
 
@@ -161,7 +161,46 @@ argSelector = /\|arg\((\d+)\)/
 #region =============== Each helper =========================
 
 !function eachHelper(selector, options)
-    asd!
+    view = this
+    holder = @find selector
+    list = if field = options.field then @model.get field else @model
+
+    options.viewList = {}
+
+    options.addHandler ?= \append
+    options.delHandler ?= \remove
+
+    if typeof options.addHandler is \string
+        options.addHandler = eachHelper.addHandlers[options.addHandler]
+
+    if typeof options.delHandler is \string
+        options.delHandler = eachHelper.delHandlers[options.delHandler]
+
+    view.listenTo list, \add, eachAddListener
+    view.listenTo list, \remove, eachRemoveListener
+
+    list.each eachAddListener
+
+    !function eachAddListener(model)
+        View = if options.view.hasOwnProperty '__super__' then options.view else options.view.call view, model
+        subView = new View model: model
+        options.viewList[model.cid] = subView
+        options.addHandler.call view, holder, subView
+
+    !function eachRemoveListener(model)
+        subView = delete options.viewList[model.cid]
+        options.delHandler.call view, holder, subView
+
+eachHelper.addHandlers = do
+    append: (ul, view)!-> ul.append view.$el
+    prepend: (ul, view)!-> ul.prepend view.$el
+    fadeIn:  (ul, view)!-> view.$el.hide!.appendTo(ul).fadeIn!
+    slideIn: (ul, view)!-> view.$el.hide!.appendTo(ul).slideIn!
+
+eachHelper.delHandlers = do
+    remove: (ul, view)!-> view.$el.remove!
+    fadeOut:  (ul, view)!-> view.$el.fadeOut -> view.$el.remove!
+    slideOut: (ul, view)!-> view.$el.slideOut -> view.$el.remove!
 
 #endregion
 

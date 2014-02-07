@@ -14,12 +14,13 @@
       constructor: function(ops){
         var rest, selector, ref$, helps, helper, options, own$ = {}.hasOwnProperty;
         rest = slice$.call(arguments, 1);
-        if (ops instanceof Backbone.Model) {
+        if (ops instanceof Backbone.Model || ops instanceof Backbone.Collection) {
           Backbone.View.apply(this, [{
             model: ops
           }].concat(rest));
+        } else {
+          Backbone.View.apply(this, arguments);
         }
-        Backbone.View.apply(this, arguments);
         if (typeof this.template !== 'object') {
           return;
         }
@@ -211,8 +212,70 @@
       }
     }
     function eachHelper(selector, options){
-      asd();
+      var view, holder, list, field;
+      view = this;
+      holder = this.find(selector);
+      list = (field = options.field)
+        ? this.model.get(field)
+        : this.model;
+      options.viewList = {};
+      options.addHandler == null && (options.addHandler = 'append');
+      options.delHandler == null && (options.delHandler = 'remove');
+      if (typeof options.addHandler === 'string') {
+        options.addHandler = eachHelper.addHandlers[options.addHandler];
+      }
+      if (typeof options.delHandler === 'string') {
+        options.delHandler = eachHelper.delHandlers[options.delHandler];
+      }
+      view.listenTo(list, 'add', eachAddListener);
+      view.listenTo(list, 'remove', eachRemoveListener);
+      list.each(eachAddListener);
+      function eachAddListener(model){
+        var View, subView;
+        View = options.view.hasOwnProperty('__super__')
+          ? options.view
+          : options.view.call(view, model);
+        subView = new View({
+          model: model
+        });
+        options.viewList[model.cid] = subView;
+        options.addHandler.call(view, holder, subView);
+      }
+      function eachRemoveListener(model){
+        var subView, ref$, key$, ref1$;
+        subView = (ref1$ = (ref$ = options.viewList)[key$ = model.cid], delete ref$[key$], ref1$);
+        options.delHandler.call(view, holder, subView);
+      }
     }
+    eachHelper.addHandlers = {
+      append: function(ul, view){
+        ul.append(view.$el);
+      },
+      prepend: function(ul, view){
+        ul.prepend(view.$el);
+      },
+      fadeIn: function(ul, view){
+        view.$el.hide().appendTo(ul).fadeIn();
+      },
+      slideIn: function(ul, view){
+        view.$el.hide().appendTo(ul).slideIn();
+      }
+    };
+    eachHelper.delHandlers = {
+      remove: function(ul, view){
+        view.$el.remove();
+      },
+      fadeOut: function(ul, view){
+        view.$el.fadeOut(function(){
+          return view.$el.remove();
+        });
+      },
+      slideOut: function(ul, view){
+        view.$el.slideOut(function(){
+          return view.$el.remove();
+        });
+      }
+    };
     return DOMView;
   });
 }).call(this);
