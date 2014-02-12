@@ -1,24 +1,25 @@
 {
-  "name": "backbone-dom-view",
-  "main": "backbone-dom-view.js",
-  "version": "1.0.0",
-  "homepage": "https://github.com/redexp/backbone-dom-view",
-  "authors": [
-    "Sergii Kliuchnyk <sergiikliuchnyk@gmail.com>"
-  ],
-  "description": "Better View class for Backbone",
-  "keywords": [
-    "backbone",
-    "view",
-    "dom"
-  ],
-  "license": "MIT",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "libs",
-    "test",
-    "tests"
-  ]
+    "name":         "backbone-dom-view",
+    "main":         "backbone-dom-view.js",
+    "version":      "1.1.0",
+    "homepage":     "https://github.com/redexp/backbone-dom-view",
+    "authors":      [
+        "Sergii Kliuchnyk <sergiikliuchnyk@gmail.com>"
+    ],
+    "description":  "Better View class for Backbone",
+    "keywords":     [
+        "backbone",
+        "view",
+        "dom"
+    ],
+    "license":      "MIT",
+    "ignore":       [
+        "**/.*",
+        "libs",
+        "test"
+    ],
+    "dependencies": {
+        "backbone":   "~",
+        "jquery":     ">=1.7.0"
+    }
 }
