@@ -24,6 +24,16 @@ View = Backbone.DOMView.extend
 ```
 Which means - on change `title` field, change `.title` innerHTML and when `is_done` will be true add class `done`
 
+## Installation
+
+Bower:
+`bower install backbone-dom-view`
+
+Script:
+`<script src="backbone-dom-view.js"></script>`
+
+**RequireJS ready**
+
 ## Empty selector
 
 You can use empty string to pointing to $el itself.
@@ -46,6 +56,9 @@ view.$el.hasClass 'tested' #>> true
 * [on](#on)
 * [connect](#connect)
 * [each](#each)
+
+You can define your helpers, just add them to `Backbone.DOMView.helpers` object.
+Arguments of helpers are selector and options.
 
 ### class
 
