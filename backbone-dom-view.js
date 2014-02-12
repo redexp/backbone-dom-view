@@ -89,14 +89,16 @@
       });
     }
     function onHelper(selector, options){
-      var node, event, func, own$ = {}.hasOwnProperty, this$ = this;
+      var node, i$, own$ = {}.hasOwnProperty;
       node = this.find(selector);
-      for (event in options) if (own$.call(options, event)) {
-        func = options[event];
-        node.on(event, fn$);
+      for (i$ in options) if (own$.call(options, i$)) {
+        (fn$.call(this, i$, options[i$]));
       }
-      function fn$(){
-        return func.apply(this$, arguments);
+      function fn$(event, func){
+        var this$ = this;
+        node.on(event, function(){
+          return func.apply(this$, arguments);
+        });
       }
     }
     function connectHelper(selector, options){

@@ -71,7 +71,7 @@ helpers = DOMView.helpers = do
 
 !function onHelper(selector, options)
     node = @find(selector)
-    for own event, func of options
+    for own let event, func of options
         node.on event, ~> func.apply this, arguments
 
 !function connectHelper(selector, options)
