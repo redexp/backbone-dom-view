@@ -24,6 +24,9 @@ View = Backbone.DOMView.extend
 ```
 Which means - on change `title` field, change `.title` innerHTML and when `is_done` will be true add class `done`
 
+In `examples/todos` directory you can find rewritten version of [Todos](http://backbonejs.org/examples/todos/index.html)
+so you can compare become it better or not
+
 ## Installation
 
 Bower:
