@@ -117,7 +117,9 @@
           return this$.model.set(field, node.prop(prop));
         });
         this.model.on('change:' + field, function(model, value){
-          return node.prop(prop, value);
+          if (value !== node.prop(prop)) {
+            return node.prop(prop, value);
+          }
         });
         node.prop(prop, this.model.get(field));
       }
