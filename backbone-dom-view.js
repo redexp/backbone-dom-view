@@ -14,6 +14,7 @@
       constructor: function(ops){
         var rest, selector, ref$, helps, helper, options, own$ = {}.hasOwnProperty;
         rest = slice$.call(arguments, 1);
+        this.initialize = function(){};
         if (ops instanceof Backbone.Model || ops instanceof Backbone.Collection) {
           Backbone.View.apply(this, [{
             model: ops
@@ -21,16 +22,17 @@
         } else {
           Backbone.View.apply(this, arguments);
         }
-        if (typeof this.template !== 'object') {
-          return;
-        }
-        for (selector in ref$ = this.template) if (own$.call(ref$, selector)) {
-          helps = ref$[selector];
-          for (helper in helps) if (own$.call(helps, helper)) {
-            options = helps[helper];
-            helpers[helper].call(this, selector, options);
+        if (typeof this.template === 'object') {
+          for (selector in ref$ = this.template) if (own$.call(ref$, selector)) {
+            helps = ref$[selector];
+            for (helper in helps) if (own$.call(helps, helper)) {
+              options = helps[helper];
+              helpers[helper].call(this, selector, options);
+            }
           }
         }
+        delete this.initialize;
+        this.initialize();
       },
       find: function(selector){
         if (selector) {
