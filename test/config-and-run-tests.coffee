@@ -32,7 +32,10 @@ require ['require', 'chai', 'chai-jquery', 'mocha'], (require, chai, chaiJquery,
     mocha.setup 'bdd'
 
     tests = [
-        'main'
+        'class-prop-attr-style-html'
+        'on'
+        'connect'
+        'each'
     ]
 
     require tests, ->

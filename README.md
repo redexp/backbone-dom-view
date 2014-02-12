@@ -14,12 +14,27 @@ View = Backbone.DOMView.extend
 
 For example view for Todo model
 ```coffeescript
-TodoView = Backbone.DOMView.extend
+View = Backbone.DOMView.extend
     template:
         ".title":
             html: "@title"
+        ".state":
+            class:
+                "done": "@is_done"
 ```
-Which means - on change `title` field, change `.title` innerHTML
+Which means - on change `title` field, change `.title` innerHTML and when `is_done` will be true add class `done`
+
+## Empty selector
+
+You can use empty string to pointing to $el itself.
+```coffeescript
+View = Backbone.DOMView.extend
+    template: "":
+        class: "tested": "@tested"
+
+view = new View new Backbone.Model tested: yes
+view.$el.hasClass 'tested' #>> true
+```
 
 ## Helpers
 
@@ -37,23 +52,23 @@ Which means - on change `title` field, change `.title` innerHTML
 This helper takes object where keys are space separated css classes and values are space separated model events.
 First argument of event will be passed to jquery `toggleClass`.
 
-[Example](test/main.coffee#L11-L41)
+[Example](test/class-prop-attr-style-html.coffee#L10-L40)
 
 To change number of argument you can use `|arg(number)` helper after event name
 
-[Example](test/main.coffee#L43-L73)
+[Example](test/class-prop-attr-style-html.coffee#L42-L72)
 
 To bind class with model field you can `@fieldName` notation
 
-[Example](test/main.coffee#L75-L107)
+[Example](test/class-prop-attr-style-html.coffee#L74-L106)
 
 To handle view events just add `#` before event name
 
-[Example](test/main.coffee#L109-L139)
+[Example](test/class-prop-attr-style-html.coffee#L108-L138)
 
 To do some calculation before passing event value, use object where keys are events and values are functions
 
-[Example](test/main.coffee#L141-L173)
+[Example](test/class-prop-attr-style-html.coffee#L140-L172)
 
 ### attr and prop
 
@@ -72,14 +87,14 @@ Works just like `class` helper only difference that it not takes names of classe
 Helper for jquery `.on()` method.
 Takes object where keys are events and values are functions
 
-[Example](test/main.coffee#L176-L184)
+[Example](test/on.coffee)
 
 ### connect
 
 Simply binds field of model with property of element by some event (default is `change`).
 To set event just add `|eventName` after property name.
 
-[Example](test/main.coffee#L187-L207)
+[Example](test/connect.coffee)
 
 ### each
 
@@ -88,11 +103,11 @@ It has three options: view, addHandler and delHandler.
 
 `view:` is view class for added model
 
-[Example](test/main.coffee#L210-L235)
+[Example](test/each.coffee#L9-L34)
 
 or you can set function which should return view class.
 
-[Example](test/main.coffee#L264-L284)
+[Example](test/each.coffee#L36-L56)
 
 `addHandler:` is a function which takes two arguments: jquery element and view object of added model.
 In this function you should add element of model view to jquery element.
@@ -115,4 +130,4 @@ Predefined methods:
 
 To add more methods just add them to `Backbone.DOMView.helpers.each.delHandlers` object
 
-[Example](test/main.coffee#L237-L262)
+[Example](test/each.coffee#L58-L83)

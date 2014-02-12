@@ -185,8 +185,19 @@
           }
         }
       }
-      function fn1$(event, func){
-        model.on(event, helperHandler);
+      function fn1$(events, func){
+        var i$, len$, event, target;
+        events = events.split(/\s+/);
+        for (i$ = 0, len$ = events.length; i$ < len$; ++i$) {
+          event = events[i$];
+          if (viewEvent.test(event)) {
+            event = event.replace('#', '');
+            target = view;
+          } else {
+            target = model;
+          }
+          target.on(event, helperHandler);
+        }
         function helperHandler(){
           var value;
           value = func.apply(view, arguments);

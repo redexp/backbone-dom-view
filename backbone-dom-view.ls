@@ -130,8 +130,16 @@ argSelector = /\|arg\((\d+)\)/
                     node[method] value
 
     case \object
-        for own let event, func of options
-            model.on event, helperHandler
+        for own let events, func of options
+            events = events.split /\s+/
+            for event in events
+                if viewEvent.test event
+                    event = event.replace \# ''
+                    target = view
+                else
+                    target = model
+
+                target.on event, helperHandler
 
             !function helperHandler()
                 value = func.apply view, arguments
