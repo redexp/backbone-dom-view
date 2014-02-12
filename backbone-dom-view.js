@@ -14,7 +14,6 @@
       constructor: function(ops){
         var rest, selector, ref$, helps, helper, options, own$ = {}.hasOwnProperty;
         rest = slice$.call(arguments, 1);
-        this.initialize = function(){};
         if (ops instanceof Backbone.Model || ops instanceof Backbone.Collection) {
           Backbone.View.apply(this, [{
             model: ops
@@ -31,8 +30,7 @@
             }
           }
         }
-        delete this.initialize;
-        this.initialize();
+        this.trigger('template-ready');
       },
       find: function(selector){
         if (selector) {

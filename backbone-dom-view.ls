@@ -8,9 +8,6 @@ Backbone <- def ['backbone']
 
 DOMView = Backbone.DOMView = Backbone.View.extend do
     constructor: (ops, ...rest) !->
-        # do not init until template create
-        this.initialize = ->
-
         if ops instanceof Backbone.Model or ops instanceof Backbone.Collection
             Backbone.View.apply(this, [model: ops].concat rest)
         else
@@ -21,10 +18,7 @@ DOMView = Backbone.DOMView = Backbone.View.extend do
                 for own helper, options of helps
                     helpers[helper].call(this, selector, options)
 
-        # remove only self init method not proto
-        delete this.initialize
-
-        this.initialize()
+        this.trigger \template-ready
 
     find: (selector) ->
         if selector
