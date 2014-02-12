@@ -4,7 +4,7 @@
     "version":      "1.1.0",
     "homepage":     "https://github.com/redexp/backbone-dom-view",
     "authors":      [
-        "Sergii Kliuchnyk <sergiikliuchnyk@gmail.com>"
+        "Sergii Kliuchnyk <redexp@ukr.net>"
     ],
     "description":  "Better View class for Backbone",
     "keywords":     [
