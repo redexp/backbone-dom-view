@@ -14,11 +14,12 @@ DOMView = Backbone.DOMView = Backbone.View.extend do
             Backbone.View.apply(this, arguments)
 
         if typeof @template is \object
+            @template = Backbone.$.extend true, {}, @template
             for own selector, helps of @template
                 for own helper, options of helps
                     helpers[helper].call(this, selector, options)
 
-        this.trigger \template-ready
+            this.trigger \template-ready
 
     find: (selector) ->
         if selector
@@ -191,8 +192,8 @@ argSelector = /\|arg\((\d+)\)/
     list.each eachAddListener
 
     !function eachAddListener(model)
-        View = if options.view.hasOwnProperty '__super__' then options.view else options.view.call view, model
-        subView = new View model: model
+        View = if isClass options.view then options.view else options.view.call view, model
+        subView = if isClass View then new View(model: model) else View
         options.viewList[model.cid] = subView
         options.addHandler.call view, holder, subView
 
@@ -210,6 +211,9 @@ eachHelper.delHandlers = do
     remove: (ul, view)!-> view.$el.remove!
     fadeOut:  (ul, view)!-> view.$el.fadeOut -> view.$el.remove!
     slideOut: (ul, view)!-> view.$el.slideOut -> view.$el.remove!
+
+function isClass(func)
+    return func.hasOwnProperty '__super__'
 
 #endregion
 

@@ -1,4 +1,4 @@
-define ['chai', 'backbone', 'dom-view'], ({expect}, Backbone, DomView) ->
+define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) ->
 
     model = null
 

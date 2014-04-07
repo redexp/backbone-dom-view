@@ -22,6 +22,7 @@
           Backbone.View.apply(this, arguments);
         }
         if (typeof this.template === 'object') {
+          this.template = Backbone.$.extend(true, {}, this.template);
           for (selector in ref$ = this.template) if (own$.call(ref$, selector)) {
             helps = ref$[selector];
             for (helper in helps) if (own$.call(helps, helper)) {
@@ -29,8 +30,8 @@
               helpers[helper].call(this, selector, options);
             }
           }
+          this.trigger('template-ready');
         }
-        this.trigger('template-ready');
       },
       find: function(selector){
         if (selector) {
@@ -247,12 +248,12 @@
       list.each(eachAddListener);
       function eachAddListener(model){
         var View, subView;
-        View = options.view.hasOwnProperty('__super__')
+        View = isClass(options.view)
           ? options.view
           : options.view.call(view, model);
-        subView = new View({
+        subView = isClass(View) ? new View({
           model: model
-        });
+        }) : View;
         options.viewList[model.cid] = subView;
         options.addHandler.call(view, holder, subView);
       }
@@ -291,6 +292,9 @@
         });
       }
     };
+    function isClass(func){
+      return func.hasOwnProperty('__super__');
+    }
     return DOMView;
   });
 }).call(this);

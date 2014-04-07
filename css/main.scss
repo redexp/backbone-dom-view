@@ -1,0 +1,24 @@
+.products {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+        float: left;
+        padding: 0;
+        margin: 0;
+        border: 1px solid #000000;
+
+        h3 {
+            padding: 4px;
+            margin: 0;
+        }
+
+        .price {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+        }
+    }
+}

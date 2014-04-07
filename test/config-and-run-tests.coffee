@@ -16,16 +16,16 @@ require.config
             exports: 'mocha'
 
     paths:
-        jquery:        '../libs/jquery/jquery'
-        underscore:    '../libs/underscore/underscore-min'
+        jquery:        '../libs/jquery/dist/jquery.min'
+        underscore:    '../libs/underscore/underscore'
         backbone:      '../libs/backbone/backbone'
-        'dom-view':    '../backbone-dom-view'
+        'backbone-dom-view':    '../backbone-dom-view'
         mocha:         '../libs/mocha/mocha'
         chai:          '../libs/chai/chai'
         'chai-jquery': '../libs/chai-jquery/chai-jquery'
 
 
-require ['require', 'chai', 'chai-jquery', 'mocha'], (require, chai, chaiJquery, mocha) ->
+require ['chai', 'chai-jquery', 'mocha'], (chai, chaiJquery, mocha) ->
 
     chai.use chaiJquery
 
