@@ -33,6 +33,7 @@ helpers = DOMView.helpers = do
     prop:    propHelper
     style:   styleHelper
     html:    htmlHelper
+    text:    textHelper
     on:      onHelper
     connect: connectHelper
     each:    eachHelper
@@ -70,6 +71,12 @@ helpers = DOMView.helpers = do
         method: 'html'
         options: options
 
+!function textHelper(selector, options)
+    callJqueryMethod.call this, do
+        node:    @find(selector)
+        method: 'text'
+        options: options
+
 !function onHelper(selector, options)
     node = @find(selector)
     for own let event, func of options
@@ -82,7 +89,7 @@ helpers = DOMView.helpers = do
         if propEvent = prop.match dividedField
             [x, prop, event] = propEvent
         node.on event, ~> this.model.set field, node.prop(prop)
-        @model.on \change: + field, (model, value) -> if value is not node.prop(prop) then node.prop prop, value
+        @listenTo model, \change: + field, (model, value) -> if value is not node.prop(prop) then node.prop prop, value
 
         node.prop prop, @model.get field
 
@@ -95,69 +102,69 @@ fieldEvent =  /@([\w-]+)/
 viewEvent = /#([\w-:\.]+)/
 argSelector = /\|arg\((\d+)\)/
 
-!function callJqueryMethod({node, method, options, wrapper, fieldName})
+!function callJqueryMethod({node, method, options, wrapper, fieldName}:ops)
     model = @model
     view = this
+    ops.view = view
+    ops.model = view.model
 
     switch typeof options
     case \string
-        events = options.split /\s+/
-        for let event in events
-            target = model
-            argNum = 0
-
-            event = event.replace argSelector, (x, num)->
-                argNum := num
-                return ''
-
-            event = event.replace fieldEvent, (x, field)->
-                target := model
-                argNum := 1
-                helperHandler target, model.get field
-                return 'change:' + field
-
-            event = event.replace viewEvent, (x, event)->
-                target := view
-                helperHandler!
-                return event
-
-            target.on event, helperHandler
-
-            !function helperHandler()
-                value = arguments[argNum]
-                if wrapper then value = wrapper value
-                if fieldName
-                    node[method] fieldName, value
-                else
-                    node[method] value
+        ops.events = options.split /\s+/
+        convertEvents ops
 
     case \object
         for own let events, func of options
-            events = events.split /\s+/
-            for event in events
-                if viewEvent.test event
-                    event = event.replace \# ''
-                    target = view
-                else
-                    target = model
-
-                target.on event, helperHandler
-
-            !function helperHandler()
-                value = func.apply view, arguments
-                if wrapper then value = wrapper value
-                if fieldName
-                    node[method] fieldName, value
-                else
-                    node[method] value
+            ops.events = events.split /\s+/
+            ops.func = func
+            convertEvents ops
 
     case \function
         value = options.apply view, arguments
-        if wrapper then value = wrapper value
-        if fieldName
-            node[method] fieldName, value
+        ops.value = value
+        applyJqueryMethod ops
+
+!function convertEvents({node, method, events, wrapper, fieldName, func, view, model}:ops)
+    for let event in events
+        target = model
+        argNum = 0
+
+        event = event.replace argSelector, (x, num)->
+            argNum := num
+            return ''
+
+        event = event.replace fieldEvent, (x, field)->
+            target := model
+            argNum := 1
+            helperHandler target, model.get field
+            return 'change:' + field
+
+        event = event.replace viewEvent, (x, event)->
+            target := view
+            helperHandler!
+            return event
+
+        if target is model
+            view.listenTo model, event, helperHandler
         else
-            node[method] value
+            view.on event, helperHandler
+
+        !function helperHandler()
+            if func
+                value = func.apply view, arguments
+            else
+                value = arguments[argNum]
+                
+            ops.value = value
+            applyJqueryMethod ops
+
+!function applyJqueryMethod({node, method, fieldName, wrapper, value}:ops)
+    if wrapper then value = wrapper value
+    
+    if fieldName
+        node[method] fieldName, value
+    else
+        node[method] value
 
 !function callJquerySetterMethod(ops)
     {options} = ops
@@ -193,7 +200,14 @@ argSelector = /\|arg\((\d+)\)/
 
     !function eachAddListener(model)
         View = if isClass options.view then options.view else options.view.call view, model
-        subView = if isClass View then new View(model: model) else View
+        
+        subView = if isClass View
+            ops = {model: model}
+            if options.viewNode then ops.el = options.viewNode.clone!
+            new View(ops)
+        else 
+            View
+            
         options.viewList[model.cid] = subView
         options.addHandler.call view, holder, subView
 
