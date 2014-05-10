@@ -89,7 +89,7 @@ helpers = DOMView.helpers = do
         if propEvent = prop.match dividedField
             [x, prop, event] = propEvent
         node.on event, ~> this.model.set field, node.prop(prop)
-        @listenTo model, \change: + field, (model, value) -> if value is not node.prop(prop) then node.prop prop, value
+        @listenTo @model, \change: + field, (model, value) -> if value is not node.prop(prop) then node.prop prop, value
 
         node.prop prop, @model.get field
 
