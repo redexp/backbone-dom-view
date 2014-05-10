@@ -22,5 +22,10 @@
     "dependencies": {
         "backbone":   ">=1.1.1",
         "jquery":     ">=1.7.0"
-    }
+    },
+	"devDependencies": {
+		"mocha": "",
+		"chai": "",
+		"chai-jquery": ""
+	}
 }
