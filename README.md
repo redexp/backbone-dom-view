@@ -147,3 +147,7 @@ Predefined methods:
 To add more methods just add them to `Backbone.DOMView.helpers.each.delHandlers` object
 
 [Example](test/each.coffee#L58-L83)
+
+`el:` selector for elements which will be detached to use as `el` for `view` class
+
+[Example](test/each.coffee#L85-L108)

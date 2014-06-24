@@ -228,9 +228,10 @@
       }
     }
     function eachHelper(selector, options){
-      var view, holder, list, field;
+      var view, holder, itemTpl, list, field;
       view = this;
       holder = this.find(selector);
+      itemTpl = options.el ? holder.find(options.el).detach() : false;
       list = (field = options.field)
         ? this.model.get(field)
         : this.model;
@@ -247,15 +248,23 @@
       view.listenTo(list, 'remove', eachRemoveListener);
       list.each(eachAddListener);
       function eachAddListener(model){
-        var View, subView;
+        var View, instOps, viewInst;
         View = isClass(options.view)
           ? options.view
           : options.view.call(view, model);
-        subView = isClass(View) ? new View({
-          model: model
-        }) : View;
-        options.viewList[model.cid] = subView;
-        options.addHandler.call(view, holder, subView);
+        if (isClass(View)) {
+          instOps = {
+            model: model
+          };
+          if (itemTpl) {
+            instOps.el = itemTpl.clone();
+          }
+          viewInst = new View(instOps);
+        } else {
+          viewInst = View;
+        }
+        options.viewList[model.cid] = viewInst;
+        options.addHandler.call(view, holder, viewInst);
       }
       function eachRemoveListener(model){
         var subView, ref$, key$, ref1$;

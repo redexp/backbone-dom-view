@@ -173,6 +173,7 @@ argSelector = /\|arg\((\d+)\)/
 !function eachHelper(selector, options)
     view = this
     holder = @find selector
+    itemTpl = if options.el then holder.find(options.el).detach() else false
     list = if field = options.field then @model.get field else @model
 
     options.viewList = {}
@@ -193,9 +194,18 @@ argSelector = /\|arg\((\d+)\)/
 
     !function eachAddListener(model)
         View = if isClass options.view then options.view else options.view.call view, model
-        subView = if isClass View then new View(model: model) else View
-        options.viewList[model.cid] = subView
-        options.addHandler.call view, holder, subView
+
+        if isClass View
+            instOps = model: model
+            if itemTpl
+                instOps.el = itemTpl.clone()
+
+            viewInst = new View(instOps)
+        else
+            viewInst = View
+
+        options.viewList[model.cid] = viewInst
+        options.addHandler.call view, holder, viewInst
 
     !function eachRemoveListener(model)
         subView = delete options.viewList[model.cid]

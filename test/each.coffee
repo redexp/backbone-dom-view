@@ -81,3 +81,28 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             list.at(0).destroy()
 
             expect(el).to.have.text 'BobJack'
+
+        it 'should create view with el:', ->
+            View = DomView.extend
+                template: '':
+                    html: '@name'
+
+            ListView = DomView.extend
+                el: $('<ul><li class="test"></li></ul>')
+                template: '':
+                    each:
+                        view: View
+                        el: '> *'
+
+            list = new Backbone.Collection()
+
+            listView = new ListView list
+            el = listView.$el
+
+            expect(el.find('li').length).to.equal 0
+
+            list.set([{name: 'Jack'}, {name: 'Bob'}])
+
+            expect(el.find('li').length).to.equal 2
+
+            expect(el.find('li')).to.have.class 'test'
