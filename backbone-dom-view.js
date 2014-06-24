@@ -47,6 +47,7 @@
       prop: propHelper,
       style: styleHelper,
       html: htmlHelper,
+      text: textHelper,
       on: onHelper,
       connect: connectHelper,
       each: eachHelper
@@ -89,6 +90,13 @@
         options: options
       });
     }
+    function textHelper(selector, options){
+      callJqueryMethod.call(this, {
+        node: this.find(selector),
+        method: 'text',
+        options: options
+      });
+    }
     function onHelper(selector, options){
       var node, i$, own$ = {}.hasOwnProperty;
       node = this.find(selector);
@@ -117,7 +125,7 @@
         node.on(event, function(){
           return this$.model.set(field, node.prop(prop));
         });
-        this.model.on('change:' + field, function(model, value){
+        this.listenTo(this.model, 'change:' + field, function(model, value){
           if (value !== node.prop(prop)) {
             return node.prop(prop, value);
           }
@@ -129,33 +137,39 @@
     fieldEvent = /@([\w-]+)/;
     viewEvent = /#([\w-:\.]+)/;
     argSelector = /\|arg\((\d+)\)/;
-    function callJqueryMethod(arg$){
-      var node, method, options, wrapper, fieldName, model, view, events, i$, len$, value, own$ = {}.hasOwnProperty;
-      node = arg$.node, method = arg$.method, options = arg$.options, wrapper = arg$.wrapper, fieldName = arg$.fieldName;
+    function callJqueryMethod(ops){
+      var node, method, options, wrapper, fieldName, model, view, i$, value, own$ = {}.hasOwnProperty;
+      node = ops.node, method = ops.method, options = ops.options, wrapper = ops.wrapper, fieldName = ops.fieldName;
       model = this.model;
       view = this;
+      ops.view = view;
+      ops.model = view.model;
       switch (typeof options) {
       case 'string':
-        events = options.split(/\s+/);
-        for (i$ = 0, len$ = events.length; i$ < len$; ++i$) {
-          (fn$.call(this, events[i$]));
-        }
+        ops.events = options.split(/\s+/);
+        convertEvents(ops);
         break;
       case 'object':
         for (i$ in options) if (own$.call(options, i$)) {
-          (fn1$.call(this, i$, options[i$]));
+          (fn$.call(this, i$, options[i$]));
         }
         break;
       case 'function':
         value = options.apply(view, arguments);
-        if (wrapper) {
-          value = wrapper(value);
-        }
-        if (fieldName) {
-          node[method](fieldName, value);
-        } else {
-          node[method](value);
-        }
+        ops.value = value;
+        applyJqueryMethod(ops);
+      }
+      function fn$(events, func){
+        ops.events = events.split(/\s+/);
+        ops.func = func;
+        convertEvents(ops);
+      }
+    }
+    function convertEvents(ops){
+      var node, method, events, wrapper, fieldName, func, view, model, i$, len$;
+      node = ops.node, method = ops.method, events = ops.events, wrapper = ops.wrapper, fieldName = ops.fieldName, func = ops.func, view = ops.view, model = ops.model;
+      for (i$ = 0, len$ = events.length; i$ < len$; ++i$) {
+        (fn$.call(this, events[i$]));
       }
       function fn$(event){
         var target, argNum;
@@ -176,45 +190,33 @@
           helperHandler();
           return event;
         });
-        target.on(event, helperHandler);
+        if (target === model) {
+          view.listenTo(model, event, helperHandler);
+        } else {
+          view.on(event, helperHandler);
+        }
         function helperHandler(){
           var value;
-          value = arguments[argNum];
-          if (wrapper) {
-            value = wrapper(value);
-          }
-          if (fieldName) {
-            node[method](fieldName, value);
+          if (func) {
+            value = func.apply(view, arguments);
           } else {
-            node[method](value);
+            value = arguments[argNum];
           }
+          ops.value = value;
+          applyJqueryMethod(ops);
         }
       }
-      function fn1$(events, func){
-        var i$, len$, event, target;
-        events = events.split(/\s+/);
-        for (i$ = 0, len$ = events.length; i$ < len$; ++i$) {
-          event = events[i$];
-          if (viewEvent.test(event)) {
-            event = event.replace('#', '');
-            target = view;
-          } else {
-            target = model;
-          }
-          target.on(event, helperHandler);
-        }
-        function helperHandler(){
-          var value;
-          value = func.apply(view, arguments);
-          if (wrapper) {
-            value = wrapper(value);
-          }
-          if (fieldName) {
-            node[method](fieldName, value);
-          } else {
-            node[method](value);
-          }
-        }
+    }
+    function applyJqueryMethod(ops){
+      var node, method, fieldName, wrapper, value;
+      node = ops.node, method = ops.method, fieldName = ops.fieldName, wrapper = ops.wrapper, value = ops.value;
+      if (wrapper) {
+        value = wrapper(value);
+      }
+      if (fieldName) {
+        node[method](fieldName, value);
+      } else {
+        node[method](value);
       }
     }
     function callJquerySetterMethod(ops){
