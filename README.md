@@ -56,6 +56,7 @@ view.$el.hasClass 'tested' #>> true
 * [prop](#attr-and-prop)
 * [style](#style)
 * [html](#html)
+* [text](#text)
 * [on](#on)
 * [connect](#connect)
 * [each](#each)
@@ -97,6 +98,10 @@ Set css style to element, works just like `class`.
 ### html
 
 Works just like `class` helper only difference that it not takes names of classes.
+
+### text
+
+Works just like `html` helper only difference that it uses `text()` method of jQuery.
 
 ### on
 
