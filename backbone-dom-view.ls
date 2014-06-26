@@ -105,6 +105,9 @@ argSelector = /\|arg\((\d+)\)/
 !function callJqueryMethod({node, method, options, wrapper, fieldName}:ops)
     model = @model
     view = this
+
+    ops = Backbone.$.extend({}, ops)
+
     ops.view = view
     ops.model = view.model
 

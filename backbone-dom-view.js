@@ -142,6 +142,7 @@
       node = ops.node, method = ops.method, options = ops.options, wrapper = ops.wrapper, fieldName = ops.fieldName;
       model = this.model;
       view = this;
+      ops = Backbone.$.extend({}, ops);
       ops.view = view;
       ops.model = view.model;
       switch (typeof options) {
