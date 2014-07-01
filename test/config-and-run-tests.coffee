@@ -32,6 +32,7 @@ require ['chai', 'chai-jquery', 'mocha'], (chai, chaiJquery, mocha) ->
     mocha.setup 'bdd'
 
     tests = [
+        'constructor'
         'class-prop-attr-style-html'
         'on'
         'connect'

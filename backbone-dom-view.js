@@ -22,7 +22,7 @@
           Backbone.View.apply(this, arguments);
         }
         if (typeof this.template === 'object') {
-          this.template = Backbone.$.extend(true, {}, this.template);
+          this.template = Backbone.$.extend(true, {}, parentTemplate(this) || {}, this.template);
           for (selector in ref$ = this.template) if (own$.call(ref$, selector)) {
             helps = ref$[selector];
             for (helper in helps) if (own$.call(helps, helper)) {
@@ -306,6 +306,10 @@
     };
     function isClass(func){
       return func.hasOwnProperty('__super__');
+    }
+    function parentTemplate(view){
+      var ref$, ref1$;
+      return (ref$ = view.constructor) != null ? (ref1$ = ref$.__super__) != null ? (ref$ = ref1$.constructor) != null ? (ref1$ = ref$.prototype) != null ? ref1$.template : void 8 : void 8 : void 8 : void 8;
     }
     return DOMView;
   });

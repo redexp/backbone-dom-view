@@ -14,7 +14,7 @@ DOMView = Backbone.DOMView = Backbone.View.extend do
             Backbone.View.apply(this, arguments)
 
         if typeof @template is \object
-            @template = Backbone.$.extend true, {}, @template
+            @template = Backbone.$.extend true, {}, (parentTemplate(this) or {}), @template
             for own selector, helps of @template
                 for own helper, options of helps
                     helpers[helper].call(this, selector, options)
@@ -232,9 +232,12 @@ eachHelper.delHandlers = do
     fadeOut:  (ul, view)!-> view.$el.fadeOut -> view.$el.remove!
     slideOut: (ul, view)!-> view.$el.slideOut -> view.$el.remove!
 
+#endregion
+
 function isClass(func)
     return func.hasOwnProperty '__super__'
 
-#endregion
+function parentTemplate(view)
+    return view.constructor?.__super__?.constructor?.prototype?.template
 
 return DOMView

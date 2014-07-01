@@ -49,6 +49,12 @@ view = new View new Backbone.Model tested: yes
 view.$el.hasClass 'tested' #>> true
 ```
 
+## Extending views
+
+Each new extended view class will extend `template:` option from parent view class
+
+[Example](test/constructor.coffee#L9-L29)
+
 ## Helpers
 
 * [class](#class)
