@@ -188,7 +188,6 @@
         });
         event = event.replace(viewEvent, function(x, event){
           target = view;
-          helperHandler();
           return event;
         });
         if (target === model) {

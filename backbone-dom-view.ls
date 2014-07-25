@@ -144,7 +144,6 @@ argSelector = /\|arg\((\d+)\)/
 
         event = event.replace viewEvent, (x, event)->
             target := view
-            helperHandler!
             return event
 
         if target is model
