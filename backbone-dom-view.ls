@@ -213,11 +213,13 @@ argSelector = /\|arg\((\d+)\)/
         else
             viewInst = View
 
+        viewInst.parent ?= view
         options.viewList[model.cid] = viewInst
         options.addHandler.call view, holder, viewInst
 
     !function eachRemoveListener(model)
         subView = delete options.viewList[model.cid]
+        delete subView.parent if subView.parent == view
         options.delHandler.call view, holder, subView
 
 eachHelper.addHandlers = do

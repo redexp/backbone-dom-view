@@ -265,12 +265,16 @@
         } else {
           viewInst = View;
         }
+        viewInst.parent == null && (viewInst.parent = view);
         options.viewList[model.cid] = viewInst;
         options.addHandler.call(view, holder, viewInst);
       }
       function eachRemoveListener(model){
         var subView, ref$, key$, ref1$;
         subView = (ref1$ = (ref$ = options.viewList)[key$ = model.cid], delete ref$[key$], ref1$);
+        if (subView.parent === view) {
+          delete subView.parent;
+        }
         options.delHandler.call(view, holder, subView);
       }
     }

@@ -119,7 +119,7 @@
         list.at(0).destroy();
         return expect(el).to.have.text('BobJack');
       });
-      return it('should create view with el:', function() {
+      it('should create view with el:', function() {
         var ListView, View, el, list, listView;
         View = DomView.extend({
           template: {
@@ -152,6 +152,40 @@
         ]);
         expect(el.find('li').length).to.equal(2);
         return expect(el.find('li')).to.have["class"]('test');
+      });
+      return it('should have `parent` field', function() {
+        var ListView, list, listView, views;
+        views = [];
+        ListView = DomView.extend({
+          el: $('<ul></ul>'),
+          template: {
+            '': {
+              each: {
+                view: function(model) {
+                  var view;
+                  view = new Backbone.View({
+                    model: model
+                  });
+                  if (model.get('parent')) {
+                    view.parent = true;
+                  }
+                  views.push(view);
+                  return view;
+                }
+              }
+            }
+          }
+        });
+        list = new Backbone.Collection([
+          {
+            parent: false
+          }, {
+            parent: true
+          }
+        ]);
+        listView = new ListView(list);
+        expect(views[0].parent).to.be.equal(listView);
+        return expect(views[1].parent).to.be.equal(true);
       });
     });
   });

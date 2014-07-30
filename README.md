@@ -162,3 +162,8 @@ To add more methods just add them to `Backbone.DOMView.helpers.each.delHandlers`
 `el:` selector for elements which will be detached to use as `el` for `view` class
 
 [Example](test/each.coffee#L85-L108)
+
+Each generated sub view will have field `parent` which points to view generated them.
+If sub view already have field `parent` then it will not be overwritten.
+
+[Example](test/each.coffee#L110-L128)

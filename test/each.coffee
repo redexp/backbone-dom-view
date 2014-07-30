@@ -106,3 +106,23 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(el.find('li').length).to.equal 2
 
             expect(el.find('li')).to.have.class 'test'
+
+        it 'should have `parent` field', ->
+            views = []
+
+            ListView = DomView.extend
+                el: $('<ul></ul>')
+                template: '':
+                    each:
+                        view: (model) ->
+                            view = new Backbone.View(model: model)
+                            view.parent = true if model.get('parent')
+                            views.push(view);
+                            return view
+
+            list = new Backbone.Collection([{parent: false}, {parent: true}])
+
+            listView = new ListView list
+
+            expect(views[0].parent).to.be.equal listView
+            expect(views[1].parent).to.be.equal true
