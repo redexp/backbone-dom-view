@@ -3,7 +3,7 @@
   var slice$ = [].slice;
   function def(modules, module){
     if (typeof define === 'function' && define.amd) {
-      return define(modules, module);
+      return define('backbone-dom-view', modules, module);
     } else {
       return module(Backbone);
     }

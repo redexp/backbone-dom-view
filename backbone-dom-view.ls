@@ -1,6 +1,6 @@
 function def(modules, module)
     if typeof define is \function and define.amd
-        define modules, module
+        define 'backbone-dom-view', modules, module
     else
         module Backbone
 
