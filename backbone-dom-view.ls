@@ -1,10 +1,10 @@
-function def(modules, module)
+function def(module)
     if typeof define is \function and define.amd
-        define 'backbone-dom-view', modules, module
+        define 'backbone-dom-view', ['backbone'], module
     else
         module Backbone
 
-Backbone <- def ['backbone']
+Backbone <- def
 
 DOMView = Backbone.DOMView = Backbone.View.extend do
     constructor: (ops, ...rest) !->
