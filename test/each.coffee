@@ -20,7 +20,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             list = new Backbone.Collection [{name: 'Jack'}, {name: 'Bob'}]
 
-            listView = new ListView list
+            listView = new ListView model: list
             el = listView.$el
 
             expect(el.find('li').length).to.equal 2
@@ -49,7 +49,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             list = new Backbone.Collection [{type: 'li'}, {type: 'div'}]
 
-            listView = new ListView list
+            listView = new ListView model: list
             el = listView.$el
 
             expect(el.find('li').length).to.be.equal 1
@@ -73,7 +73,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             list = new Backbone.Collection [{name: 'Jack'}, {name: 'Bob'}]
 
-            listView = new ListView list
+            listView = new ListView model: list
             el = listView.$el
 
             expect(el).to.have.text 'BobJack'
@@ -96,7 +96,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             list = new Backbone.Collection()
 
-            listView = new ListView list
+            listView = new ListView model: list
             el = listView.$el
 
             expect(el.find('li').length).to.equal 0
@@ -122,7 +122,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             list = new Backbone.Collection([{parent: false}, {parent: true}])
 
-            listView = new ListView list
+            listView = new ListView model: list
 
             expect(views[0].parent).to.be.equal listView
             expect(views[1].parent).to.be.equal true

@@ -13,5 +13,5 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                         expect(this).to.be.instanceOf View
                         done()
 
-            view = new View model
+            view = new View model: model
             view.$el.click()

@@ -14,7 +14,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             model.set 'id', 'test'
 
-            view = new View model
+            view = new View model: model
             el = view.$el
 
             expect(el).to.have.prop 'id', 'test'

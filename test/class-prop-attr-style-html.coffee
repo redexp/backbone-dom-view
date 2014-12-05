@@ -16,7 +16,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     style: 'opacity': 'test eventName'
                     html: 'test eventName'
 
-            view = new View model
+            view = new View model: model
             el = view.$el
 
             expect(el).not.to.have.class 'aTest'
@@ -48,7 +48,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     style: 'opacity': 'test|arg(1) eventName|arg(2)'
                     html: 'test|arg(1) eventName|arg(2)'
 
-            view = new View model
+            view = new View model: model
             el = view.$el
 
             expect(el).not.to.have.class 'aTest'
@@ -82,7 +82,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             model.set 'test', yes
 
-            view = new View model
+            view = new View model: model
             el = view.$el
 
             expect(el).to.have.class 'cTest'
@@ -146,7 +146,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     style: 'opacity': 'test': -> @model.get 'field'
                     html: 'test': -> @model.get 'field'
 
-            view = new View model
+            view = new View model: model
             el = view.$el
 
             expect(el).not.to.have.class 'aTest'
@@ -177,7 +177,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     prop: 'pTest': 'test #vtest': -> @model.get 'field'
                     html: 'test #vtest': -> @model.get 'field'
 
-            view = new View model
+            view = new View model: model
             el = view.$el
 
             expect(el).not.to.have.prop 'pTest'

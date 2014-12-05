@@ -16,9 +16,9 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                 template: '':
                     prop: "test": '@name'
 
-            view = new View model
+            view = new View model: model
             el1 = view.$el
-            xView = new XView model
+            xView = new XView model: model
             el2 = xView.$el
 
             model.set('name', 'Jack')
