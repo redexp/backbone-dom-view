@@ -22,6 +22,8 @@
 
                 View.apply(view, arguments);
 
+                this.animationFrameQueue = [];
+
                 if (typeof view.template !== 'object') return;
 
                 var template = view.template = extend(true, {}, parentTemplate(view) || {}, view.template);
@@ -87,6 +89,31 @@
                         return func.apply(view, argNum === null ? arguments : [arguments[argNum]]);
                     }
                 }
+            },
+
+            enableRequestAnimationFrame: false,
+
+            requestAnimationFrame: function (func) {
+                var view = this;
+
+                if (view.enableRequestAnimationFrame !== true) {
+                    func();
+                    return;
+                }
+
+                if (view.animationFrameQueue.length === 0) {
+                    requestAnimationFrame(function () {
+                        view.flushAnimationFrameQueue();
+                    });
+                }
+
+                view.animationFrameQueue.push(func);
+            },
+
+            flushAnimationFrameQueue: function () {
+                flushAnimationFrameQueue(this.animationFrameQueue);
+
+                this.animationFrameQueue = [];
             }
         });
 
@@ -112,7 +139,8 @@
                 options: options,
                 wrapper: function(v) {
                     return !!v;
-                }
+                },
+                enableRequestAnimationFrame: true
             });
         }
 
@@ -121,7 +149,8 @@
                 view: this,
                 node: this.find(selector),
                 method: 'attr',
-                options: options
+                options: options,
+                enableRequestAnimationFrame: true
             });
         }
 
@@ -130,7 +159,8 @@
                 view: this,
                 node: this.find(selector),
                 method: 'prop',
-                options: options
+                options: options,
+                enableRequestAnimationFrame: true
             });
         }
 
@@ -139,7 +169,8 @@
                 view: this,
                 node: this.find(selector),
                 method: 'css',
-                options: options
+                options: options,
+                enableRequestAnimationFrame: true
             });
         }
 
@@ -148,7 +179,8 @@
                 view: this,
                 node: this.find(selector),
                 method: 'html',
-                options: options
+                options: options,
+                enableRequestAnimationFrame: true
             });
         }
 
@@ -157,7 +189,8 @@
                 view: this,
                 node: this.find(selector),
                 method: 'text',
-                options: options
+                options: options,
+                enableRequestAnimationFrame: true
             });
         }
 
@@ -249,7 +282,8 @@
         }
 
         function applyJqueryMethod (ops) {
-            var node = ops.node,
+            var view = ops.view,
+                node = ops.node,
                 method = ops.method,
                 fieldName = ops.fieldName,
                 wrapper = ops.wrapper,
@@ -259,11 +293,20 @@
                 value = wrapper(value);
             }
 
-            if (fieldName) {
-                node[method](fieldName, value);
+            if (ops.enableRequestAnimationFrame === true) {
+                view.requestAnimationFrame(runJqueryMethod);
             }
             else {
-                node[method](value);
+                runJqueryMethod();
+            }
+
+            function runJqueryMethod() {
+                if (fieldName) {
+                    node[method](fieldName, value);
+                }
+                else {
+                    node[method](value);
+                }
             }
         }
 
@@ -327,22 +370,26 @@
             function eachRemoveListener (model) {
                 var subView = viewList[model.cid];
 
+                delHandler.call(view, holder, subView);
+
                 viewList[model.cid] = null;
 
                 if (subView.parent === view) {
                     subView.parent = null;
                 }
-
-                delHandler.call(view, holder, subView);
             }
         }
 
         eachHelper.addHandlers = {
             append: function(ul, view) {
-                ul.append(view.$el);
+                this.requestAnimationFrame(function () {
+                    ul.append(view.$el);
+                });
             },
             prepend: function(ul, view) {
-                ul.prepend(view.$el);
+                this.requestAnimationFrame(function () {
+                    ul.prepend(view.$el);
+                });
             },
             fadeIn: function(ul, view) {
                 view.$el.hide().appendTo(ul).fadeIn();
@@ -354,7 +401,9 @@
 
         eachHelper.delHandlers = {
             remove: function(ul, view) {
-                view.$el.remove();
+                this.requestAnimationFrame(function () {
+                    view.$el.remove();
+                });
             },
             fadeOut: function(ul, view) {
                 view.$el.fadeOut(function() {
@@ -383,6 +432,34 @@
 
         function has (obj, field) {
             return obj.hasOwnProperty(field);
+        }
+
+        var originRequestAnimationFrame = (function(){
+            return  window.requestAnimationFrame   ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame    ||
+                window.oRequestAnimationFrame      ||
+                window.msRequestAnimationFrame     ||
+                function requestAnimationFrame(callback){
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
+
+        function requestAnimationFrame(func) {
+            var d = $.Deferred();
+
+            originRequestAnimationFrame(function () {
+                d.resolve(func());
+            });
+
+            return d.promise();
+        }
+
+        function flushAnimationFrameQueue(list) {
+            for (var i = 0, len = list.length; i < len; i++) {
+                list[i]();
+                list[i] = null;
+            }
         }
 
         return DOMView;
