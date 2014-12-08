@@ -27,7 +27,7 @@ var TodoView = Backbone.DOMView.extend({
             html: "@title"
         },
         ".state": {
-            class: {
+            'class': {
                 "done": "@is_done",
 
                 "selected": {
@@ -42,7 +42,7 @@ var TodoView = Backbone.DOMView.extend({
 ```
 Which means - on change `title` field, change `.title` innerHTML and when `is_done` will be true - class `done` will be added
 
-In `examples/todos` directory you can find rewritten version of [TodoMVC](http://backbonejs.org/examples/todos/index.html)
+In `examples/todomvc` directory you can find rewritten version of [TodoMVC](https://github.com/tastejs/todomvc/tree/gh-pages/examples/backbone)
 so you can compare become it better or not
 
 ## Installation
@@ -108,7 +108,7 @@ To change number of argument you can use `|arg(number)` after event name
 
 [Example](test/class-prop-attr-style-html.coffee#L42-L72)
 
-To bind class with model field you can `@fieldName` notation
+To bind class with model field you can use `@fieldName` notation
 
 [Example](test/class-prop-attr-style-html.coffee#L74-L106)
 
@@ -171,7 +171,7 @@ Also you you can set this option as string name of predefined method:
 * append
 * prepend
 * fadeIn
-* slideIn
+* slideDown
 
 To add more methods just add them to `Backbone.DOMView.helpers.each.addHandlers` object
 
@@ -180,7 +180,7 @@ Predefined methods:
 
 * remove
 * fadeOut
-* slideOut
+* slideUp
 
 To add more methods just add them to `Backbone.DOMView.helpers.each.delHandlers` object
 
@@ -194,3 +194,5 @@ Each generated sub view will have field `parent` which points to view generated 
 If sub view already have field `parent` then it will not be overwritten.
 
 [Example](test/each.coffee#L110-L128)
+
+`field:` use name of model field to iterate over it
