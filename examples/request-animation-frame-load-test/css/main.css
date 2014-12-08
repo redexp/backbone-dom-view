@@ -1,0 +1,8 @@
+.toolbar button {
+    border: 2px outset #DDD;
+    padding: 3px;
+    background: #DDD;
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+}

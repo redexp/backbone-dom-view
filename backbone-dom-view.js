@@ -8,8 +8,8 @@
 
     function module (BB) {
 
-        var View = BB.View;
-        $ = BB.$;
+        var View = BB.View,
+            $ = BB.$;
 
         var dividedField = /^(.+)\|(.+)/,
             fieldEvent = /@([\w-]+)/,
@@ -21,8 +21,6 @@
                 var view = this;
 
                 View.apply(view, arguments);
-
-                this.animationFrameQueue = [];
 
                 if (typeof view.template !== 'object') return;
 
@@ -89,31 +87,6 @@
                         return func.apply(view, argNum === null ? arguments : [arguments[argNum]]);
                     }
                 }
-            },
-
-            enableRequestAnimationFrame: false,
-
-            requestAnimationFrame: function (func) {
-                var view = this;
-
-                if (view.enableRequestAnimationFrame !== true) {
-                    func();
-                    return;
-                }
-
-                if (view.animationFrameQueue.length === 0) {
-                    requestAnimationFrame(function () {
-                        view.flushAnimationFrameQueue();
-                    });
-                }
-
-                view.animationFrameQueue.push(func);
-            },
-
-            flushAnimationFrameQueue: function () {
-                flushAnimationFrameQueue(this.animationFrameQueue);
-
-                this.animationFrameQueue = [];
             }
         });
 
@@ -139,8 +112,7 @@
                 options: options,
                 wrapper: function(v) {
                     return !!v;
-                },
-                enableRequestAnimationFrame: true
+                }
             });
         }
 
@@ -149,8 +121,7 @@
                 view: this,
                 node: this.find(selector),
                 method: 'attr',
-                options: options,
-                enableRequestAnimationFrame: true
+                options: options
             });
         }
 
@@ -159,8 +130,7 @@
                 view: this,
                 node: this.find(selector),
                 method: 'prop',
-                options: options,
-                enableRequestAnimationFrame: true
+                options: options
             });
         }
 
@@ -169,8 +139,7 @@
                 view: this,
                 node: this.find(selector),
                 method: 'css',
-                options: options,
-                enableRequestAnimationFrame: true
+                options: options
             });
         }
 
@@ -179,8 +148,7 @@
                 view: this,
                 node: this.find(selector),
                 method: 'html',
-                options: options,
-                enableRequestAnimationFrame: true
+                options: options
             });
         }
 
@@ -189,8 +157,7 @@
                 view: this,
                 node: this.find(selector),
                 method: 'text',
-                options: options,
-                enableRequestAnimationFrame: true
+                options: options
             });
         }
 
@@ -293,20 +260,11 @@
                 value = wrapper(value);
             }
 
-            if (ops.enableRequestAnimationFrame === true) {
-                view.requestAnimationFrame(runJqueryMethod);
+            if (fieldName) {
+                node[method](fieldName, value);
             }
             else {
-                runJqueryMethod();
-            }
-
-            function runJqueryMethod() {
-                if (fieldName) {
-                    node[method](fieldName, value);
-                }
-                else {
-                    node[method](value);
-                }
+                node[method](value);
             }
         }
 
@@ -382,14 +340,10 @@
 
         eachHelper.addHandlers = {
             append: function(ul, view) {
-                this.requestAnimationFrame(function () {
-                    ul.append(view.$el);
-                });
+                ul.append(view.$el);
             },
             prepend: function(ul, view) {
-                this.requestAnimationFrame(function () {
-                    ul.prepend(view.$el);
-                });
+                ul.prepend(view.$el);
             },
             fadeIn: function(ul, view) {
                 view.$el.hide().appendTo(ul).fadeIn();
@@ -401,9 +355,7 @@
 
         eachHelper.delHandlers = {
             remove: function(ul, view) {
-                this.requestAnimationFrame(function () {
-                    view.$el.remove();
-                });
+                view.$el.remove();
             },
             fadeOut: function(ul, view) {
                 view.$el.fadeOut(function() {
@@ -434,7 +386,7 @@
             return obj.hasOwnProperty(field);
         }
 
-        var originRequestAnimationFrame = (function(){
+        var requestAnimationFrame = (function(){
             return  window.requestAnimationFrame   ||
                 window.webkitRequestAnimationFrame ||
                 window.mozRequestAnimationFrame    ||
@@ -445,22 +397,9 @@
                 };
         })();
 
-        function requestAnimationFrame(func) {
-            var d = $.Deferred();
-
-            originRequestAnimationFrame(function () {
-                d.resolve(func());
-            });
-
-            return d.promise();
-        }
-
-        function flushAnimationFrameQueue(list) {
-            for (var i = 0, len = list.length; i < len; i++) {
-                list[i]();
-                list[i] = null;
-            }
-        }
+        DOMView.requestAnimationFrame = function (func) {
+            requestAnimationFrame(func);
+        };
 
         return DOMView;
     }

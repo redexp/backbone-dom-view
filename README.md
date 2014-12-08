@@ -4,27 +4,45 @@ backbone-dom-view
 Better View class for Backbone
 
 Main idea of this view class is in configuration template object which looks like this
-```coffeescript
-View = Backbone.DOMView.extend
-    template:
-        "jquery selector":
-            "name of helper":
-                "helper options"
+```javascript
+var View = Backbone.DOMView.extend({
+    template: {
+        "jquery selector": {
+            "name of helper": {
+                "helper options": {
+                    "model-event #view-event": function () {
+                        //..
+                    }
+                }
+            }
+        }
+    }
+});
 ```
-
 For example view for Todo model
 ```coffeescript
-View = Backbone.DOMView.extend
-    template:
-        ".title":
+var TodoView = Backbone.DOMView.extend({
+    template: {
+        ".title": {
             html: "@title"
-        ".state":
-            class:
-                "done": "@is_done"
-```
-Which means - on change `title` field, change `.title` innerHTML and when `is_done` will be true add class `done`
+        },
+        ".state": {
+            class: {
+                "done": "@is_done",
 
-In `examples/todos` directory you can find rewritten version of [Todos](http://backbonejs.org/examples/todos/index.html)
+                "selected": {
+                    "change:selected": function () {
+                        return this.model.get('selected');
+                    }
+                }
+            }
+        }
+    }
+});
+```
+Which means - on change `title` field, change `.title` innerHTML and when `is_done` will be true - class `done` will be added
+
+In `examples/todos` directory you can find rewritten version of [TodoMVC](http://backbonejs.org/examples/todos/index.html)
 so you can compare become it better or not
 
 ## Installation
@@ -40,13 +58,22 @@ Script:
 ## Empty selector
 
 You can use empty string to pointing to $el itself.
-```coffeescript
-View = Backbone.DOMView.extend
-    template: "":
-        class: "tested": "@tested"
+```javascript
+var View = Backbone.DOMView.extend({
+    template: {
+        "": {
+            class: {
+                "tested": "@tested"
+            }
+        }
+    }
+});
 
-view = new View new Backbone.Model tested: yes
-view.$el.hasClass 'tested' #>> true
+var view = new View({
+    model: new Backbone.Model({tested: true})
+});
+
+view.$el.hasClass('tested'); // true
 ```
 
 ## Extending views
@@ -67,8 +94,8 @@ Each new extended view class will extend `template:` option from parent view cla
 * [connect](#connect)
 * [each](#each)
 
-You can define your helpers, just add them to `Backbone.DOMView.helpers` object.
-Arguments of helpers are selector and options.
+You can define your own helpers, just add them to `Backbone.DOMView.helpers` object.
+Arguments passed to helpers are `selector` and `options`.
 
 ### class
 
@@ -77,7 +104,7 @@ First argument of event will be passed to jquery `toggleClass`.
 
 [Example](test/class-prop-attr-style-html.coffee#L10-L40)
 
-To change number of argument you can use `|arg(number)` helper after event name
+To change number of argument you can use `|arg(number)` after event name
 
 [Example](test/class-prop-attr-style-html.coffee#L42-L72)
 

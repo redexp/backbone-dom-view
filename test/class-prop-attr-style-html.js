@@ -244,7 +244,7 @@
         expect(el).to.have.css('opacity', '1');
         return expect(el).to.be.empty;
       });
-      it('should react on view event with function', function() {
+      return it('should react on view event with function', function() {
         var View, el, view;
         View = DomView.extend({
           template: {
@@ -278,54 +278,6 @@
         view.trigger('vtest');
         expect(el).to.have.prop('pTest', '2');
         return expect(el).to.have.html('2');
-      });
-      return it('should use requestAnimationFrame', function(done) {
-        var View, el, view;
-        View = DomView.extend({
-          enableRequestAnimationFrame: true,
-          template: {
-            '': {
-              "class": {
-                'cTest': 'test'
-              },
-              prop: {
-                'pTest': 'test'
-              },
-              attr: {
-                'aTest': 'test'
-              },
-              style: {
-                'opacity': 'test'
-              },
-              html: 'test'
-            }
-          }
-        });
-        view = new View({
-          model: model
-        });
-        el = view.$el;
-        expect(el).not.to.have["class"]('aTest');
-        expect(el).not.to.have.prop('pTest');
-        expect(el).not.to.have.attr('aTest');
-        expect(el).to.have.css('opacity', '1');
-        expect(el).to.be.empty;
-        model.trigger('test', 1);
-        expect(view.animationFrameQueue.length).to.equal(5);
-        expect(el).not.to.have["class"]('aTest');
-        expect(el).not.to.have.prop('pTest');
-        expect(el).not.to.have.attr('aTest');
-        expect(el).to.have.css('opacity', '1');
-        expect(el).to.be.empty;
-        return setTimeout(function() {
-          expect(el).to.have["class"]('cTest');
-          expect(el).to.have.prop('pTest', 1);
-          expect(el).to.have.attr('aTest', '1');
-          expect(el).to.have.css('opacity', '1');
-          expect(el).to.have.html('1');
-          expect(view.animationFrameQueue.length).to.equal(0);
-          return done();
-        }, 100);
       });
     });
   });
