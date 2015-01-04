@@ -161,11 +161,11 @@
         expect(el.find('li').length).to.equal(2);
         return expect(el.find('li')).to.have["class"]('test');
       });
-      return it('should have `parent` field', function() {
+      it('should have `parent` field', function() {
         var ListView, list, listView, views;
         views = [];
         ListView = DomView.extend({
-          el: $('<ul></ul>'),
+          el: '<ul></ul>',
           template: {
             '': {
               each: {
@@ -196,6 +196,96 @@
         });
         expect(views[0].parent).to.be.equal(listView);
         return expect(views[1].parent).to.be.equal(true);
+      });
+      it('should to be sorted by event', function() {
+        var Item, ListView, li, list, view;
+        Item = DomView.extend({
+          template: {
+            '': {
+              html: '@name'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          template: {
+            '': {
+              each: {
+                view: Item,
+                el: '> *',
+                sort: true
+              }
+            }
+          }
+        });
+        list = new Backbone.Collection();
+        list.comparator = 'name';
+        view = new ListView({
+          model: list
+        });
+        list.set([
+          {
+            name: 1
+          }, {
+            name: 3
+          }, {
+            name: 2
+          }
+        ]);
+        li = view.$el.children();
+        expect(li.eq(0)).to.have.text('1');
+        expect(li.eq(1)).to.have.text('2');
+        return expect(li.eq(2)).to.have.text('3');
+      });
+      return it('should to be sorted by custom event and field', function() {
+        var Item, ListView, li, list, view;
+        Item = DomView.extend({
+          template: {
+            '': {
+              html: '@name'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          template: {
+            '': {
+              each: {
+                view: Item,
+                el: '> *',
+                sort: {
+                  event: 'test',
+                  field: 'name'
+                }
+              }
+            }
+          }
+        });
+        list = new Backbone.Collection();
+        view = new ListView({
+          model: list
+        });
+        list.set([
+          {
+            name: 1
+          }, {
+            name: 3
+          }, {
+            name: 2
+          }
+        ]);
+        li = view.$el.children();
+        expect(li.eq(0)).to.have.text('1');
+        expect(li.eq(1)).to.have.text('3');
+        expect(li.eq(2)).to.have.text('2');
+        list.trigger('test');
+        li = view.$el.children();
+        expect(li.eq(0)).to.have.text('1');
+        expect(li.eq(1)).to.have.text('2');
+        expect(li.eq(2)).to.have.text('3');
+        expect(list.at(0).get('name')).to.equal(1);
+        expect(list.at(1).get('name')).to.equal(3);
+        return expect(list.at(2).get('name')).to.equal(2);
       });
     });
   });

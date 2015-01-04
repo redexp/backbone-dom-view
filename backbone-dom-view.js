@@ -326,8 +326,12 @@
                 delHandler = eachHelper.delHandlers[delHandler];
             }
 
-            view.listenTo(list, 'add', eachAddListener);
-            view.listenTo(list, 'remove', eachRemoveListener);
+            view.listenTo(list, options.addEvent || 'add', eachAddListener);
+            view.listenTo(list, options.removeEvent || 'remove', eachRemoveListener);
+
+            if (options.sort) {
+                view.listenTo(list, options.sort.event || 'sort', eachSortHandler);
+            }
 
             list.each(eachAddListener);
 
@@ -362,6 +366,32 @@
                 if (subView.parent === view) {
                     subView.parent = null;
                 }
+            }
+
+            function eachSortHandler() {
+                if (options.sort.field) {
+                    list.toArray().sort(sortByField).reduce(sortViews);
+                }
+                else {
+                    list.reduce(sortViews);
+                }
+            }
+
+            function sortViews(prev, model, i) {
+                if (i === 1) {
+                    var first = viewList[prev.cid].$el;
+                    holder.prepend(first);
+                    prev = first;
+                }
+
+                return viewList[model.cid].$el.insertAfter(prev);
+            }
+
+            function sortByField(a, b) {
+                a = a.get(options.sort.field);
+                b = b.get(options.sort.field);
+
+                return a < b ? -1 : a === b ? 0 : 1;
             }
         }
 

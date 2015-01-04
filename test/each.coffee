@@ -111,7 +111,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             views = []
 
             ListView = DomView.extend
-                el: $('<ul></ul>')
+                el: '<ul></ul>'
                 template: '':
                     each:
                         view: (model) ->
@@ -126,3 +126,67 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(views[0].parent).to.be.equal listView
             expect(views[1].parent).to.be.equal true
+
+        it 'should to be sorted by event', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        view: Item
+                        el: '> *'
+                        sort: true
+
+            list = new Backbone.Collection()
+            list.comparator = 'name';
+
+            view = new ListView model: list
+
+            list.set([{name: 1}, {name: 3}, {name: 2}])
+
+            li = view.$el.children()
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'
+            expect(li.eq(2)).to.have.text '3'
+
+        it 'should to be sorted by custom event and field', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        view: Item
+                        el: '> *'
+                        sort:
+                            event: 'test'
+                            field: 'name'
+
+            list = new Backbone.Collection()
+
+            view = new ListView model: list
+
+            list.set([{name: 1}, {name: 3}, {name: 2}])
+
+            li = view.$el.children()
+
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '3'
+            expect(li.eq(2)).to.have.text '2'
+
+            list.trigger('test')
+
+            li = view.$el.children()
+
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'
+            expect(li.eq(2)).to.have.text '3'
+
+            expect(list.at(0).get('name')).to.equal 1
+            expect(list.at(1).get('name')).to.equal 3
+            expect(list.at(2).get('name')).to.equal 2
