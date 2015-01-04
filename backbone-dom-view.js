@@ -172,19 +172,37 @@
 
         function onHelper (selector, options) {
             var view = this,
-                node = view.find(selector);
+                node = view.find(selector),
+                ops;
 
             for (var event in options) {
                 if (!has(options, event)) continue;
 
-                onHelperBindEvent(event, options[event]);
+                ops = options[event];
+
+                if (typeof ops === 'object') {
+                    for (var target in ops) {
+                        if (!has(ops, target)) continue;
+
+                        onHelperBindEvent(event, target, ops[target]);
+                    }
+                }
+                else {
+                    onHelperBindEvent(event, ops);
+                }
             }
 
-            function onHelperBindEvent (event, func) {
-                node.on(event, function(e) {
-                    e.templateNodes = node;
-                    return func.apply(view, arguments);
-                });
+            function onHelperBindEvent (event, target, func) {
+                if (typeof target === 'string') {
+                    node.on(event, target, function() {
+                        return func.apply(view, arguments);
+                    });
+                }
+                else {
+                    node.on(event, function() {
+                        return target.apply(view, arguments);
+                    });
+                }
             }
         }
 
