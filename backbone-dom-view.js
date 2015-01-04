@@ -22,9 +22,18 @@
 
                 View.apply(view, arguments);
 
+                var ui = mergeExtendedField(view.constructor, 'ui');
+                view.ui = {};
+
+                for (var name in ui) {
+                    if (!has(ui, name)) continue;
+
+                    view.ui[name] = view.find(ui[name]);
+                }
+
                 if (typeof view.template !== 'object') return;
 
-                var template = view.template = extend(true, {}, parentTemplate(view) || {}, view.template);
+                var template = view.template = mergeExtendedField(view.constructor, 'template');
 
                 for (var selector in template) {
                     if (!has(template, selector)) continue;
@@ -42,7 +51,7 @@
             },
 
             find: function(selector) {
-                return selector ? this.$el.find(selector) : this.$el;
+                return selector ? this.ui[selector] || this.$el.find(selector) : this.$el;
             },
 
             bind: function (events, func) {
@@ -369,20 +378,24 @@
             }
         };
 
-        function isClass (func) {
+        function isClass(func) {
             return func.hasOwnProperty('__super__');
         }
 
-        function parentTemplate (view) {
-            var con = view.constructor;
-            return isClass(con) ? con.__super__.constructor.prototype.template : null;
+        function getViewExtendedFieldList(viewClass, field) {
+            var result = [viewClass.prototype[field] || {}];
+            return viewClass.__super__ ? result.concat(getViewExtendedFieldList(viewClass.__super__.constructor, field)) : result;
         }
 
-        function extend () {
+        function mergeExtendedField(viewClass, field) {
+            return extend.apply(null, [true, {}].concat(getViewExtendedFieldList(viewClass, field)));
+        }
+
+        function extend() {
             return $.extend.apply($, arguments);
         }
 
-        function has (obj, field) {
+        function has(obj, field) {
             return obj.hasOwnProperty(field);
         }
 
