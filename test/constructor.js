@@ -9,7 +9,7 @@
     });
     return describe('constructor', function() {
       it('should extend parent template:', function() {
-        var View, XView, YView, el1, el2, el3, view, xView, yView;
+        var View, XView, YView, ZView, el1, el2, el3, view, xView, yView, zView;
         View = DomView.extend({
           template: {
             '': {
@@ -56,7 +56,21 @@
         expect(el3).to.have.prop('test', 'Jack');
         expect(el1).not.to.have.attr('test');
         expect(el2).not.to.have.attr('test');
-        return expect(el3).to.have.attr('test', 'Jack');
+        expect(el3).to.have.attr('test', 'Jack');
+        ZView = YView.extend({
+          template: {
+            '': {
+              attr: {
+                "test": '@age'
+              }
+            }
+          }
+        });
+        zView = new ZView({
+          model: model
+        });
+        model.set('age', 20);
+        return expect(zView.$el).to.have.attr('test', '20');
       });
       return it('should extend parent ui:', function() {
         var View, XView, YView, el1, el2, el3, view, xView, yView;

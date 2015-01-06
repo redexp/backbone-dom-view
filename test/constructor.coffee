@@ -38,6 +38,16 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(el2).not.to.have.attr 'test'
             expect(el3).to.have.attr 'test', 'Jack'
 
+            ZView = YView.extend
+                template: '':
+                    attr: "test": '@age'
+
+            zView = new ZView model: model
+
+            model.set('age', 20)
+
+            expect(zView.$el).to.have.attr 'test', '20'
+
         it 'should extend parent ui:', ->
             View = DomView.extend
                 el: '<li><span></span><a href="#"></a></li>'

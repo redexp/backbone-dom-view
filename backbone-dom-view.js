@@ -436,7 +436,7 @@
         }
 
         function mergeExtendedField(viewClass, field) {
-            return extend.apply(null, [true, {}].concat(getViewExtendedFieldList(viewClass, field)));
+            return extend.apply(null, [true, {}].concat(getViewExtendedFieldList(viewClass, field).reverse()));
         }
 
         function extend() {
