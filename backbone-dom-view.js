@@ -250,7 +250,7 @@
 
             switch (typeof options) {
                 case 'string':
-                    bindEvents(options, ops.func);
+                    bindEvents(options);
                     break;
 
                 case 'object':
@@ -276,8 +276,7 @@
         }
 
         function applyJqueryMethod (ops) {
-            var view = ops.view,
-                node = ops.node,
+            var node = ops.node,
                 method = ops.method,
                 fieldName = ops.fieldName,
                 wrapper = ops.wrapper,
@@ -307,7 +306,37 @@
             }
         }
 
+        /**
+         * Options for "each" helper
+         * @typedef {Object} EachHelperOptions
+         * @property {String} field
+         * @property {Function|Object} view
+         * @property {String} el
+         * @property {String} addHandler
+         * @property {String} delHandler
+         * @property {String} addEvent
+         * @property {String} resetEvent
+         * @property {String} removeEvent
+         * @property {Boolean|Object} sort
+         * @property {Boolean} offOnRemove
+         * @property {Object} viewList
+         */
+
+        /**
+         * @param {string} selector
+         * @param {EachHelperOptions} options
+         */
         function eachHelper (selector, options) {
+            optional(options, {
+                addHandler: 'append',
+                delHandler: 'remove',
+                addEvent: 'add',
+                resetEvent: 'reset',
+                removeEvent: 'remove',
+                sort: false,
+                offOnRemove: true
+            });
+
             var view = this,
                 holder = view.find(selector),
                 viewEl = options.el ? holder.find(options.el).detach() : false,
@@ -315,8 +344,8 @@
                 list = field ? view.model.get(field) : view.model;
 
             var viewList = options.viewList = {};
-            var addHandler = options.addHandler || 'append';
-            var delHandler = options.delHandler || 'remove';
+            var addHandler = options.addHandler;
+            var delHandler = options.delHandler;
 
             if (typeof addHandler === 'string') {
                 addHandler = eachHelper.addHandlers[addHandler];
@@ -326,8 +355,9 @@
                 delHandler = eachHelper.delHandlers[delHandler];
             }
 
-            view.listenTo(list, options.addEvent || 'add', eachAddListener);
-            view.listenTo(list, options.removeEvent || 'remove', eachRemoveListener);
+            view.listenTo(list, options.addEvent, eachAddListener);
+            view.listenTo(list, options.resetEvent, eachResetListener);
+            view.listenTo(list, options.removeEvent, eachRemoveListener);
 
             if (options.sort) {
                 view.listenTo(list, options.sort.event || 'sort', eachSortHandler);
@@ -356,16 +386,29 @@
                 addHandler.call(view, holder, childView);
             }
 
+            function eachResetListener() {
+                list.each(eachAddListener);
+            }
+
             function eachRemoveListener (model) {
                 var subView = viewList[model.cid];
 
                 delHandler.call(view, holder, subView);
 
-                viewList[model.cid] = null;
+                subView.trigger(options.removeEvent, view);
 
                 if (subView.parent === view) {
                     subView.parent = null;
                 }
+
+                if (options.offOnRemove) {
+                    subView
+                        .off()
+                        .stopListening()
+                    ;
+                }
+
+                delete viewList[model.cid];
             }
 
             function eachSortHandler() {
@@ -443,6 +486,16 @@
             return $.extend.apply($, arguments);
         }
 
+        function optional(target, ops) {
+            for (var name in ops) {
+                if (!has(ops, name) || has(target, name)) continue;
+
+                target[name] = ops[name];
+            }
+
+            return target;
+        }
+
         function has(obj, field) {
             return obj.hasOwnProperty(field);
         }
@@ -453,7 +506,7 @@
                 window.mozRequestAnimationFrame    ||
                 window.oRequestAnimationFrame      ||
                 window.msRequestAnimationFrame     ||
-                function requestAnimationFrame(callback){
+                function (callback) {
                     window.setTimeout(callback, 1000 / 60);
                 };
         })();
