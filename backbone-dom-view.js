@@ -22,15 +22,6 @@
 
                 View.apply(view, arguments);
 
-                var ui = mergeExtendedField(view.constructor, 'ui');
-                view.ui = {};
-
-                for (var name in ui) {
-                    if (!has(ui, name)) continue;
-
-                    view.ui[name] = view.find(ui[name]);
-                }
-
                 if (typeof view.template !== 'object') return;
 
                 var template = view.template = mergeExtendedField(view.constructor, 'template');
@@ -48,6 +39,23 @@
                 }
 
                 view.trigger(DOMView.readyEvent);
+            },
+
+            setElement: function () {
+                View.prototype.setElement.apply(this, arguments);
+
+                var view = this;
+
+                var ui = mergeExtendedField(view.constructor, 'ui');
+                view.ui = {};
+
+                for (var name in ui) {
+                    if (!has(ui, name)) continue;
+
+                    view.ui[name] = view.find(ui[name]);
+                }
+
+                return this;
             },
 
             find: function(selector) {
