@@ -7,9 +7,10 @@ Main idea of this view class is in configuration template object which looks lik
 ```javascript
 var View = Backbone.DOMView.extend({
     template: {
-        "jquery selector": {
-            "name of helper": {
-                "helper options": {
+        "jquery-selector": {
+            "helper-name": {
+                "first-option": "value",
+                "second-option": {
                     "model-event #view-event": function () {
                         //..
                     }
@@ -20,11 +21,11 @@ var View = Backbone.DOMView.extend({
 });
 ```
 For example view for Todo model
-```coffeescript
+```javascript
 var TodoView = Backbone.DOMView.extend({
     template: {
         ".title": {
-            html: "@title"
+            text: "@title"
         },
         ".state": {
             'class': {
@@ -40,47 +41,33 @@ var TodoView = Backbone.DOMView.extend({
     }
 });
 ```
-Which means - on change `title` field, change `.title` innerHTML and when `is_done` will be true - class `done` will be added
+Which means:
+* Change `.title` text to model's `title` field value and listen `change:title` for future changes
+* Add to `.state` class `done` when model's `is_done` field will be equal truthy value
+* Add to `.state` class `selected` when model will trigger `change:selected` event and callback will return truthy value
 
 In `examples/todomvc` directory you can find rewritten version of [TodoMVC](https://github.com/tastejs/todomvc/tree/gh-pages/examples/backbone)
-so you can compare become it better or not
 
 ## Installation
 
 Bower:
 `bower install backbone-dom-view`
 
-Script:
-`<script src="backbone-dom-view.js"></script>`
+**RequireJS ready** module name is `backbone-dom-view`
 
-**RequireJS ready**
+## Methods
 
-## Empty selector
+### find()
 
-You can use empty string to pointing to $el itself.
-```javascript
-var View = Backbone.DOMView.extend({
-    template: {
-        "": {
-            class: {
-                "tested": "@tested"
-            }
-        }
-    }
-});
+Same as view's `.$(selector)` but it can accept empty value and return `.$el` it self. This method used with `template:` option to select root element with empty string like `"": {class: {done: '@done'}}`
 
-var view = new View({
-    model: new Backbone.Model({tested: true})
-});
+### bind()
 
-view.$el.hasClass('tested'); // true
-```
+Same as `.on()` method but with it you can bind callback to model and to view in same time
 
-## Extending views
-
-Each new extended view class will extend `template:` option from parent view class
-
-[Example](test/constructor.coffee#L9-L29)
+**Arguments:**
+* `{String} event` - space separated events names
+* `{Function} callback`
 
 ## Helpers
 
@@ -196,3 +183,30 @@ If sub view already have field `parent` then it will not be overwritten.
 [Example](test/each.coffee#L110-L128)
 
 `field:` use name of model field to iterate over it
+
+## Empty selector
+
+You can use empty string to pointing to $el itself.
+```javascript
+var View = Backbone.DOMView.extend({
+    template: {
+        "": {
+            class: {
+                "tested": "@tested"
+            }
+        }
+    }
+});
+
+var view = new View({
+    model: new Backbone.Model({tested: true})
+});
+
+view.$el.hasClass('tested'); // true
+```
+
+## Extending views
+
+Each new extended view class will extend `template:` option from parent view class
+
+[Example](test/constructor.coffee#L9-L29)
