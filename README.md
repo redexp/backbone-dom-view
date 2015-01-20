@@ -55,6 +55,17 @@ Bower:
 
 **RequireJS ready** module name is `backbone-dom-view`
 
+## Fields
+
+### ui:
+
+Used to make abstraction from jQuery selectors.
+```javascript
+var View = Backbone.DOMView.extend({
+    
+});
+```
+
 ## Methods
 
 ### find()
