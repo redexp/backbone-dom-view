@@ -1,41 +1,41 @@
-/*global Backbone */
-var app = app || {};
-
-(function () {
+;(function (app) {
 	'use strict';
 
-	// Todo Collection
-	// ---------------
-
-	// The collection of todos is backed by *localStorage* instead of a remote
-	// server.
 	app.Todos = Backbone.Collection.extend({
 		// Reference to this collection's model.
 		model: app.Todo,
 
-		// Save all of the todo items under the `"todos"` namespace.
-		localStorage: new Backbone.LocalStorage('todos-backbone'),
+		localStorage: new Backbone.LocalStorage('todo-backbone'),
 
-		// Filter down the list of all todo items that are finished.
+		initialize: function (data, ops) {
+		    var dispatcher = ops.dispatcher;
+
+			this.listenTo(dispatcher, 'remove-todo', function (todo) {
+				this.remove(todo);
+			});
+
+			this.listenTo(dispatcher, 'save-todo', function (todo, data) {
+				if (todo = this.get(todo)) {
+					todo.save(data);
+				}
+			});
+
+			this.listenTo(dispatcher, 'save-all-todo', function (data) {
+				this.invoke('save', data);
+			});
+
+			this.listenTo(dispatcher, 'create-todo', function (data) {
+				this.create(data);
+			});
+		},
+
 		completed: function () {
 			return this.where({completed: true});
 		},
 
-		// Filter down the list to only todo items that are still not finished.
 		remaining: function () {
 			return this.where({completed: false});
-		},
-
-		// We keep the Todos in sequential order, despite being saved by unordered
-		// GUID in the database. This generates the next order number for new items.
-		nextOrder: function () {
-			return this.length ? this.last().get('order') + 1 : 1;
-		},
-
-		// Todos are sorted by their original insertion order.
-		comparator: 'order'
+		}
 	});
 
-	// Create our global collection of **Todos**.
-	app.todos = new app.Todos();
-})();
+})(window.app);

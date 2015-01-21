@@ -190,3 +190,76 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(list.at(0).get('name')).to.equal 1
             expect(list.at(1).get('name')).to.equal 3
             expect(list.at(2).get('name')).to.equal 2
+
+        it 'should sort list by views event on event', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        view: Item
+                        el: '> *'
+                        sortByViews: 'test'
+
+            list = new Backbone.Collection()
+
+            view = new ListView model: list
+
+            list.set([{name: 1}, {name: 2}, {name: 3}])
+
+            li = view.$el.children()
+
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'
+            expect(li.eq(2)).to.have.text '3'
+
+            li.eq(0).insertAfter(li.eq(2))
+
+            view.trigger('test')
+
+            expect(list.at(0).get('name')).to.equal 2
+            expect(list.at(1).get('name')).to.equal 3
+            expect(list.at(2).get('name')).to.equal 1
+
+        it 'should sort list by views on event and set index to field', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        view: Item
+                        el: '> *'
+                        sortByViews:
+                            event: 'test'
+                            field: 'order'
+
+            list = new Backbone.Collection()
+
+            view = new ListView model: list
+
+            list.set([{name: 1, order: 0}, {name: 2, order: 1}, {name: 3, order: 2}])
+
+            li = view.$el.children()
+
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'
+            expect(li.eq(2)).to.have.text '3'
+
+            li.eq(0).insertAfter(li.eq(2))
+
+            view.trigger('test')
+
+            expect(list.at(0).get('name')).to.equal 1
+            expect(list.at(0).get('order')).to.equal 2
+
+            expect(list.at(1).get('name')).to.equal 2
+            expect(list.at(1).get('order')).to.equal 0
+
+            expect(list.at(2).get('name')).to.equal 3
+            expect(list.at(2).get('order')).to.equal 1

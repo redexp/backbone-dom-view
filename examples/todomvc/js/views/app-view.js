@@ -1,97 +1,102 @@
-/*global Backbone, jQuery, _, ENTER_KEY */
-var app = app || {};
-
-(function ($) {
+;(function (app) {
 	'use strict';
 
-	// The Application
-	// ---------------
-
-	// Our overall **AppView** is the top-level piece of UI.
 	app.AppView = Backbone.DOMView.extend({
-
-		// Instead of generating a new element, bind to the existing skeleton of
-		// the App already present in the HTML.
 		el: '#todoapp',
 
-		// Delegated events for creating new items, and clearing completed ones.
-		events: {
-			'keypress #new-todo': 'createOnEnter',
-			'click #clear-completed': 'clearCompleted',
-			'click #toggle-all': 'toggleAllComplete'
+		ui: {
+			'toggleAll': '#toggle-all',
+			'newTitle': '#new-todo'
 		},
 
-		// At initialization we bind to the relevant events on the `Todos`
-		// collection, when items are added or changed. Kick things off by
-		// loading any preexisting todos that might be saved in *localStorage*.
 		initialize: function () {
-			this.allCheckbox = this.$('#toggle-all')[0];
-			this.$input = this.$('#new-todo');
+			this.completed = 0;
+			this.remaining = 0;
 
-			this.listenTo(this.model, 'change:completed', this.filterOne);
-			this.listenTo(this.model, 'filter', this.filterAll);
-
-			this.bind('#template-ready add remove change:completed', function () {
-				this.cacheCompleted();
-				this.trigger('change:list');
+			this.bind('#template-ready add remove reset change:completed', function () {
+				this.cacheStats();
+				this.trigger('list-changed');
 			});
-			
-			this.cacheCompleted();
-
-			// Suppresses 'add' events with {reset: true} and prevents the app view
-			// from being re-rendered for every model. Only renders when the 'reset'
-			// event is triggered at the end of the fetch.
-			this.model.fetch({reset: true});
 		},
 
-		cacheCompleted: function () {
+		cacheStats: function () {
 			this.completed = this.model.completed().length;
 			this.remaining = this.model.remaining().length;
 		},
 
-		filterOne: function (todo) {
-			todo.trigger('visible');
+		createNewTodo: function () {
+			app.actions.todo.create({
+				title: this.ui.newTitle.val().trim()
+			});
 		},
 
-		filterAll: function () {
-			this.model.each(this.filterOne, this);
+		removeCompleted: function () {
+			app.actions.todo.remove(this.model.completed());
 		},
 
-		// Generate the attributes for a new Todo item.
-		newAttributes: function () {
-			return {
-				title: this.$input.val().trim(),
-				order: this.model.nextOrder(),
-				completed: false
-			};
-		},
-
-		// If you hit return in the main input field, create new **Todo** model,
-		// persisting it to *localStorage*.
-		createOnEnter: function (e) {
-			if (e.which === ENTER_KEY && this.$input.val().trim()) {
-				this.model.create(this.newAttributes());
-				this.$input.val('');
-			}
-		},
-
-		// Clear all completed todo items, destroying their models.
-		clearCompleted: function () {
-			_.invoke(this.model.completed(), 'destroy');
-			return false;
-		},
-
-		toggleAllComplete: function () {
-			var completed = this.allCheckbox.checked;
-
-			this.model.each(function (todo) {
-				todo.save({
-					completed: completed
-				});
+		changeAllCompleted: function () {
+			app.actions.todo.saveAll({
+				completed: this.ui.toggleAll.prop('checked')
 			});
 		},
 
 		template: {
+			"": {
+				'class': {
+					'all-filter': {
+						'filter': function (path) {
+						    return !path;
+						}
+					},
+					'active-filter': {
+						'filter': function (path) {
+						    return path === 'active';
+						}
+					},
+					'completed-filter': {
+						'filter': function (path) {
+						    return path === 'completed';
+						}
+					}
+				}
+			},
+
+			"newTitle": {
+				on: {
+					'keydown': function (e) {
+					    switch (e.which) {
+							case ENTER_KEY:
+								e.preventDefault();
+
+								var title = this.ui.newTitle.val().trim();
+
+								if (!title) return;
+
+								this.createNewTodo();
+
+								this.ui.newTitle.val('');
+								break;
+						}
+					}
+				}
+			},
+
+			"toggleAll": {
+				prop: {
+					"checked": {
+						"#list-changed": function () {
+							return !this.remaining;
+						}
+					}
+				},
+
+				on: {
+					'change': function () {
+					    this.changeAllCompleted();
+					}
+				}
+			},
+
 			"#todo-list": {
 				each: {
 					view: app.TodoView,
@@ -101,7 +106,7 @@ var app = app || {};
 			"#main, #footer": {
 				'class': {
 					'hidden': {
-						"#template-ready add remove": function () {
+						"#template-ready add remove reset": function () {
 						    return this.model.length === 0;
 						}
 					}
@@ -109,15 +114,15 @@ var app = app || {};
 			},
 			"#todo-count strong": {
 				text: {
-					// event #change:list triggered in initialize function
-					"#change:list": function () {
+					// event #list-changed triggered in initialize function
+					"#list-changed": function () {
 					    return this.remaining;
 					}
 				}
 			},
 			"#todo-count span": {
 				text: {
-					"#change:list": function () {
+					"#list-changed": function () {
 					    return (this.remaining === 1 ? 'item' : 'items') + ' left';
 					}
 				}
@@ -125,25 +130,22 @@ var app = app || {};
 			"#clear-completed": {
 				'class': {
 					"hidden": {
-						"#change:list": function () {
+						"#list-changed": function () {
 							return this.completed === 0;
 						}
+					}
+				},
+				on: {
+					'click': function (e) {
+						e.preventDefault();
+					    this.removeCompleted();
 					}
 				}
 			},
 			"#clear-completed span": {
 				text: {
-					"#change:list": function () {
+					"#list-changed": function () {
 						return this.completed;
-					}
-				}
-			},
-			"#toggle-all": {
-				prop: {
-					"checked": {
-						"#change:list": function () {
-							return !this.remaining;
-						}
 					}
 				}
 			},
@@ -176,4 +178,4 @@ var app = app || {};
 			}
 		}
 	});
-})(jQuery);
+})(window.app);

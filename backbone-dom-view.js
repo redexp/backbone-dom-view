@@ -328,6 +328,7 @@
          * @property {Boolean|Object} sort
          * @property {Boolean} offOnRemove
          * @property {Object} viewList
+         * @property {String|Object} sortByViews
          */
 
         /**
@@ -342,6 +343,7 @@
                 resetEvent: 'reset',
                 removeEvent: 'remove',
                 sort: false,
+                sortByViews: false,
                 offOnRemove: true
             });
 
@@ -367,8 +369,15 @@
             view.listenTo(list, options.resetEvent, eachResetListener);
             view.listenTo(list, options.removeEvent, eachRemoveListener);
 
-            if (options.sort) {
-                view.listenTo(list, options.sort.event || 'sort', eachSortHandler);
+            var sort = options.sort;
+            if (sort) {
+                view.listenTo(list, sort.event || 'sort', eachSortHandler);
+            }
+
+            var sortByViews = options.sortByViews;
+            if (sortByViews) {
+                var sortEvent = typeof sortByViews === 'string' ? sortByViews : sortByViews.event;
+                view.on(sortEvent, eachSortListByViewsHandler);
             }
 
             list.each(eachAddListener);
@@ -420,7 +429,7 @@
             }
 
             function eachSortHandler() {
-                if (options.sort.field) {
+                if (sort.field) {
                     list.toArray().sort(sortByField).reduce(sortViews);
                 }
                 else {
@@ -439,10 +448,25 @@
             }
 
             function sortByField(a, b) {
-                a = a.get(options.sort.field);
-                b = b.get(options.sort.field);
+                a = a.get(sort.field);
+                b = b.get(sort.field);
 
                 return a < b ? -1 : a === b ? 0 : 1;
+            }
+
+            function eachSortListByViewsHandler() {
+                if (sortByViews.field) {
+                    list.forEach(function (model) {
+                        model.set(sortByViews.field, modelViewIndex(model));
+                    });
+                }
+                else {
+                    list.models = list.sortBy(modelViewIndex);
+                }
+            }
+
+            function modelViewIndex(model) {
+                return viewList[model.cid].$el.index();
             }
         }
 

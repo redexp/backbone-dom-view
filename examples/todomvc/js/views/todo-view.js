@@ -1,129 +1,111 @@
-/*global Backbone, jQuery, _, ENTER_KEY, ESC_KEY */
-var app = app || {};
-
-(function ($) {
+;(function (app) {
 	'use strict';
 
-	// Todo Item View
-	// --------------
-
-	// The DOM element for a todo item...
 	app.TodoView = Backbone.DOMView.extend({
-		// The DOM events specific to an item.
-		events: {
-			'click .toggle': 'toggleCompleted',
-			'dblclick label': 'edit',
-			'click .destroy': 'clear',
-			'keypress .edit': 'updateOnEnter',
-			'keydown .edit': 'revertOnEscape',
-			'blur .edit': 'close'
+		ui: {
+			title: '.edit',
+			completed: '.toggle'
 		},
 
-		// The TodoView listens for changes to its model, re-rendering. Since
-		// there's a one-to-one correspondence between a **Todo** and a
-		// **TodoView** in this app, we set a direct reference on the model for
-		// convenience.
-		initialize: function () {
-			this.$input = this.$('input');
+		changeTitle: function () {
+			var title = this.ui.title.val().trim();
 
-			this.listenTo(this.model, 'destroy', this.remove);
-		},
-
-		isHidden: function () {
-			return this.model.get('completed') ?
-				app.TodoFilter === 'active' :
-				app.TodoFilter === 'completed';
-		},
-
-		// Toggle the `"completed"` state of the model.
-		toggleCompleted: function () {
-			this.model.toggle();
-		},
-
-		// Switch this view into `"editing"` mode, displaying the input field.
-		edit: function () {
-			this.$el.addClass('editing');
-			this.$input.focus();
-		},
-
-		// Close the `"editing"` mode, saving changes to the todo.
-		close: function () {
-			var value = this.$input.val();
-			var trimmedValue = value.trim();
-
-			// We don't want to handle blur events from an item that is no
-			// longer being edited. Relying on the CSS class here has the
-			// benefit of us not having to maintain state in the DOM and the
-			// JavaScript logic.
-			if (!this.$el.hasClass('editing')) {
+			if (!title) {
+				this.trigger('not-valid', true);
 				return;
 			}
 
-			if (trimmedValue) {
-				this.model.save({ title: trimmedValue });
-
-				if (value !== trimmedValue) {
-					// Model values changes consisting of whitespaces only are
-					// not causing change to be triggered Therefore we've to
-					// compare untrimmed version with a trimmed one to check
-					// whether anything changed
-					// And if yes, we've to trigger change event ourselves
-					this.model.trigger('change');
-				}
-			} else {
-				this.clear();
-			}
-
-			this.$el.removeClass('editing');
+			app.actions.todo.save(this.model, {
+				title: title
+			});
 		},
 
-		// If you hit `enter`, we're through editing the item.
-		updateOnEnter: function (e) {
-			if (e.which === ENTER_KEY) {
-				this.close();
-			}
+		changeCompleted: function () {
+			app.actions.todo.save(this.model, {
+				completed: this.ui.completed.prop('checked')
+			});
 		},
 
-		// If you're pressing `escape` we revert your change by simply leaving
-		// the `editing` state.
-		revertOnEscape: function (e) {
-			if (e.which === ESC_KEY) {
-				this.$el.removeClass('editing');
-				// Also reset the hidden input back to the original value.
-				this.$input.val(this.model.get('title'));
-			}
+		removeModel: function () {
+			app.actions.todo.remove(this.model);
 		},
 
-		// Remove the item, destroy the model from *localStorage* and delete its view.
-		clear: function () {
-			this.model.destroy();
+		startEdit: function () {
+			this.trigger('edit', true);
+		},
+
+		stopEdit: function () {
+			this.trigger('edit', false);
 		},
 
 		template: {
 			"": {
 				"class": {
-					"hidden": {
-						'visible': function () {
-						    return this.isHidden();
-						}
+					"completed": "@completed",
+					"editing": "#edit",
+					"not-valid": "#not-valid"
+				}
+			},
+
+			"completed": {
+				prop: {
+					'checked': '@completed'
+				},
+				on: {
+					'change': function () {
+						this.changeCompleted();
 					}
 				}
 			},
-			".toggle": {
-				prop: {
-					'checked': '@completed'
+
+			"label": {
+				text: '@title',
+				on: {
+					"dblclick": function () {
+					    this.startEdit();
+					}
 				}
 			},
-			"label": {
-				text: '@title'
-			},
-			".edit": {
+
+			"title": {
 				prop: {
-					'value': function () {
-					    return this.model.get('title');
+					'value': {
+						'#edit': function (edit) {
+							if (edit) {
+								this.ui.title.focus();
+							}
+
+						    return this.model.get('title')
+						}
+					}
+				},
+				on: {
+					'keydown': function (e) {
+					    switch (e.which) {
+							case ENTER_KEY:
+								e.preventDefault();
+								this.changeTitle();
+								this.stopEdit();
+								break;
+
+							case ESC_KEY:
+								this.stopEdit();
+								break;
+						}
+					},
+					'blur': function () {
+					    this.stopEdit();
+					}
+				}
+			},
+
+			".destroy": {
+				on: {
+					'click': function () {
+					    this.removeModel();
 					}
 				}
 			}
 		}
 	});
-})(jQuery);
+})(window.app);
