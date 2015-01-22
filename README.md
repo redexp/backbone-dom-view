@@ -57,7 +57,7 @@ Bower:
 
 ### ui:
 
-Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one plase. Also you can use this alias in `template:` instead of selectors. When you extend views `ui:` field will be merged from all parents prototypes.
+Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one plase. Also you can use this alias in `template:` instead of selectors. When you extend views, `ui:` field will be merged with all parents prototypes.
 ```javascript
 Backbone.DOMView.extend({
     ui: {
@@ -80,7 +80,7 @@ Backbone.DOMView.extend({
 
 ### template:
 
-Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers).
+Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers). When you extend views, `template:` field will be merged with all parents prototypes.
 
 ## Methods
 
@@ -302,10 +302,31 @@ Works just like `html` helper only difference that it uses `text()` method of jQ
 
 ### on
 
-Helper for jquery `.on()` method.
-Takes object where keys are events and values are functions
+**jQuery alias:** `.on()`
 
-[Example](test/on.coffee)
+Used to bind callbacks to dom events.
+
+It is a hash where keys are space separated dom events and values are callbacks or hash of selectors and callbacks. Callback will get same arguments as jQuery `.on()` callback. `this` in callbacks will be current view.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.remove': {
+            'on': {
+                'click': function (e) {
+                    e.preventDefault();
+                    return this.model.remove();
+                },
+                
+                'change': {
+                    'input.name': function (e) {
+                        this.model.set('name', e.currentTarget.value);
+                    }
+                }
+            }
+        }
+    } 
+});
+```
 
 ### connect
 
@@ -360,30 +381,3 @@ If sub view already have field `parent` then it will not be overwritten.
 [Example](test/each.coffee#L110-L128)
 
 `field:` use name of model field to iterate over it
-
-## Empty selector
-
-You can use empty string to pointing to $el itself.
-```javascript
-var View = Backbone.DOMView.extend({
-    template: {
-        "": {
-            class: {
-                "tested": "@tested"
-            }
-        }
-    }
-});
-
-var view = new View({
-    model: new Backbone.Model({tested: true})
-});
-
-view.$el.hasClass('tested'); // true
-```
-
-## Extending views
-
-Each new extended view class will extend `template:` option from parent view class
-
-[Example](test/constructor.coffee#L9-L29)
