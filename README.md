@@ -46,8 +46,6 @@ Which means:
 * Add to `.state` class `done` when model's `is_done` field will be equal truthy value
 * Add to `.state` class `selected` when model will trigger `change:selected` event and callback will return truthy value
 
-In `examples/todomvc` directory you can find rewritten version of [TodoMVC](https://github.com/tastejs/todomvc/tree/gh-pages/examples/backbone)
-
 ## Installation
 
 Bower:
@@ -59,32 +57,78 @@ Bower:
 
 ### ui:
 
-Used to make abstraction from jQuery selectors.
+Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one plase. Also you can use this alias in `template:` instead of selectors. When you extend views `ui:` field will be merged from all parents prototypes.
 ```javascript
-var View = Backbone.DOMView.extend({
+Backbone.DOMView.extend({
+    ui: {
+        title: 'input.title'
+    },
     
+    template: {
+        'title': {
+            'class': {
+                'error': {
+                    'validate': function () {
+                        return this.ui.title.val() === '';
+                    }
+                }
+            }
+        }
+    }
 });
 ```
+
+### template:
+
+Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers).
 
 ## Methods
 
 ### find()
 
-Same as view's `.$(selector)` but it can accept empty value and return `.$el` it self. This method used with `template:` option to select root element with empty string like `"": {class: {done: '@done'}}`
+Same as view's `.$(selector)` but it can accept empty value to return `.$el` it self. This method was created for `template:` option to **select root element** with empty string like `"": {class: {done: '@done'}}` and select aliases from `ui:` option.
 
 ### bind()
 
-Same as `.on()` method but with it you can bind callback to model and to view in same time
-
-**Arguments:**
-* `{String} event` - space separated events names
-* `{Function} callback`
+Same as `.on()` method but with it you can bind callback to model and to view in same time. 
+```javascript
+Backbone.DOMView.extend({
+    initialize: function () {
+        this.bind('change:title #changed', function () {});
+        // same as
+        this.listenTo(this.model, 'change:title', function () {});
+        this.on('changed', function () {});
+    } 
+});
+```
+So all events with `#` before them are view events, the rest are model events. But there one more feature `@model_field_name` notation which will be converted to `change:model_field_name` event and it callback will be called immediately with `model_field_name` value as first argument. All default helpers uses this method to bind to events.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'class': {
+                'active': {
+                    'change:active': function (value) {
+                        return value;
+                    }
+                },
+                'selected': {
+                    '@selected': function (value) {
+                        return value;
+                    }
+                }
+            }
+        }
+    } 
+});
+```
+Class `active` will not be added when view will be created even if model field `active` is `true`, beacuse it will wait for `change:active` event. Instead of it class `selected` will be synced with model field `selected` on view creation because it uses `@selected` notation.
 
 ## Helpers
 
 * [class](#class)
-* [attr](#attr-and-prop)
-* [prop](#attr-and-prop)
+* [attr](#attr)
+* [prop](#prop)
 * [style](#style)
 * [html](#html)
 * [text](#text)
@@ -97,42 +141,164 @@ Arguments passed to helpers are `selector` and `options`.
 
 ### class
 
-This helper takes object where keys are space separated css classes and values are space separated model events.
-First argument of event will be passed to jquery `toggleClass`.
+**jQuery alias:** `.toggleClass()`
 
-[Example](test/class-prop-attr-style-html.coffee#L10-L40)
+It will add css class to element if first argument of event will be truthy and remove if not.
 
-To change number of argument you can use `|arg(number)` after event name
+It is a hash where keys are space separated css class names and values are: event name or hash of events and callbacks or function. If value is event name, then helper will create callback for you where it will take first argument.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'class': {
+                'active': 'change:active',
+                // same as 
+                'active': {
+                    'change:active': function (value) {
+                        return value
+                    }
+                },
+                // or you can change number of argument like this
+                'selected': '@selected|arg(3)',
+                // same as
+                'selected': {
+                    '@selected': functio (value1, value2, value3) {
+                        return value3;
+                    }
+                }
+            }
+        }
+    } 
+});
+```
+If value is function it means css class should be initialized once only on view creation.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'class': {
+                'product': function () {
+                    return this.model.isProduct();
+                }
+            }
+        }
+    } 
+});
+```
 
-[Example](test/class-prop-attr-style-html.coffee#L42-L72)
+### attr
 
-To bind class with model field you can use `@fieldName` notation
+**jQuery alias:** `.attr()`
 
-[Example](test/class-prop-attr-style-html.coffee#L74-L106)
+Used to change attributes values.
 
-To handle view events just add `#` before event name
+It is a hash where keys are attributes names and values same as in [class](#class) helper only values from callbacks will be used as values for attributes.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'attr': {
+                'data-message': '@message',
+                'data-error': {
+                    'validate': function () {
+                        return this.model.validationError;
+                    }
+                },
+                'rel': function () {
+                    return this.model.get('id');
+                }
+            }
+        }
+    } 
+});
+```
 
-[Example](test/class-prop-attr-style-html.coffee#L108-L138)
+### prop
 
-To do some calculation before passing event value, use object where keys are events and values are functions
+**jQuery alias:** `.prop()`
 
-[Example](test/class-prop-attr-style-html.coffee#L140-L172)
+Used to change properties values.
 
-### attr and prop
-
-Works just like `class` helper only they set values of events to attributes and properties.
+It is a hash where keys are properties names and values from callbacks will be used as values for properties.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'prop': {
+                'id': '@id',
+                'value': {
+                    'change:value': function () {
+                        return this.model.get('value');
+                    }
+                },
+                'disabled': function () {
+                    return !this.model.get('active');
+                }
+            }
+        }
+    } 
+});
+```
 
 ### style
 
-Set css style to element, works just like `class`.
+**jQuery alias:** `.css()`
+
+Used to change css properties of element.
+
+It is a hash where keys are css properties names and values from callbacks will be used as values for this properties.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'style': {
+                'z-index': '@index',
+                'background-color': {
+                    'validate': function () {
+                        return this.model.isValid ? 'green' : 'red';
+                    }
+                },
+                'width': function () {
+                    return this.model.get('width') + 'px';
+                }
+            }
+        }
+    } 
+});
+```
 
 ### html
 
-Works just like `class` helper only difference that it not takes names of classes.
+**jQuery alias:** `.html()`
+
+Used to change `innerHTML` of element.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'html': '@title'
+        },
+        '.text': {
+            'html': {
+                'change:text': function () {
+                    return '<b>' + this.model.get('text') + '</b>';
+                }
+            }
+        },
+        '.type': {
+            'html': function () {
+                return this.model.get('type');
+            }
+        }
+    } 
+});
+```
 
 ### text
 
-Works just like `html` helper only difference that it uses `text()` method of jQuery.
+**jQuery alias:** `.text()`
+
+Works just like `html` helper only difference that it uses `text()` method of jQuery, which will convert all html special chars to html entities.
 
 ### on
 
