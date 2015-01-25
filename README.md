@@ -355,11 +355,6 @@ connect: {
 ### each
 
 Helper to render collections.
-```html
-<div id="items">
-    <ul class="items"></ul>
-</div>
-```
 ```javascript
 var ItemView = Backbone.DOMView.extend({
     tagName: 'li',
