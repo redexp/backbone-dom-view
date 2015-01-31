@@ -16,30 +16,32 @@
             viewEvent = /#([\w\-:\.]+)/,
             argSelector = /\|arg\((\d+)\)/;
 
-        var DOMView = BB.DOMView = View.extend({
-            constructor: function(ops) {
-                var view = this;
+        function DOMView(ops) {
+            var view = this;
 
-                View.apply(view, arguments);
+            View.apply(view, arguments);
 
-                if (typeof view.template !== 'object') return;
+            if (typeof view.template !== 'object') return;
 
-                var template = view.template = mergeExtendedField(view.constructor, 'template');
+            var template = view.template = mergeExtendedField(view.constructor, 'template');
 
-                for (var selector in template) {
-                    if (!has(template, selector)) continue;
+            for (var selector in template) {
+                if (!has(template, selector)) continue;
 
-                    var helpersList = template[selector];
+                var helpersList = template[selector];
 
-                    for (var helper in helpersList) {
-                        if (!has(helpersList, helper)) continue;
+                for (var helper in helpersList) {
+                    if (!has(helpersList, helper)) continue;
 
-                        helpers[helper].call(view, selector, helpersList[helper]);
-                    }
+                    helpers[helper].call(view, selector, helpersList[helper]);
                 }
+            }
 
-                view.trigger(DOMView.readyEvent);
-            },
+            view.trigger(DOMView.readyEvent);
+        }
+
+        BB.DOMView = View.extend({
+            constructor: DOMView,
 
             setElement: function () {
                 View.prototype.setElement.apply(this, arguments);
