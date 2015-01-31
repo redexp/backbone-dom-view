@@ -20,6 +20,8 @@ var View = Backbone.DOMView.extend({
     }
 });
 ```
+`DOMView` class is extended from base `Backbone.View` class.
+
 For example view for Todo model
 ```javascript
 var TodoView = Backbone.DOMView.extend({
@@ -46,8 +48,6 @@ Which means:
 * Add to `.state` class `done` when model's `is_done` field will be equal truthy value
 * Add to `.state` class `selected` when model will trigger `change:selected` event and callback will return truthy value
 
-In `examples/todomvc` directory you can find rewritten version of [TodoMVC](https://github.com/tastejs/todomvc/tree/gh-pages/examples/backbone)
-
 ## Installation
 
 Bower:
@@ -59,32 +59,78 @@ Bower:
 
 ### ui:
 
-Used to make abstraction from jQuery selectors.
+Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one plase. Also you can use this alias in `template:` instead of selectors. When you extend views, `ui:` field will be merged with all parents prototypes.
 ```javascript
-var View = Backbone.DOMView.extend({
+Backbone.DOMView.extend({
+    ui: {
+        title: 'input.title'
+    },
     
+    template: {
+        'title': {
+            'class': {
+                'error': {
+                    'validate': function () {
+                        return this.ui.title.val() === '';
+                    }
+                }
+            }
+        }
+    }
 });
 ```
+
+### template:
+
+Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers). When you extend views, `template:` field will be merged with all parents prototypes.
 
 ## Methods
 
 ### find()
 
-Same as view's `.$(selector)` but it can accept empty value and return `.$el` it self. This method used with `template:` option to select root element with empty string like `"": {class: {done: '@done'}}`
+Same as view's `.$(selector)` but it can accept empty value to return `.$el` it self. This method was created for `template:` option to **select root element** with empty string like `"": {class: {done: '@done'}}` and select aliases from `ui:` option.
 
 ### bind()
 
-Same as `.on()` method but with it you can bind callback to model and to view in same time
-
-**Arguments:**
-* `{String} event` - space separated events names
-* `{Function} callback`
+Same as `.on()` method but with it you can bind callback to model and to view in same time. 
+```javascript
+Backbone.DOMView.extend({
+    initialize: function () {
+        this.bind('change:title #changed', function () {});
+        // same as
+        this.listenTo(this.model, 'change:title', function () {});
+        this.on('changed', function () {});
+    } 
+});
+```
+So all events with `#` before them are view events, the rest are model events. But there one more feature `@model_field_name` notation which will be converted to `change:model_field_name` event and it callback will be called immediately with `model_field_name` value as first argument. All default helpers uses this method to bind to events.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'class': {
+                'active': {
+                    'change:active': function (value) {
+                        return value;
+                    }
+                },
+                'selected': {
+                    '@selected': function (value) {
+                        return value;
+                    }
+                }
+            }
+        }
+    } 
+});
+```
+Class `active` will not be added when view will be created even if model field `active` is `true`, beacuse it will wait for `change:active` event. Instead of it class `selected` will be synced with model field `selected` on view creation because it uses `@selected` notation.
 
 ## Helpers
 
 * [class](#class)
-* [attr](#attr-and-prop)
-* [prop](#attr-and-prop)
+* [attr](#attr)
+* [prop](#prop)
 * [style](#style)
 * [html](#html)
 * [text](#text)
@@ -97,127 +143,406 @@ Arguments passed to helpers are `selector` and `options`.
 
 ### class
 
-This helper takes object where keys are space separated css classes and values are space separated model events.
-First argument of event will be passed to jquery `toggleClass`.
+**jQuery alias:** `.toggleClass()`
 
-[Example](test/class-prop-attr-style-html.coffee#L10-L40)
+It will add css class to element if first argument of event will be truthy and remove if not.
 
-To change number of argument you can use `|arg(number)` after event name
+It is a hash where keys are space separated css class names and values are: event name or hash of events and callbacks or function. If value is event name, then helper will create callback for you where it will take first argument.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'class': {
+                'active': 'change:active',
+                // same as 
+                'active': {
+                    'change:active': function (value) {
+                        return value
+                    }
+                },
+                // or you can change number of argument like this
+                'selected': '@selected|arg(3)',
+                // same as
+                'selected': {
+                    '@selected': functio (value1, value2, value3) {
+                        return value3;
+                    }
+                }
+            }
+        }
+    } 
+});
+```
+If value is function it means css class should be initialized once only on view creation.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'class': {
+                'product': function () {
+                    return this.model.isProduct();
+                }
+            }
+        }
+    } 
+});
+```
 
-[Example](test/class-prop-attr-style-html.coffee#L42-L72)
+### attr
 
-To bind class with model field you can use `@fieldName` notation
+**jQuery alias:** `.attr()`
 
-[Example](test/class-prop-attr-style-html.coffee#L74-L106)
+Used to change attributes values.
 
-To handle view events just add `#` before event name
+It is a hash where keys are attributes names and values same as in [class](#class) helper only values from callbacks will be used as values for attributes.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'attr': {
+                'data-message': '@message',
+                'data-error': {
+                    'validate': function () {
+                        return this.model.validationError;
+                    }
+                },
+                'rel': function () {
+                    return this.model.get('id');
+                }
+            }
+        }
+    } 
+});
+```
 
-[Example](test/class-prop-attr-style-html.coffee#L108-L138)
+### prop
 
-To do some calculation before passing event value, use object where keys are events and values are functions
+**jQuery alias:** `.prop()`
 
-[Example](test/class-prop-attr-style-html.coffee#L140-L172)
+Used to change properties values.
 
-### attr and prop
-
-Works just like `class` helper only they set values of events to attributes and properties.
+It is a hash where keys are properties names and values from callbacks will be used as values for properties.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'prop': {
+                'id': '@id',
+                'value': {
+                    'change:value': function () {
+                        return this.model.get('value');
+                    }
+                },
+                'disabled': function () {
+                    return !this.model.get('active');
+                }
+            }
+        }
+    } 
+});
+```
 
 ### style
 
-Set css style to element, works just like `class`.
+**jQuery alias:** `.css()`
+
+Used to change css properties of element.
+
+It is a hash where keys are css properties names and values from callbacks will be used as values for this properties.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'style': {
+                'z-index': '@index',
+                'background-color': {
+                    'validate': function () {
+                        return this.model.isValid ? 'green' : 'red';
+                    }
+                },
+                'width': function () {
+                    return this.model.get('width') + 'px';
+                }
+            }
+        }
+    } 
+});
+```
 
 ### html
 
-Works just like `class` helper only difference that it not takes names of classes.
+**jQuery alias:** `.html()`
+
+Used to change `innerHTML` of element.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'html': '@title'
+        },
+        '.text': {
+            'html': {
+                'change:text': function () {
+                    return '<b>' + this.model.get('text') + '</b>';
+                }
+            }
+        },
+        '.type': {
+            'html': function () {
+                return this.model.get('type');
+            }
+        }
+    } 
+});
+```
 
 ### text
 
-Works just like `html` helper only difference that it uses `text()` method of jQuery.
+**jQuery alias:** `.text()`
+
+Works just like `html` helper only difference that it uses `text()` method of jQuery, which will convert all html special chars to html entities.
 
 ### on
 
-Helper for jquery `.on()` method.
-Takes object where keys are events and values are functions
+**jQuery alias:** `.on()`
 
-[Example](test/on.coffee)
+Used to bind callbacks to dom events.
+
+It is a hash where keys are space separated dom events and values are callbacks or hash of selectors and callbacks. Callback will get same arguments as jQuery `.on()` callback. `this` in callbacks will be current view.
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.remove': {
+            'on': {
+                'click': function (e) {
+                    e.preventDefault();
+                    return this.model.remove();
+                },
+                
+                'change': {
+                    'input.name': function (e) {
+                        this.model.set('name', e.currentTarget.value);
+                    }
+                }
+            }
+        }
+    } 
+});
+```
 
 ### connect
 
-Simply binds field of model with property of element by some event (default is `change`).
-To set event just add `|eventName` after property name.
-
-[Example](test/connect.coffee)
+This helper gives you two way binding with element property and model field. By default helper will listen for `chnage` event in element and `change:model_field` in model
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        'input.title': {
+            connect: {
+                'value': 'title'
+            }
+        }
+    }
+});
+```
+So when element will trigger `change` event, helper will take `value` property and set it to model's `title` field and when model trigger `change:title`, helper will change `value` with new `title`.
+If you want to listen different event in element then you can use `property|event` notation
+```javascript
+connect: {
+    'value|keyup': 'title'
+}
+```
 
 ### each
 
-Helper for collections.
-It has three options: view, addHandler and delHandler.
-
-`view:` is view class for added model
-
-[Example](test/each.coffee#L9-L34)
-
-or you can set function which should return view class.
-
-[Example](test/each.coffee#L36-L56)
-
-`addHandler:` is a function which takes two arguments: jquery element and view object of added model.
-In this function you should add element of model view to jquery element.
-By default `each` will use `append` method.
-Also you you can set this option as string name of predefined method:
-
-* append
-* prepend
-* fadeIn
-* slideDown
-
-To add more methods just add them to `Backbone.DOMView.helpers.each.addHandlers` object
-
-`delHandler:` is the same as `addHandler` only for removing elements. Default is `remove`.
-Predefined methods:
-
-* remove
-* fadeOut
-* slideUp
-
-To add more methods just add them to `Backbone.DOMView.helpers.each.delHandlers` object
-
-[Example](test/each.coffee#L58-L83)
-
-`el:` selector for elements which will be detached to use as `el` for `view` class
-
-[Example](test/each.coffee#L85-L108)
-
-Each generated sub view will have field `parent` which points to view generated them.
-If sub view already have field `parent` then it will not be overwritten.
-
-[Example](test/each.coffee#L110-L128)
-
-`field:` use name of model field to iterate over it
-
-## Empty selector
-
-You can use empty string to pointing to $el itself.
+Helper to render collections.
 ```javascript
-var View = Backbone.DOMView.extend({
+var ItemView = Backbone.DOMView.extend({
+    tagName: 'li',
     template: {
-        "": {
-            class: {
-                "tested": "@tested"
+        '': {
+            text: '@title'
+        }
+    }
+});
+
+var ListView = Backbone.DOMView.extend({
+    tagName: 'ul',
+    template: {
+        '': {
+            each: {
+                view: ItemView
             }
         }
     }
 });
 
-var view = new View({
-    model: new Backbone.Model({tested: true})
+var list = new Backbone.Collection([
+    {title: 'one'},
+    {title: 'two'},
+    {title: 'three'}
+]);
+
+var view = new LsitView({
+    model: list,
+    el: '#items'
 });
 
-view.$el.hasClass('tested'); // true
+view.$el //= <ul><li>one</li><li>two</li><li>three</li></ul>
+
+list.remove(list.at(1));
+
+view.$el //= <ul><li>one</li><li>three</li></ul>
+
+list.add({title: 'four'});
+
+view.$el //= <ul><li>one</li><li>three</li><li>four</li></ul>
+
+list.at(0).set('title', 'zero');
+
+view.$el //= <ul><li>zero</li><li>three</li><li>four</li></ul>
 ```
 
-## Extending views
+#### Options
 
-Each new extended view class will extend `template:` option from parent view class
+**view:** `{View|Function}`
 
-[Example](test/constructor.coffee#L9-L29)
+If `view:` value is `Backbone.View` class (or extended form it) then helper will create instances from this class for each model added to collection. If `view:` value is `Function` then helper will call it for each model and expect view instance from it (helpful if you need different views in same collection).
+
+**el:** `{String}` Default: `null`
+
+Selector for `el:` option fo `view:` class. You can use it when template for `ItemView` is in `ul.items`
+```html
+<ul class="items">
+    <li><span class="title"></span></li>
+</ul>
+```
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: ItemView,
+                el: '> li' // means 'ul.items > li'
+            }
+        }
+    }
+});
+
+//...
+
+view.$el //= <ul class="items"><li><span class="title">one</span></li><li><span class="title">two</span></li><li><span class="title">three</span></li></ul>
+```
+When you will create instance of `ListView` it will detach `ul.items > li` and use it clones as `el:` option for `ItemView`
+
+**addEvent:** `{String}` Default: `'add'`
+
+By default helper will listen for `add` event to add new view, but you can change it with this option
+
+**removeEvent:** `{String}` Default: ``remove``
+
+Same as previous only for `remove` event.
+
+**addHandler:** `{String|Function}` Default: `'append'`
+
+By default helper will use `.append()` jQuery method to add views to `ul.items`, you can chenge it with three predefined jQuery methods and pass it as a string for this option: `prepend`, `fadeIn`, `slideDown`. Or you can use function and add view in custom way.
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: ItemView,
+                addHandler: function (ul, view) {
+                    view.$el.hide().appendTo(ul).animate({backgrounColor: 'red'});
+                }
+            }
+        }
+    }
+});
+```
+
+**delHandler:** `{String|Function}` Default: `'remove'`
+
+Same as `addHandler` only for removing views. Default method is `remove`. Predefined methods: `fadeOut`, `slideUp`.
+
+**sort:** `{Boolean|Object}` Default: `false`
+
+Elements in `ul.items` can be sorted and sync with models in collection. If `sort:` is `true` then helper will listen for `sort` event and will change order of views in `ul.items` or you can set custom event name with object.
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: ItemView,
+                sort: {
+                    event: 'change-order'
+                }
+            }
+        }
+    }
+});
+```
+Also you can change views order by some models field value not by their index in collection.
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: ItemView,
+                sort: {
+                    event: 'change:order'
+                    field: 'order'
+                }
+            }
+        }
+    }
+});
+
+var list = new Backbone.Collection([
+    {title: 'one', order: 1},
+    {title: 'two', order: 2},
+    {title: 'three', order: 3}
+]);
+
+//...
+
+view.$el //= <ul class="items"><li>one</li><li>two</li><li>three</li></ul>
+
+list.at(0).set('order', 4);
+
+view.$el //= <ul class="items"><li>two</li><li>three</li><li>one</li></ul>
+```
+
+**offOnRemove:** `{Boolean}` Default: `true`
+
+By default all views created by this helper on remove will stop listen all events (`.off()` and `.stopListening()`). You can disable it by set this option to `false`.
+
+**field:** `{String}` Default: `null`
+
+Helper can work not only with `this.model` but also with collection in model field. Name of this filed you can set with this option
+```javascript
+var UserView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                field: 'items'
+                view: ItemView
+            }
+        }
+    }
+});
+
+var user = new Backbone.Model({
+    name: 'Max',
+    items: new Backbone.Collection([
+        {title: 'one'},
+        {title: 'two'},
+        {title: 'three'}
+    ])
+});
+
+var view = new UserView({
+    model: user
+});
+
+view.$el.find('.items') //= <ul class="items"><li>one</li><li>two</li><li>three</li></ul>
+```
