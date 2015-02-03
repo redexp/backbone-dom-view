@@ -72,7 +72,7 @@
         model.set('age', 20);
         return expect(zView.$el).to.have.attr('test', '20');
       });
-      return it('should extend parent ui:', function() {
+      it('should extend parent ui:', function() {
         var View, XView, YView, el1, el2, el3, view, xView, yView;
         View = DomView.extend({
           el: '<li><span></span><a href="#"><i></i></a></li>',
@@ -141,6 +141,23 @@
         expect(xView.ui.name).to.be.undefined;
         expect(el3.find('span')).to.have.text('Jack');
         return expect(yView.ui.name).to.have.text('Jack');
+      });
+      return it('should trigger elementEvent on setElement', function() {
+        var View, view, x;
+        x = 0;
+        View = DomView.extend({
+          tagName: 'li',
+          constructor: function() {
+            this.on(DomView.elementEvent, function() {
+              x = 1;
+              expect(this.$el).instanceOf(jQuery);
+              return expect(this.$el).to.match('li');
+            });
+            return DomView.apply(this, arguments);
+          }
+        });
+        view = new View;
+        return expect(x).to.equal(1);
       });
     });
   });

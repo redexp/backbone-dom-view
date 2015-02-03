@@ -57,6 +57,8 @@
                     view.ui[name] = view.find(ui[name]);
                 }
 
+                this.trigger(DOMView.elementEvent);
+
                 return this;
             },
 
@@ -110,6 +112,7 @@
         });
 
         DOMView.readyEvent = 'template-ready';
+        DOMView.elementEvent = 'element-ready';
 
         var helpers = DOMView.helpers = {
             'class': classHelper,

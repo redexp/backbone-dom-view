@@ -126,6 +126,26 @@ Backbone.DOMView.extend({
 ```
 Class `active` will not be added when view will be created even if model field `active` is `true`, beacuse it will wait for `change:active` event. Instead of it class `selected` will be synced with model field `selected` on view creation because it uses `@selected` notation.
 
+## Internal Events
+
+View has several internal events
+
+### template-ready
+
+By default `template` will be executed only after `initialize` callback, so if you want to do some stuff after it you can use `template-ready` event or `Backbone.DOMView.readyEvent`
+```javascript
+Backbone.DOMView.extend({
+    initialize: function () {
+        this.on('template-ready', function () { /*...*/ });
+        this.on(Backbone.DOMView.readyEvent, function () { /*...*/ });
+    }
+});
+```
+
+### element-ready
+
+If you want to do some stuff before `initialize` but after `this.$el` prepared or you need to react when `this.$el` will be changed with `this.setElement()` method, then you can use `element-ready` event or `Backbone.DOMView.elementEvent`
+
 ## Helpers
 
 * [class](#class)

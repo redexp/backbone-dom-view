@@ -99,3 +99,19 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(xView.ui.name).to.be.undefined
             expect(el3.find('span')).to.have.text 'Jack'
             expect(yView.ui.name).to.have.text 'Jack'
+
+        it 'should trigger elementEvent on setElement', ->
+            x = 0
+            View = DomView.extend
+                tagName: 'li'
+                constructor: ->
+                    this.on DomView.elementEvent, ->
+                        x = 1
+                        expect(this.$el).instanceOf jQuery
+                        expect(this.$el).to.match 'li'
+
+                    DomView.apply(this, arguments)
+
+            view = new View
+
+            expect(x).to.equal 1
