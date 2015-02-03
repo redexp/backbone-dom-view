@@ -75,7 +75,7 @@
       return it('should extend parent ui:', function() {
         var View, XView, YView, el1, el2, el3, view, xView, yView;
         View = DomView.extend({
-          el: '<li><span></span><a href="#"></a></li>',
+          el: '<li><span></span><a href="#"><i></i></a></li>',
           ui: {
             root: ''
           },
@@ -88,8 +88,11 @@
           }
         });
         XView = View.extend({
-          ui: {
-            deleteButton: 'a'
+          ui: function() {
+            expect(this).instanceOf(XView);
+            return {
+              deleteButton: 'a'
+            };
           },
           template: {
             deleteButton: {

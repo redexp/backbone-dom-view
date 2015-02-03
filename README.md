@@ -59,7 +59,7 @@ Bower:
 
 ### ui:
 
-Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one plase. Also you can use this alias in `template:` instead of selectors. When you extend views, `ui:` field will be merged with all parents prototypes.
+Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one place. As value of `ui:` you can use `Object` or `Function` (which should return an object). Also you can use this alias in `template:` instead of selectors. When you extend views, `ui:` field will be merged with all parents prototypes.
 ```javascript
 Backbone.DOMView.extend({
     ui: {
@@ -82,7 +82,7 @@ Backbone.DOMView.extend({
 
 ### template:
 
-Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers). When you extend views, `template:` field will be merged with all parents prototypes.
+Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers). When you extend views, `template:` field will be merged with all parents prototypes. As value of `template:` you can use `Object` or `Function` (which should return an object).
 
 ## Methods
 

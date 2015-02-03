@@ -23,7 +23,7 @@
 
             if (typeof view.template !== 'object') return;
 
-            var template = view.template = mergeExtendedField(view.constructor, 'template');
+            var template = view.template = mergeExtendedField(view, 'template');
 
             for (var selector in template) {
                 if (!has(template, selector)) continue;
@@ -48,7 +48,7 @@
 
                 var view = this;
 
-                var ui = mergeExtendedField(view.constructor, 'ui');
+                var ui = mergeExtendedField(view, 'ui');
                 view.ui = {};
 
                 for (var name in ui) {
@@ -507,13 +507,18 @@
             return func.hasOwnProperty('__super__');
         }
 
-        function getViewExtendedFieldList(viewClass, field) {
-            var result = [viewClass.prototype[field] || {}];
-            return viewClass.__super__ ? result.concat(getViewExtendedFieldList(viewClass.__super__.constructor, field)) : result;
+        function getViewExtendedFieldList(viewClass, field, context) {
+            var value = viewClass.prototype[field] || {};
+            if (typeof value === 'function') {
+                value = value.call(context);
+            }
+            var result = [value];
+            return viewClass.__super__ ? result.concat(getViewExtendedFieldList(viewClass.__super__.constructor, field, context)) : result;
         }
 
-        function mergeExtendedField(viewClass, field) {
-            return extend.apply(null, [true, {}].concat(getViewExtendedFieldList(viewClass, field).reverse()));
+        function mergeExtendedField(context, field) {
+            var viewClass = context.constructor;
+            return extend.apply(null, [true, {}].concat(getViewExtendedFieldList(viewClass, field, context).reverse()));
         }
 
         function extend() {

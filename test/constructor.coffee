@@ -50,15 +50,17 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
         it 'should extend parent ui:', ->
             View = DomView.extend
-                el: '<li><span></span><a href="#"></a></li>'
+                el: '<li><span></span><a href="#"><i></i></a></li>'
                 ui:
                     root: ''
                 template:
                     root: prop: 'test': '@name'
 
             XView = View.extend
-                ui:
-                    deleteButton: 'a'
+                ui: ->
+                    expect(this).instanceOf XView
+                    return {deleteButton: 'a'}
+
                 template:
                     deleteButton: html: '@name'
 
