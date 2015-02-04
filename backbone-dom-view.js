@@ -73,7 +73,7 @@
                         rootSelectorLength = this.$el.selector.length;
 
                     selector = selector.replace(uiSelectors, function (x, name) {
-                        return ui[name].selector.slice(rootSelectorLength);
+                        return typeof ui[name] === 'string' ? ui[name] : ui[name].selector.slice(rootSelectorLength);
                     });
                 }
 

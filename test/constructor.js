@@ -186,11 +186,14 @@
         View = DomView.extend({
           el: node.find('li'),
           ui: {
-            test: 'span'
+            test: 'span',
+            comb: '{test} + i'
           }
         });
         view = new View;
-        return expect(view.find('{test} ~ i')).to.match('i');
+        expect(view.find('{test} ~ i')).to.match('i');
+        expect(view.find('{comb}')).to.match('i');
+        return expect(view.find('comb')).to.match('i');
       });
     });
   });

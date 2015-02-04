@@ -143,7 +143,10 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                 el: node.find('li')
                 ui:
                     test: 'span'
+                    comb: '{test} + i'
 
             view = new View
 
             expect(view.find('{test} ~ i')).to.match 'i'
+            expect(view.find('{comb}')).to.match 'i'
+            expect(view.find('comb')).to.match 'i'

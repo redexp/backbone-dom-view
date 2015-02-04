@@ -60,10 +60,13 @@ Bower:
 ### ui:
 
 Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one place. As value of `ui:` you can use `Object` or `Function` (which should return an object). Also you can use this alias in `template:` instead of selectors. When you extend views, `ui:` field will be merged with all parents prototypes.
+
+You can use names of aliases in other aliases selector.
 ```javascript
 Backbone.DOMView.extend({
     ui: {
-        title: 'input.title'
+        title: 'input.title',
+        edit: '{title} ~ .edit'
     },
     
     template: {
