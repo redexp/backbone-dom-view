@@ -88,7 +88,25 @@ Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers
 
 ### find()
 
-Same as view's `.$(selector)` but it can accept empty value to return `.$el` it self. This method was created for `template:` option to **select root element** with empty string like `"": {class: {done: '@done'}}` and select aliases from `ui:` option.
+Same as view's `.$(selector)` but it can accept empty value to return `.$el` it self or `ui:` property name or selector with `ui:` property name in curly brackets. This method was created for `template:` selectors.
+```javascript
+Backbone.DOMView.extend({
+    el: '<div><span>Name</span> <button>Edit</button></div>',
+    ui: {
+        name: 'span'
+    },
+    template: {
+        "": { /* <div> */ },
+        "name": { /* <span> */ },
+        "{name} ~ button": { /* <button> */ }
+    },
+    initialize: function () {
+        this.find() // <div>
+        this.find('name') // <span>
+        this.find('{name} ~ button') // <button>
+    }
+});
+```
 
 ### bind()
 

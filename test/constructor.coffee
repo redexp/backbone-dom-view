@@ -115,3 +115,33 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view = new View
 
             expect(x).to.equal 1
+
+    describe 'find()', ->
+
+        it 'should return root node', ->
+            View = DomView.extend
+                tagName: 'li'
+
+            view = new View
+
+            expect(view.find()).to.equal view.$el
+
+        it 'should return ui element', ->
+            View = DomView.extend
+                el: '<li><span></span></li>'
+                ui:
+                    test: 'span'
+
+            view = new View
+
+            expect(view.find('test')).to.match 'span'
+
+        it 'should replace "{name}" on ui element selector', ->
+            View = DomView.extend
+                el: '<li><span></span> <i></i></li>'
+                ui:
+                    test: 'span'
+
+            view = new View
+
+            expect(view.find('{test} ~ i')).to.match 'i'

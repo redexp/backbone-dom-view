@@ -7,7 +7,7 @@
     beforeEach(function() {
       return model = new Backbone.Model();
     });
-    return describe('constructor', function() {
+    describe('constructor', function() {
       it('should extend parent template:', function() {
         var View, XView, YView, ZView, el1, el2, el3, view, xView, yView, zView;
         View = DomView.extend({
@@ -158,6 +158,38 @@
         });
         view = new View;
         return expect(x).to.equal(1);
+      });
+    });
+    return describe('find()', function() {
+      it('should return root node', function() {
+        var View, view;
+        View = DomView.extend({
+          tagName: 'li'
+        });
+        view = new View;
+        return expect(view.find()).to.equal(view.$el);
+      });
+      it('should return ui element', function() {
+        var View, view;
+        View = DomView.extend({
+          el: '<li><span></span></li>',
+          ui: {
+            test: 'span'
+          }
+        });
+        view = new View;
+        return expect(view.find('test')).to.match('span');
+      });
+      return it('should replace "{name}" on ui element selector', function() {
+        var View, view;
+        View = DomView.extend({
+          el: '<li><span></span> <i></i></li>',
+          ui: {
+            test: 'span'
+          }
+        });
+        view = new View;
+        return expect(view.find('{test} ~ i')).to.match('i');
       });
     });
   });

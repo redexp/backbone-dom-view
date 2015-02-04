@@ -14,7 +14,8 @@
         var dividedField = /^(.+)\|(.+)/,
             fieldEvent = /@([\w-]+)/,
             viewEvent = /#([\w\-:\.]+)/,
-            argSelector = /\|arg\((\d+)\)/;
+            argSelector = /\|arg\((\d+)\)/,
+            uiSelectors = /\{([^}]+)}/g;
 
         function DOMView(ops) {
             var view = this;
@@ -63,7 +64,18 @@
             },
 
             find: function(selector) {
-                return selector ? this.ui[selector] || this.$el.find(selector) : this.$el;
+                if (!selector) return this.$el;
+
+                if (this.ui[selector]) return this.ui[selector];
+
+                if (selector.indexOf('{') > -1) {
+                    var ui = this.ui;
+                    selector = selector.replace(uiSelectors, function (x, name) {
+                        return ui[name].selector;
+                    });
+                }
+
+                return this.$el.find(selector);
             },
 
             bind: function (events, func) {
