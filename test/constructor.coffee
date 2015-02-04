@@ -137,8 +137,10 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(view.find('test')).to.match 'span'
 
         it 'should replace "{name}" on ui element selector', ->
+            node = $('<div><li><span></span> <i></i></li></div>')
+
             View = DomView.extend
-                el: '<li><span></span> <i></i></li>'
+                el: node.find('li')
                 ui:
                     test: 'span'
 

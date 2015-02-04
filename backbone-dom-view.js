@@ -69,9 +69,11 @@
                 if (this.ui[selector]) return this.ui[selector];
 
                 if (selector.indexOf('{') > -1) {
-                    var ui = this.ui;
+                    var ui = this.ui,
+                        rootSelectorLength = this.$el.selector.length;
+
                     selector = selector.replace(uiSelectors, function (x, name) {
-                        return ui[name].selector;
+                        return ui[name].selector.slice(rootSelectorLength);
                     });
                 }
 

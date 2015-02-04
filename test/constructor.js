@@ -181,9 +181,10 @@
         return expect(view.find('test')).to.match('span');
       });
       return it('should replace "{name}" on ui element selector', function() {
-        var View, view;
+        var View, node, view;
+        node = $('<div><li><span></span> <i></i></li></div>');
         View = DomView.extend({
-          el: '<li><span></span> <i></i></li>',
+          el: node.find('li'),
           ui: {
             test: 'span'
           }
