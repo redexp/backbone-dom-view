@@ -22,8 +22,6 @@
 
             View.apply(view, arguments);
 
-            if (typeof view.template !== 'object') return;
-
             var template = view.template = mergeExtendedField(view, 'template');
 
             for (var selector in template) {
