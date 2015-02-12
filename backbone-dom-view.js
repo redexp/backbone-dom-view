@@ -334,7 +334,7 @@
         /**
          * Options for "each" helper
          * @typedef {Object} EachHelperOptions
-         * @property {String} field
+         * @property {String|Object} field
          * @property {Function|Object} view
          * @property {String} el
          * @property {String} addHandler
@@ -367,8 +367,24 @@
             var view = this,
                 holder = view.find(selector),
                 viewEl = options.el ? holder.find(options.el).detach() : false,
-                field = options.field,
-                list = field ? view.model.get(field) : view.model;
+                list = view.model;
+
+            if (options.field) {
+                var field = options.field,
+                    fieldName = field,
+                    fieldClass = null;
+
+                if (typeof field === 'object') {
+                    fieldName = field.name;
+                    fieldClass = field.wrapper;
+                }
+
+                list = view.model.get(fieldName);
+
+                if (fieldClass) {
+                    list = new fieldClass(list);
+                }
+            }
 
             var viewList = options.viewList = {};
             var addHandler = options.addHandler;

@@ -263,3 +263,29 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(list.at(2).get('name')).to.equal 3
             expect(list.at(2).get('order')).to.equal 1
+
+        it 'should iterate over plain array', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        field:
+                            name: 'list'
+                            wrapper: Backbone.Collection
+                        view: Item
+                        el: '> *'
+
+            model = new Backbone.Model({
+                list: [{name: 1},{name: 2}]
+            })
+
+            view = new ListView model: model
+
+            li = view.$el.children()
+
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'

@@ -331,7 +331,7 @@
         expect(list.at(1).get('name')).to.equal(3);
         return expect(list.at(2).get('name')).to.equal(1);
       });
-      return it('should sort list by views on event and set index to field', function() {
+      it('should sort list by views on event and set index to field', function() {
         var Item, ListView, li, list, view;
         Item = DomView.extend({
           template: {
@@ -383,6 +383,46 @@
         expect(list.at(1).get('order')).to.equal(0);
         expect(list.at(2).get('name')).to.equal(3);
         return expect(list.at(2).get('order')).to.equal(1);
+      });
+      return it('should iterate over plain array', function() {
+        var Item, ListView, li, view;
+        Item = DomView.extend({
+          template: {
+            '': {
+              html: '@name'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          template: {
+            '': {
+              each: {
+                field: {
+                  name: 'list',
+                  wrapper: Backbone.Collection
+                },
+                view: Item,
+                el: '> *'
+              }
+            }
+          }
+        });
+        model = new Backbone.Model({
+          list: [
+            {
+              name: 1
+            }, {
+              name: 2
+            }
+          ]
+        });
+        view = new ListView({
+          model: model
+        });
+        li = view.$el.children();
+        expect(li.eq(0)).to.have.text('1');
+        return expect(li.eq(1)).to.have.text('2');
       });
     });
   });

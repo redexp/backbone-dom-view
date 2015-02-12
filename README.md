@@ -530,7 +530,7 @@ var ListView = Backbone.DOMView.extend({
             each: {
                 view: ItemView,
                 sort: {
-                    event: 'change:order'
+                    event: 'change:order',
                     field: 'order'
                 }
             }
@@ -557,7 +557,7 @@ view.$el //= <ul class="items"><li>two</li><li>three</li><li>one</li></ul>
 
 By default all views created by this helper on remove will stop listen all events (`.off()` and `.stopListening()`). You can disable it by set this option to `false`.
 
-**field:** `{String}` Default: `null`
+**field:** `{String|Object}` Default: `null`
 
 Helper can work not only with `this.model` but also with collection in model field. Name of this filed you can set with this option
 ```javascript
@@ -565,7 +565,7 @@ var UserView = Backbone.DOMView.extend({
     template: {
         'ul.items': {
             each: {
-                field: 'items'
+                field: 'items',
                 view: ItemView
             }
         }
@@ -586,4 +586,65 @@ var view = new UserView({
 });
 
 view.$el.find('.items') //= <ul class="items"><li>one</li><li>two</li><li>three</li></ul>
+```
+Or you can iterate over plain array, but you will need to set wrapper constructor (usually `Backbone.Collection`).
+```javascript
+var user = new Backbone.Model({
+    name: 'Max',
+    items: [
+        {title: 'one'},
+        {title: 'two'},
+        {title: 'three'}
+    ]
+});
+
+var UserView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                field: {
+                    name: 'items',
+                    wrapper: Backbone.Collection
+                },
+                view: ItemView
+            }
+        }
+    }
+});
+```
+
+Backbone Collection can work only with array of objects, so your wrapper can prepare array of values to array of objects
+```javascript
+var user = new Backbone.Model({
+    name: 'Max',
+    items: [
+        'one',
+        'two',
+        'three'
+    ]
+});
+
+var Items = Backbone.Collection.extend({
+    constructor: function (items) {
+        items = items.map(function (item) {
+            return {title: item};
+        });
+
+        Backbone.Collection.call(this, items);
+    }
+});
+
+var UserView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                field: {
+                    name: 'items',
+                    wrapper: Items
+                },
+                view: ItemView
+            }
+        }
+    }
+});
 ```
