@@ -479,9 +479,13 @@ When you will create instance of `ListView` it will detach `ul.items > li` and u
 
 By default helper will listen for `add` event to add new view, but you can change it with this option
 
-**removeEvent:** `{String}` Default: ``remove``
+**removeEvent:** `{String}` Default: `'remove'`
 
 Same as previous only for `remove` event.
+
+**addedEvent:** `{String}` Default: `'added'`
+
+This event will be triggered in sub view when `addHandler` will be called
 
 **addHandler:** `{String|Function}` Default: `'append'`
 

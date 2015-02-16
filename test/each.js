@@ -384,7 +384,7 @@
         expect(list.at(2).get('name')).to.equal(3);
         return expect(list.at(2).get('order')).to.equal(1);
       });
-      return it('should iterate over plain array', function() {
+      it('should iterate over plain array', function() {
         var Item, ListView, li, view;
         Item = DomView.extend({
           template: {
@@ -423,6 +423,73 @@
         li = view.$el.children();
         expect(li.eq(0)).to.have.text('1');
         return expect(li.eq(1)).to.have.text('2');
+      });
+      return it('should trigger added event', function() {
+        var Item, ListView, XItem, XListView, num, view, x;
+        num = 0;
+        Item = DomView.extend({
+          initialize: function() {
+            expect(this.$el.parent().length).to.equal(0);
+            return this.on('added', function() {
+              num++;
+              return expect(this.$el.parent().length).to.equal(1);
+            });
+          },
+          template: {
+            '': {
+              html: '@name'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          template: {
+            '': {
+              each: {
+                view: Item,
+                el: '> *'
+              }
+            }
+          }
+        });
+        model = new Backbone.Collection([
+          {
+            name: 1
+          }, {
+            name: 2
+          }
+        ]);
+        view = new ListView({
+          model: model
+        });
+        expect(num).to.equal(2);
+        x = 0;
+        XItem = Item.extend({
+          initialize: function() {
+            expect(this.$el.parent().length).to.equal(0);
+            this.on('added', function() {
+              return x++;
+            });
+            return this.on('tested', function() {
+              x++;
+              return expect(this.$el.parent().length).to.equal(1);
+            });
+          }
+        });
+        XListView = ListView.extend({
+          template: {
+            '': {
+              each: {
+                addedEvent: 'tested',
+                view: XItem
+              }
+            }
+          }
+        });
+        view = new XListView({
+          model: model
+        });
+        return expect(x).to.equal(2);
       });
     });
   });

@@ -289,3 +289,53 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(li.eq(0)).to.have.text '1'
             expect(li.eq(1)).to.have.text '2'
+
+        it 'should trigger added event', ->
+            num = 0
+
+            Item = DomView.extend
+                initialize: ->
+                    expect(this.$el.parent().length).to.equal 0
+
+                    this.on 'added', ->
+                        num++
+                        expect(this.$el.parent().length).to.equal 1
+
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        view: Item
+                        el: '> *'
+
+            model = new Backbone.Collection([{name: 1},{name: 2}])
+
+            view = new ListView model: model
+
+            expect(num).to.equal 2
+
+            x = 0;
+
+            XItem = Item.extend
+                initialize: ->
+                    expect(this.$el.parent().length).to.equal 0
+
+                    this.on 'added', ->
+                        x++
+
+                    this.on 'tested', ->
+                        x++
+                        expect(this.$el.parent().length).to.equal 1
+
+            XListView = ListView.extend
+                template: '':
+                    each:
+                        addedEvent: 'tested'
+                        view: XItem
+
+            view = new XListView model: model
+
+            expect(x).to.equal 2

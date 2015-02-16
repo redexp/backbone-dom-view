@@ -342,6 +342,7 @@
          * @property {String} addEvent
          * @property {String} resetEvent
          * @property {String} removeEvent
+         * @property {String} addedEvent
          * @property {Boolean|Object} sort
          * @property {Boolean} offOnRemove
          * @property {Object} viewList
@@ -359,6 +360,7 @@
                 addEvent: 'add',
                 resetEvent: 'reset',
                 removeEvent: 'remove',
+                addedEvent: 'added',
                 sort: false,
                 sortByViews: false,
                 offOnRemove: true
@@ -434,6 +436,7 @@
                 childView.parent = childView.parent || view;
                 viewList[model.cid] = childView;
                 addHandler.call(view, holder, childView);
+                childView.trigger(options.addedEvent);
             }
 
             function eachResetListener() {
