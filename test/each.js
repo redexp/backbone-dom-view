@@ -424,7 +424,7 @@
         expect(li.eq(0)).to.have.text('1');
         return expect(li.eq(1)).to.have.text('2');
       });
-      return it('should trigger added event', function() {
+      it('should trigger added event', function() {
         var Item, ListView, XItem, XListView, num, view, x;
         num = 0;
         Item = DomView.extend({
@@ -490,6 +490,55 @@
           model: model
         });
         return expect(x).to.equal(2);
+      });
+      return it('should handle reset event', function() {
+        var Item, ListView, li, list, view;
+        Item = DomView.extend({
+          template: {
+            '': {
+              html: '@name'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          template: {
+            '': {
+              each: {
+                view: Item,
+                el: '> *'
+              }
+            }
+          }
+        });
+        list = new Backbone.Collection([
+          {
+            name: 1
+          }, {
+            name: 2
+          }, {
+            name: 3
+          }
+        ]);
+        view = new ListView({
+          model: list
+        });
+        li = view.$el.children();
+        expect(li.length).to.equal(3);
+        expect(li.eq(0)).to.have.text('1');
+        expect(li.eq(1)).to.have.text('2');
+        expect(li.eq(2)).to.have.text('3');
+        list.reset([
+          {
+            name: 2
+          }, {
+            name: 3
+          }
+        ]);
+        li = view.$el.children();
+        expect(li.length).to.equal(2);
+        expect(li.eq(0)).to.have.text('2');
+        return expect(li.eq(1)).to.have.text('3');
       });
     });
   });

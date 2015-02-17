@@ -439,7 +439,8 @@
                 childView.trigger(options.addedEvent);
             }
 
-            function eachResetListener() {
+            function eachResetListener(model, ops) {
+                ops.previousModels.forEach(eachRemoveListener);
                 list.each(eachAddListener);
             }
 
