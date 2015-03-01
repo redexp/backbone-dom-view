@@ -1,12 +1,12 @@
 ;(function() {
 
     if (typeof define === 'function' && define.amd) {
-        define('backbone-dom-view', ['backbone'], module);
+        define('backbone-dom-view', ['backbone', 'underscore'], module);
     } else {
         module(Backbone);
     }
 
-    function module (BB) {
+    function module (BB, _) {
 
         var View = BB.View,
             $ = BB.$;
@@ -19,6 +19,11 @@
 
         function DOMView(ops) {
             var view = this;
+
+            view.attributes = {};
+            if (view.defaults) {
+                view.set(_.result(view, 'defaults'));
+            }
 
             View.apply(view, arguments);
 
@@ -41,6 +46,10 @@
 
         BB.DOMView = View.extend({
             constructor: DOMView,
+
+            ui: {
+                root: ''
+            },
 
             setElement: function () {
                 View.prototype.setElement.apply(this, arguments);
@@ -82,7 +91,7 @@
                 var view = this,
                     model = view.model;
 
-                events = events.split(/\s+/);
+                events = $.trim(events).split(/\s+/);
 
                 for (var i = 0, len = events.length; i < len; i++) {
                     parseEvent(events[i]);
@@ -98,9 +107,9 @@
                     });
 
                     event = event.replace(fieldEvent, function(x, field) {
-                        target = model;
+                        target = view.has(field) ? view : model;
                         argNum = 1;
-                        bindApplyFunc(target, model.get(field));
+                        bindApplyFunc(target, target.get(field));
                         return 'change:' + field;
                     });
 
@@ -120,7 +129,12 @@
                         return func.apply(view, argNum === null ? arguments : [arguments[argNum]]);
                     }
                 }
-            }
+            },
+
+            get: BB.Model.prototype.get,
+            set: BB.Model.prototype.set,
+            has: BB.Model.prototype.has,
+            _validate: BB.Model.prototype._validate
         });
 
         DOMView.readyEvent = 'template-ready';
@@ -345,7 +359,7 @@
          * @property {String} addedEvent
          * @property {Boolean|Object} sort
          * @property {Boolean} offOnRemove
-         * @property {Object} viewList
+         * @property {EachViewList} viewList
          * @property {String|Object} sortByViews
          */
 
@@ -354,7 +368,7 @@
          * @param {EachHelperOptions} options
          */
         function eachHelper (selector, options) {
-            optional(options, {
+            _.defaults(options, {
                 addHandler: 'append',
                 delHandler: 'remove',
                 addEvent: 'add',
@@ -388,7 +402,7 @@
                 }
             }
 
-            var viewList = options.viewList = {};
+            var viewList = options.viewList = new EachViewList();
             var addHandler = options.addHandler;
             var delHandler = options.delHandler;
 
@@ -538,8 +552,25 @@
             }
         };
 
+        eachHelper.EachViewList = EachViewList;
+
+        function EachViewList() {
+
+        }
+
+        extend(EachViewList.prototype, {
+            where: function (attrs) {
+                return _.filter(this, function (view) {
+                    for (var key in attrs) {
+                        if (attrs[key] !== view.get(key)) return false;
+                    }
+                    return true;
+                });
+            }
+        });
+
         function isClass(func) {
-            return func.hasOwnProperty('__super__');
+            return has(func, '__super__');
         }
 
         function getViewExtendedFieldList(viewClass, field, context) {
@@ -560,34 +591,9 @@
             return $.extend.apply($, arguments);
         }
 
-        function optional(target, ops) {
-            for (var name in ops) {
-                if (!has(ops, name) || has(target, name)) continue;
-
-                target[name] = ops[name];
-            }
-
-            return target;
-        }
-
         function has(obj, field) {
-            return obj.hasOwnProperty(field);
+            return _.has(obj, field);
         }
-
-        var requestAnimationFrame = (function(){
-            return  window.requestAnimationFrame   ||
-                window.webkitRequestAnimationFrame ||
-                window.mozRequestAnimationFrame    ||
-                window.oRequestAnimationFrame      ||
-                window.msRequestAnimationFrame     ||
-                function (callback) {
-                    window.setTimeout(callback, 1000 / 60);
-                };
-        })();
-
-        DOMView.requestAnimationFrame = function (func) {
-            requestAnimationFrame(func);
-        };
 
         return DOMView;
     }

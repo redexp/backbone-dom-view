@@ -244,7 +244,7 @@
         expect(el).to.have.css('opacity', '1');
         return expect(el).to.be.empty;
       });
-      return it('should react on view event with function', function() {
+      it('should react on view event with function', function() {
         var View, el, view;
         View = DomView.extend({
           template: {
@@ -278,6 +278,30 @@
         view.trigger('vtest');
         expect(el).to.have.prop('pTest', '2');
         return expect(el).to.have.html('2');
+      });
+      return it('should react on view attributes', function() {
+        var View, el, view;
+        View = DomView.extend({
+          defaults: {
+            selected: false
+          },
+          template: {
+            '': {
+              'class': {
+                'test': '@selected'
+              }
+            }
+          }
+        });
+        view = new View({
+          model: model
+        });
+        el = view.$el;
+        expect(el).not.to.have["class"]('test');
+        view.set('selected', true);
+        expect(el).to.have["class"]('test');
+        view.set('selected', false);
+        return expect(el).not.to.have["class"]('test');
       });
     });
   });

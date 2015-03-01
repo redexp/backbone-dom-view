@@ -192,3 +192,23 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view.trigger 'vtest'
             expect(el).to.have.prop 'pTest', '2'
             expect(el).to.have.html '2'
+
+        it 'should react on view attributes', ->
+            View = DomView.extend
+                defaults:
+                    selected: false
+                template: '':
+                    'class': 'test': '@selected'
+
+            view = new View model: model
+            el = view.$el
+
+            expect(el).not.to.have.class 'test'
+
+            view.set('selected', true);
+
+            expect(el).to.have.class 'test'
+
+            view.set('selected', false);
+
+            expect(el).not.to.have.class 'test'

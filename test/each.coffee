@@ -370,3 +370,25 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(li.length).to.equal 2
             expect(li.eq(0)).to.have.text '2'
             expect(li.eq(1)).to.have.text '3'
+
+        it 'should have viewList as EachViewList', ->
+            Item = DomView.extend
+                defaults:
+                    selected: false
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: 'root':
+                    each:
+                        view: Item
+                        el: '> *'
+
+            list = new Backbone.Collection([{name: 1}, {name: 2}, {name: 3}])
+
+            view = new ListView model: list
+
+            views = view.template.root.each.viewList.where({selected: false})
+
+            expect(views.length).to.equal 3

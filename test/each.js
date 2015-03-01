@@ -491,7 +491,7 @@
         });
         return expect(x).to.equal(2);
       });
-      return it('should handle reset event', function() {
+      it('should handle reset event', function() {
         var Item, ListView, li, list, view;
         Item = DomView.extend({
           template: {
@@ -539,6 +539,46 @@
         expect(li.length).to.equal(2);
         expect(li.eq(0)).to.have.text('2');
         return expect(li.eq(1)).to.have.text('3');
+      });
+      return it('should have viewList as EachViewList', function() {
+        var Item, ListView, list, view, views;
+        Item = DomView.extend({
+          defaults: {
+            selected: false
+          },
+          template: {
+            '': {
+              html: '@name'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          template: {
+            'root': {
+              each: {
+                view: Item,
+                el: '> *'
+              }
+            }
+          }
+        });
+        list = new Backbone.Collection([
+          {
+            name: 1
+          }, {
+            name: 2
+          }, {
+            name: 3
+          }
+        ]);
+        view = new ListView({
+          model: list
+        });
+        views = view.template.root.each.viewList.where({
+          selected: false
+        });
+        return expect(views.length).to.equal(3);
       });
     });
   });
