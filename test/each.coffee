@@ -375,8 +375,15 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             Item = DomView.extend
                 defaults:
                     selected: false
+
+                initialize: ->
+                    this.set('selected', this.model.get('name') < 3)
+
                 template:
-                    '': html: '@name'
+                    'root':
+                        html: '@name'
+                        class:
+                            'selected': '@selected'
 
             ListView = DomView.extend
                 el: '<ul><li></li></ul>'
@@ -389,6 +396,17 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             view = new ListView model: list
 
-            views = view.template.root.each.viewList.where({selected: false})
+            viewList = view.template.root.each.viewList
+            views = viewList.where({selected: true})
 
-            expect(views.length).to.equal 3
+            expect(views.length).to.equal 2
+            expect(views[0].$el).to.have.class 'selected'
+            expect(views[1].$el).to.have.class 'selected'
+            expect(viewList[list.at(2).cid].$el).not.to.have.class 'selected'
+
+            views = viewList.where({selected: /^f/})
+            expect(views.length).to.equal 1
+            expect(views[0]).to.equal viewList[list.at(2).cid]
+
+            views = viewList.findWhere({selected: false})
+            expect(views).to.equal viewList[list.at(2).cid]

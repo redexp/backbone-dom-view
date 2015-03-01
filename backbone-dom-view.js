@@ -559,13 +559,27 @@
         }
 
         extend(EachViewList.prototype, {
-            where: function (attrs) {
-                return _.filter(this, function (view) {
+            filter: function (cb) {
+                return _.filter(this, cb, this);
+            },
+            find: function (cb) {
+                return _.find(this, cb, this);
+            },
+            where: function (attrs, first) {
+                return this[first ? 'find' : 'filter'](function (view) {
                     for (var key in attrs) {
-                        if (attrs[key] !== view.get(key)) return false;
+                        if (!view.has(key)) return false;
+
+                        if (attrs[key] instanceof RegExp) {
+                            if (!attrs[key].test(view.get(key))) return false;
+                        }
+                        else if (attrs[key] !== view.get(key)) return false;
                     }
                     return true;
                 });
+            },
+            findWhere: function (attrs) {
+                return this.where(attrs, true);
             }
         });
 

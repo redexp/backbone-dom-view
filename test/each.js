@@ -541,14 +541,20 @@
         return expect(li.eq(1)).to.have.text('3');
       });
       return it('should have viewList as EachViewList', function() {
-        var Item, ListView, list, view, views;
+        var Item, ListView, list, view, viewList, views;
         Item = DomView.extend({
           defaults: {
             selected: false
           },
+          initialize: function() {
+            return this.set('selected', this.model.get('name') < 3);
+          },
           template: {
-            '': {
-              html: '@name'
+            'root': {
+              html: '@name',
+              "class": {
+                'selected': '@selected'
+              }
             }
           }
         });
@@ -575,10 +581,23 @@
         view = new ListView({
           model: list
         });
-        views = view.template.root.each.viewList.where({
+        viewList = view.template.root.each.viewList;
+        views = viewList.where({
+          selected: true
+        });
+        expect(views.length).to.equal(2);
+        expect(views[0].$el).to.have["class"]('selected');
+        expect(views[1].$el).to.have["class"]('selected');
+        expect(viewList[list.at(2).cid].$el).not.to.have["class"]('selected');
+        views = viewList.where({
+          selected: /^f/
+        });
+        expect(views.length).to.equal(1);
+        expect(views[0]).to.equal(viewList[list.at(2).cid]);
+        views = viewList.findWhere({
           selected: false
         });
-        return expect(views.length).to.equal(3);
+        return expect(views).to.equal(viewList[list.at(2).cid]);
       });
     });
   });
