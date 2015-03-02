@@ -78,16 +78,109 @@ Backbone.DOMView.extend({
                     }
                 }
             }
+        },
+        'edit': {
+            prop: {
+                'value': '@title'
+            }
         }
     }
 });
 ```
+Default value of this field is `root: ""`. Empty selector means `this.$el` (see [find()](#find)) so to select root node use `root` alias.
 
 ### template:
 
-Hash where keys are jQuery selectors and values are hashes of [helpers](#helpers). When you extend views, `template:` field will be merged with all parents prototypes. As value of `template:` you can use `Object` or `Function` (which should return an object).
+Hash where keys are jQuery selectors or `ui` fields names or both of them but then you need put `ui` names in curly brackets. Values of `template:` fields are hashes of [helpers](#helpers). When you extend views, `template:` field will be merged with all parents `template` field. Merged result will written as own view `template` property and will be available in `initialize` function before processing, so you can do last modification to it. When `template` will be prepared, will be triggered [template-ready](#template-ready) event.
+```javascript
+Backbone.DOMView.extend({
+    ui: {
+        name: 'input'
+    },
+
+    initialize: function () {
+        if (this.model.get('disabled')) {
+            delete this.template.root['class'].selected;
+        }
+    },
+
+    template: {
+        'root': {
+            'class': {
+                'selected': '@selected'
+            }
+        },
+        'name': {
+            'prop': {
+                'value': '@name'
+            }
+        },
+        '{name} + label': {
+            'text': '@name'
+        }
+    }
+});
+```
+As value of `template:` you can use `Object` or `Function` (which should return an object).
+```javascript
+Backbone.DOMView.extend({
+    template: function () {
+        var tpl = {
+            'root': {
+                'class': {
+                    'selected': '@selected'
+                }
+            }
+        };
+
+        this.$('input').each(function (i, inp) {
+            var selector = 'input[name=' + inp.name + ']';
+            tpl[selector] = {
+                prop: {
+                    'value': '@' + inp.name
+                }
+            };
+        });
+
+        return tpl;
+    }
+});
+
+### defaults:
+
+Same as `Backbone.Model::defaults` option, see [Methods](#methods) section.
 
 ## Methods
+
+`DOMView` can listen model attributes, but many times you will need extra attributes to store current state of view like `selected` or `editing`, so for this purpose view inherited `get`, `set` and `has` methods from `Backbone.Model`.
+```javascript
+Backbone.DOMView.extend({
+    defaults: {
+        error: false,
+        message: ''
+    },
+
+    initialize: function () {
+        this.listenTo(this.model, 'invalid', function (error) {
+            this.set({
+                'error': true,
+                'message': error
+            });
+        });
+    },
+
+    template: {
+        'root': {
+            'class': {
+                'error': '@error'
+            }
+        },
+        '.message': {
+            text: '@message'
+        }
+    }
+});
+```
 
 ### find()
 
@@ -124,7 +217,7 @@ Backbone.DOMView.extend({
     } 
 });
 ```
-So all events with `#` before them are view events, the rest are model events. But there one more feature `@model_field_name` notation which will be converted to `change:model_field_name` event and it callback will be called immediately with `model_field_name` value as first argument. All default helpers uses this method to bind to events.
+So all events with `#` before them are view events, the rest are model events. But there one more feature `@attribute_field_name` notation which will be converted to `change:attribute_field_name` event and it callback will be called immediately with `attribute_field_name` value as first argument. If view has `attribute_field_name` then `bind` method will listen view, if not then it will listen model of view. All default helpers uses this method to bind to events.
 ```javascript
 Backbone.DOMView.extend({
     template: {
@@ -202,11 +295,11 @@ Backbone.DOMView.extend({
                     }
                 },
                 // or you can change number of argument like this
-                'selected': '@selected|arg(3)',
+                'selected': '@selected|arg(2)',
                 // same as
                 'selected': {
-                    '@selected': functio (value1, value2, value3) {
-                        return value3;
+                    '@selected': functio () {
+                        return arguments[2];
                     }
                 }
             }
@@ -373,19 +466,29 @@ Backbone.DOMView.extend({
 
 ### connect
 
-This helper gives you two way binding with element property and model field. By default helper will listen for `chnage` event in element and `change:model_field` in model
+This helper gives you two way binding with element property and view or model field. By default helper will listen for `chnage` event in element and `change:field_name` in view or model
 ```javascript
 Backbone.DOMView.extend({
+    defaults: {
+        active: false
+    },
+
     template: {
         'input.title': {
             connect: {
                 'value': 'title'
             }
+        },
+        'input.active': {
+            connect: {
+                'checked': 'active'
+            }
         }
     }
 });
 ```
-So when element will trigger `change` event, helper will take `value` property and set it to model's `title` field and when model trigger `change:title`, helper will change `value` with new `title`.
+So when `input.title` element will trigger `change` event, helper will take `value` property and set it to model's `title` field and when model trigger `change:title`, helper will change `value` with new `title`. Same with view's `active` field.
+
 If you want to listen different event in element then you can use `property|event` notation
 ```javascript
 connect: {
@@ -617,7 +720,7 @@ var UserView = Backbone.DOMView.extend({
 });
 ```
 
-Backbone Collection can work only with array of objects, so your wrapper can prepare array of values to array of objects
+Backbone Collection can work only with array of objects, so your wrapper can prepare array of values to collection of objects
 ```javascript
 var user = new Backbone.Model({
     name: 'Max',
@@ -647,6 +750,60 @@ var UserView = Backbone.DOMView.extend({
                     wrapper: Items
                 },
                 view: ItemView
+            }
+        }
+    }
+});
+```
+
+**viewList** `{DOMView.eachHelper.EachViewList}`
+
+You shouldn't pass this option, it will be created by helper. `viewList` is an object, instance of `DOMView.eachHelper.EachViewList` constructor. In this object `each` will store generated views for each model. Fields of this object are models `cid` and values are views of this models. `viewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
+
+* filter
+* find
+* where
+* findWhere
+
+`where` has extended functionality, it can accept regular expressions.
+```javascript
+var ItemView = Backbone.DOMView.extend({
+    defaults: {
+        name: '',
+        error: false
+    },
+
+    template: {
+        'root': {
+            'class': {
+                'error': '@error'
+            }
+        },
+        'input': {
+            connect: {
+                value: 'name'
+            }
+        }
+    }
+});
+
+var ListView = Backbone.DOMView.extend({
+    ui: {
+        list: '.items'
+    },
+
+    initialize: function () {
+        this.on('save', function () {
+            var views = this.template.list.each.viewList.where({name: /^test/, error: false});
+            _.invoke(views, 'set', 'error', true);
+        });
+    },
+
+    template: {
+        'list': {
+            each: {
+                view: ItemView,
+                el: '> *'
             }
         }
     }

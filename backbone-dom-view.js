@@ -25,9 +25,11 @@
                 view.set(_.result(view, 'defaults'));
             }
 
+            view.template = mergeExtendedField(view, 'template');
+
             View.apply(view, arguments);
 
-            var template = view.template = mergeExtendedField(view, 'template');
+            var template = view.template;
 
             for (var selector in template) {
                 if (!has(template, selector)) continue;
@@ -264,17 +266,19 @@
                     event = propEvent[2];
                 }
 
+                var target = view.has(field) ? view : view.model;
+
                 node.on(event, function() {
-                    view.model.set(field, node.prop(prop));
+                    target.set(field, node.prop(prop));
                 });
 
-                view.listenTo(view.model, 'change:' + field, function(model, value) {
+                view.listenTo(target, 'change:' + field, function(model, value) {
                     if (value !== node.prop(prop)) {
                         node.prop(prop, value);
                     }
                 });
 
-                node.prop(prop, view.model.get(field));
+                node.prop(prop, target.get(field));
             }
         }
 

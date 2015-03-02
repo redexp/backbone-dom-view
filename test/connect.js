@@ -8,7 +8,61 @@
       return model = new Backbone.Model();
     });
     return describe('connect helper', function() {
-      return it('should bind prop and field', function() {
+      it('should bind prop and field', function() {
+        var View, el, view;
+        View = DomView.extend({
+          template: {
+            '': {
+              connect: {
+                'value': 'name'
+              }
+            }
+          }
+        });
+        model.set('name', 'test');
+        view = new View({
+          model: model
+        });
+        el = view.$el;
+        expect(el).to.have.prop('value', 'test');
+        el.prop('value', 'max');
+        el.change();
+        expect(model.get('name')).to.be.equal('max');
+        model.set('name', 'bob');
+        return expect(el).to.have.prop('value', 'bob');
+      });
+      it('should bind prop and view field', function() {
+        var View, el, view;
+        View = DomView.extend({
+          defaults: {
+            name: ''
+          },
+          template: {
+            '': {
+              connect: {
+                'value': 'name'
+              }
+            }
+          }
+        });
+        model.set('name', 'x');
+        view = new View({
+          model: model
+        });
+        el = view.$el;
+        expect(el).to.have.prop('value', '');
+        view.set('name', 'test');
+        expect(el).to.have.prop('value', 'test');
+        expect(model.get('name')).to.equal('x');
+        el.prop('value', 'max');
+        el.change();
+        expect(view.get('name')).to.be.equal('max');
+        expect(model.get('name')).to.be.equal('x');
+        view.set('name', 'bob');
+        expect(el).to.have.prop('value', 'bob');
+        return expect(model.get('name')).to.be.equal('x');
+      });
+      return it('should bind prop and field with custom node event', function() {
         var View, el, view;
         View = DomView.extend({
           template: {
