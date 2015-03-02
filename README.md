@@ -145,6 +145,7 @@ Backbone.DOMView.extend({
         return tpl;
     }
 });
+```
 
 ### defaults:
 
