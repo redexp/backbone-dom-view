@@ -21,11 +21,10 @@
             var view = this;
 
             view.attributes = {};
+
             if (view.defaults) {
                 view.set(_.result(view, 'defaults'));
             }
-
-            view.template = mergeExtendedField(view, 'template');
 
             View.apply(view, arguments);
 
@@ -66,6 +65,8 @@
 
                     view.ui[name] = view.find(ui[name]);
                 }
+
+                view.template = mergeExtendedField(view, 'template');
 
                 this.trigger(DOMView.elementEvent);
 
