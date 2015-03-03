@@ -183,6 +183,16 @@ Backbone.DOMView.extend({
 });
 ```
 
+### matches()
+
+Same as `Backbone.Model::matches` but it not uses `_.matches` (which makes proxy function) and can accept regular expressions.
+```javascript
+var view = new Backbone.DOMView();
+view.set('name', 'test');
+view.matches({name: /^t/}); //> true
+view.matches({name: 'test'}); //> true
+```
+
 ### find()
 
 Same as view's `.$(selector)` but it can accept empty value to return `.$el` it self or `ui:` property name or selector with `ui:` property name in curly brackets. This method was created for `template:` selectors.
@@ -776,6 +786,7 @@ You shouldn't pass this option, it will be created by helper. `viewList` is an o
 * find
 * where
 * findWhere
+* count
 
 `where` has extended functionality, it can accept regular expressions.
 ```javascript
@@ -834,3 +845,4 @@ var ListView = Backbone.DOMView.extend({
     }
 });
 ```
+`count` is just like where, only it returns count of founded views

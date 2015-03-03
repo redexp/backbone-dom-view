@@ -137,6 +137,24 @@
                 return arguments.length > 0 ? arguments[0].model : this.model;
             },
 
+            matches: function (attrs) {
+                for (var key in attrs) {
+                    if (!has(attrs, key)) continue;
+
+                    if (!this.has(key)) return false;
+
+                    if (attrs[key] === this.get(key)) continue;
+
+                    if (attrs[key] instanceof RegExp) {
+                        if (!attrs[key].test(this.get(key))) return false;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                return true;
+            },
+
             get: BB.Model.prototype.get,
             set: BB.Model.prototype.set,
             has: BB.Model.prototype.has,
@@ -575,19 +593,22 @@
             },
             where: function (attrs, first) {
                 return this[first ? 'find' : 'filter'](function (view) {
-                    for (var key in attrs) {
-                        if (!view.has(key)) return false;
-
-                        if (attrs[key] instanceof RegExp) {
-                            if (!attrs[key].test(view.get(key))) return false;
-                        }
-                        else if (attrs[key] !== view.get(key)) return false;
-                    }
-                    return true;
+                    return view.matches(attrs);
                 });
             },
             findWhere: function (attrs) {
                 return this.where(attrs, true);
+            },
+            count: function (attrs) {
+                var count = 0;
+
+                _.forEach(this, function (view) {
+                    if (view.matches(attrs)) {
+                        count++;
+                    }
+                });
+
+                return count;
             }
         });
 
