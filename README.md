@@ -241,6 +241,17 @@ Backbone.DOMView.extend({
 ```
 Class `active` will not be added when view will be created even if model field `active` is `true`, beacuse it will wait for `change:active` event. Instead of it class `selected` will be synced with model field `selected` on view creation because it uses `@selected` notation.
 
+### getModel()
+
+I added this method just as map function which can return model field of view. You can use it in two ways:
+```javascript
+// as regular method
+this.getModel(); //> this.model
+// or as map function
+viewsArray.map(this.getModel); //> array of models
+```
+This method will be useful with `EachViewList::where` method, when you need array of models like.
+
 ## Internal Events
 
 View has several internal events
@@ -797,10 +808,23 @@ var ListView = Backbone.DOMView.extend({
         this.on('save', function () {
             var views = this.template.list.each.viewList.where({name: /^test/, error: false});
             _.invoke(views, 'set', 'error', true);
+
+            var models = views.map(this.getModel);
+
+            // ...
         });
     },
 
     template: {
+        'root': {
+            on: {
+                'submit': function (e) {
+                    e.preventDefault();
+
+                    this.trigger('save');
+                }
+            }
+        },
         'list': {
             each: {
                 view: ItemView,

@@ -133,6 +133,10 @@
                 }
             },
 
+            getModel: function () {
+                return arguments.length > 0 ? arguments[0].model : this.model;
+            },
+
             get: BB.Model.prototype.get,
             set: BB.Model.prototype.set,
             has: BB.Model.prototype.has,
