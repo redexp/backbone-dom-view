@@ -249,7 +249,7 @@ Backbone.DOMView.extend({
     } 
 });
 ```
-Class `active` will not be added when view will be created even if model field `active` is `true`, beacuse it will wait for `change:active` event. Instead of it class `selected` will be synced with model field `selected` on view creation because it uses `@selected` notation.
+Class `active` will not be added when view will be created even if model field `active` is `true`, because it will wait for `change:active` event. Instead of it class `selected` will be synced with model field `selected` on view creation because it uses `@selected` notation.
 
 ### getModel()
 
@@ -260,7 +260,11 @@ this.getModel(); //> this.model
 // or as map function
 viewsArray.map(this.getModel); //> array of models
 ```
-This method will be useful with `EachViewList::where` method, when you need array of models like.
+This method will be useful with `EachViewList::where` method, when you need array of models instead of array of views.
+
+### getViewList()
+
+This is shortcut for `this.template.selector.each.viewList` see [each::viewList](#viewList).
 
 ## Internal Events
 
@@ -778,7 +782,7 @@ var UserView = Backbone.DOMView.extend({
 });
 ```
 
-**viewList** `{DOMView.eachHelper.EachViewList}`
+<a name="viewList"></a>**viewList** `{DOMView.eachHelper.EachViewList}`
 
 You shouldn't pass this option, it will be created by helper. `viewList` is an object, instance of `DOMView.eachHelper.EachViewList` constructor. In this object `each` will store generated views for each model. Fields of this object are models `cid` and values are views of this models. `viewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
 

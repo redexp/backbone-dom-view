@@ -159,7 +159,11 @@
             get: BB.Model.prototype.get,
             set: BB.Model.prototype.set,
             has: BB.Model.prototype.has,
-            _validate: BB.Model.prototype._validate
+            _validate: BB.Model.prototype._validate,
+
+            getViewList: function (selector) {
+                return this.template[selector].each.viewList;
+            }
         });
 
         DOMView.readyEvent = 'template-ready';
