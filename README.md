@@ -784,15 +784,18 @@ var UserView = Backbone.DOMView.extend({
 
 <a name="viewList"></a>**viewList** `{DOMView.eachHelper.EachViewList}`
 
-You shouldn't pass this option, it will be created by helper. `viewList` is an object, instance of `DOMView.eachHelper.EachViewList` constructor. In this object `each` will store generated views for each model. Fields of this object are models `cid` and values are views of this models. `viewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
+You shouldn't pass this option, it will be created by helper. `viewList` is an object, instance of `DOMView.helpers.each.EachViewList` constructor. In this object `each` will store generated views for each model. Fields of this object are models `cid` and values are views of this models. `viewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
 
+* forEach
+* map
 * filter
 * find
 * where
 * findWhere
 * count
+* size
 
-`where` has extended functionality, it can accept regular expressions.
+`where` has extended functionality, it can accept regular expressions. `count` is just like `where`, only it returns count of founded views.
 ```javascript
 var ItemView = Backbone.DOMView.extend({
     defaults: {
@@ -849,4 +852,3 @@ var ListView = Backbone.DOMView.extend({
     }
 });
 ```
-`count` is just like where, only it returns count of founded views

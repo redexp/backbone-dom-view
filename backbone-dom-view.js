@@ -1,9 +1,10 @@
+// v1.19.0
 ;(function() {
 
     if (typeof define === 'function' && define.amd) {
         define('backbone-dom-view', ['backbone', 'underscore'], module);
     } else {
-        module(Backbone);
+        module(Backbone, _);
     }
 
     function module (BB, _) {
@@ -17,7 +18,7 @@
             argSelector = /\|arg\((\d+)\)/,
             uiSelectors = /\{([^}]+)}/g;
 
-        function DOMView(ops) {
+        function DOMView() {
             var view = this;
 
             view.attributes = {};
@@ -590,12 +591,6 @@
         }
 
         extend(EachViewList.prototype, {
-            filter: function (cb) {
-                return _.filter(this, cb, this);
-            },
-            find: function (cb) {
-                return _.find(this, cb, this);
-            },
             where: function (attrs, first) {
                 return this[first ? 'find' : 'filter'](function (view) {
                     return view.matches(attrs);
@@ -607,7 +602,7 @@
             count: function (attrs) {
                 var count = 0;
 
-                _.forEach(this, function (view) {
+                this.forEach(function (view) {
                     if (view.matches(attrs)) {
                         count++;
                     }
@@ -615,6 +610,12 @@
 
                 return count;
             }
+        });
+
+        _.forEach(['forEach', 'map', 'filter', 'find', 'size'], function (name) {
+            EachViewList.prototype[name] = function (cb) {
+                return _[name](this, cb, this);
+            };
         });
 
         function isClass(func) {

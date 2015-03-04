@@ -1,0 +1,28 @@
+{
+  "name": "backbone-dom-view",
+  "version": "1.19.0",
+  "description": "backbone-dom-view =================",
+  "main": "backbone-dom-view.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "dependencies": {
+    "gulp": "3.*",
+    "gulp-uglifyjs": "0.*"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "min": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redexp/backbone-dom-view.git"
+  },
+  "author": "Sergii Kliuchnyk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/redexp/backbone-dom-view/issues"
+  },
+  "homepage": "https://github.com/redexp/backbone-dom-view"
+}
