@@ -279,7 +279,7 @@
         expect(el).to.have.prop('pTest', '2');
         return expect(el).to.have.html('2');
       });
-      return it('should react on view attributes', function() {
+      it('should react on view attributes', function() {
         var View, el, view;
         View = DomView.extend({
           defaults: {
@@ -302,6 +302,38 @@
         expect(el).to.have["class"]('test');
         view.set('selected', false);
         return expect(el).not.to.have["class"]('test');
+      });
+      return it('should return negate value on !event', function() {
+        var View, el, view;
+        View = DomView.extend({
+          defaults: {
+            selected: false
+          },
+          template: {
+            'root': {
+              'class': {
+                'test': '!name !#test !@selected'
+              }
+            }
+          }
+        });
+        view = new View({
+          model: model
+        });
+        el = view.$el;
+        expect(el).to.have["class"]('test');
+        view.set('selected', true);
+        expect(el).not.to.have["class"]('test');
+        view.set('selected', false);
+        expect(el).to.have["class"]('test');
+        view.model.trigger('name', true);
+        expect(el).not.to.have["class"]('test');
+        view.model.trigger('name', false);
+        expect(el).to.have["class"]('test');
+        view.trigger('test', true);
+        expect(el).not.to.have["class"]('test');
+        view.trigger('test', false);
+        return expect(el).to.have["class"]('test');
       });
     });
   });

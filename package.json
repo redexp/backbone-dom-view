@@ -1,12 +1,5 @@
 {
   "name": "backbone-dom-view",
-  "version": "1.19.0",
-  "description": "backbone-dom-view =================",
-  "main": "backbone-dom-view.js",
-  "directories": {
-    "example": "examples",
-    "test": "test"
-  },
   "dependencies": {
     "gulp": "3.*",
     "gulp-uglifyjs": "0.*"

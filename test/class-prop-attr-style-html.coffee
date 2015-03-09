@@ -212,3 +212,29 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view.set('selected', false);
 
             expect(el).not.to.have.class 'test'
+
+        it 'should return negate value on !event', ->
+            View = DomView.extend
+                defaults:
+                    selected: false
+                template: 'root':
+                    'class': 'test': '!name !#test !@selected'
+
+            view = new View model: model
+            el = view.$el
+
+            expect(el).to.have.class 'test'
+            view.set('selected', true)
+            expect(el).not.to.have.class 'test'
+            view.set('selected', false)
+            expect(el).to.have.class 'test'
+
+            view.model.trigger('name', true)
+            expect(el).not.to.have.class 'test'
+            view.model.trigger('name', false)
+            expect(el).to.have.class 'test'
+
+            view.trigger('test', true)
+            expect(el).not.to.have.class 'test'
+            view.trigger('test', false)
+            expect(el).to.have.class 'test'

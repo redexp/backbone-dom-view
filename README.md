@@ -53,7 +53,7 @@ Which means:
 Bower:
 `bower install backbone-dom-view`
 
-**RequireJS ready** module name is `backbone-dom-view`
+**AMD ready**
 
 ## Fields
 
@@ -228,7 +228,7 @@ Backbone.DOMView.extend({
     } 
 });
 ```
-So all events with `#` before them are view events, the rest are model events. But there one more feature `@attribute_field_name` notation which will be converted to `change:attribute_field_name` event and it callback will be called immediately with `attribute_field_name` value as first argument. If view has `attribute_field_name` then `bind` method will listen view, if not then it will listen model of view. All default helpers uses this method to bind to events.
+So all events with `#` before them are view events, the rest are model events. But there one more feature - `@attribute_field_name` notation which will be converted to `change:attribute_field_name` event and it callback will be called immediately with `attribute_field_name` value as first argument. If view has `attribute_field_name` then `bind` method will listen view, if not then it will listen model of view. Also you can add `!` before any event type to get opposite first argument in event callback. All default helpers uses this method to bind to events.
 ```javascript
 Backbone.DOMView.extend({
     template: {
@@ -243,7 +243,8 @@ Backbone.DOMView.extend({
                     '@selected': function (value) {
                         return value;
                     }
-                }
+                },
+                'hidden': '!@visible'
             }
         }
     } 

@@ -1,22 +1,17 @@
-// v1.19.0
 ;(function() {
 
     if (typeof define === 'function' && define.amd) {
-        define('backbone-dom-view', ['backbone', 'underscore'], module);
+        define(['backbone', 'underscore'], module);
     } else {
         module(Backbone, _);
     }
 
     function module (BB, _) {
 
+        DOMView.v = '1.20.0';
+
         var View = BB.View,
             $ = BB.$;
-
-        var dividedField = /^(.+)\|(.+)/,
-            fieldEvent = /@([\w-]+)/,
-            viewEvent = /#([\w\-:\.]+)/,
-            argSelector = /\|arg\((\d+)\)/,
-            uiSelectors = /\{([^}]+)}/g;
 
         function DOMView() {
             var view = this;
@@ -103,7 +98,12 @@
 
                 function parseEvent (event) {
                     var target = model,
-                        argNum = null;
+                        argNum = null,
+                        argNot = event.charAt(0) === '!';
+
+                    if (argNot) {
+                        event = event.slice(1);
+                    }
 
                     event = event.replace(argSelector, function(x, num) {
                         argNum = num;
@@ -113,6 +113,7 @@
                     event = event.replace(fieldEvent, function(x, field) {
                         target = view.has(field) ? view : model;
                         argNum = 1;
+
                         bindApplyFunc(target, target.get(field));
                         return 'change:' + field;
                     });
@@ -122,6 +123,10 @@
                         return event;
                     });
 
+                    if (!event) {
+                        console.error('Empty event name');
+                    }
+
                     if (target === model) {
                         view.listenTo(model, event, bindApplyFunc);
                     }
@@ -130,7 +135,11 @@
                     }
 
                     function bindApplyFunc () {
-                        return func.apply(view, argNum === null ? arguments : [arguments[argNum]]);
+                        var args = argNum === null ? arguments : [arguments[argNum]];
+                        if (argNot) {
+                            args[0] = !args[0];
+                        }
+                        return func.apply(view, args);
                     }
                 }
             },
@@ -181,6 +190,12 @@
             connect: connectHelper,
             each: eachHelper
         };
+
+        var dividedField = /^(.+)\|(.+)/,
+            fieldEvent = /@([\w-]+)/,
+            viewEvent = /#([\w\-:\.]+)/,
+            argSelector = /\|arg\((\d+)\)/,
+            uiSelectors = /\{([^}]+)}/g;
 
         function classHelper (selector, options) {
             callJquerySetterMethod({
@@ -642,6 +657,10 @@
 
         function has(obj, field) {
             return _.has(obj, field);
+        }
+
+        function not(v) {
+            return !v;
         }
 
         return DOMView;

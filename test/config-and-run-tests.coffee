@@ -1,5 +1,5 @@
 require.config
-    urlArgs: '_=30'
+    urlArgs: '_=31'
     shim:
         jquery:
             exports: 'jQuery'
@@ -20,7 +20,7 @@ require.config
         jquery:        '../libs/jquery/dist/jquery.min'
         underscore:    '../libs/underscore/underscore'
         backbone:      '../libs/backbone/backbone'
-        'backbone-dom-view':    '../backbone-dom-view.min'
+        'backbone-dom-view':    '../backbone-dom-view'
         mocha:         '../libs/mocha/mocha'
         chai:          '../libs/chai/chai'
         'chai-jquery': '../libs/chai-jquery/chai-jquery'
