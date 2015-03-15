@@ -8,7 +8,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.20.0';
+        DOMView.v = '1.20.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -110,18 +110,18 @@
                         return '';
                     });
 
-                    event = event.replace(fieldEvent, function(x, field) {
-                        target = view.has(field) ? view : model;
+                    if (event.charAt(0) === '@') {
+                        event = event.slice(1);
+                        target = view.has(event) ? view : model;
                         argNum = 1;
+                        bindApplyFunc(target, target.get(event));
+                        event = 'change:' + event;
+                    }
 
-                        bindApplyFunc(target, target.get(field));
-                        return 'change:' + field;
-                    });
-
-                    event = event.replace(viewEvent, function(x, event) {
+                    if (event.charAt(0) === '#') {
+                        event = event.slice(1);
                         target = view;
-                        return event;
-                    });
+                    }
 
                     if (!event) {
                         console.error('Empty event name');
@@ -191,10 +191,7 @@
             each: eachHelper
         };
 
-        var dividedField = /^(.+)\|(.+)/,
-            fieldEvent = /@([\w-]+)/,
-            viewEvent = /#([\w\-:\.]+)/,
-            argSelector = /\|arg\((\d+)\)/,
+        var argSelector = /\|arg\((\d+)\)/,
             uiSelectors = /\{([^}]+)}/g;
 
         function classHelper (selector, options) {
@@ -302,11 +299,11 @@
 
             function connectHelperBind (prop, field) {
                 var event = 'change',
-                    propEvent = prop.match(dividedField);
+                    propEvent = prop.split('|');
 
-                if (propEvent) {
-                    prop = propEvent[1];
-                    event = propEvent[2];
+                if (propEvent.length === 2) {
+                    prop = propEvent[0];
+                    event = propEvent[1];
                 }
 
                 var target = view.has(field) ? view : view.model;
