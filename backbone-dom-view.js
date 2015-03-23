@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.22.0';
+        DOMView.v = '1.21.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -460,13 +460,13 @@
                 delHandler = eachHelper.delHandlers[delHandler];
             }
 
-            view.bind(options.addEvent, eachAddListener);
-            view.bind(options.resetEvent, eachResetListener);
-            view.bind(options.removeEvent, eachRemoveListener);
+            view.listenTo(list, options.addEvent, eachAddListener);
+            view.listenTo(list, options.resetEvent, eachResetListener);
+            view.listenTo(list, options.removeEvent, eachRemoveListener);
 
             var sort = options.sort;
             if (sort) {
-                view.bind(sort.event || 'sort', eachSortHandler);
+                view.listenTo(list, sort.event || 'sort', eachSortHandler);
             }
 
             var sortByViews = options.sortByViews;
