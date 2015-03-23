@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.21.0';
+        DOMView.v = '1.21.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -630,13 +630,24 @@
             ['forEach', 'map', 'reduce',
             'reduceRight', 'find', 'filter',
             'reject', 'every', 'some',
-            'include', 'contains', 'invoke',
-            'max', 'min', 'toArray', 'size',
-            'without', 'difference',
-            'isEmpty', 'chain'],
+            'max', 'min'],
             function (name) {
                 EachViewList.prototype[name] = function (cb) {
                     return _[name](this, cb, this);
+                };
+            }
+        );
+
+        _.forEach(
+            ['contains', 'invoke',
+            'toArray', 'size',
+            'without', 'difference',
+            'isEmpty', 'chain'],
+            function (name) {
+                EachViewList.prototype[name] = function () {
+                    var args = _.toArray(arguments);
+                    args.unshift(this);
+                    return _[name].apply(_, args);
                 };
             }
         );
