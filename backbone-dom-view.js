@@ -1,5 +1,7 @@
 ;(function() {
 
+    "strict mode";
+
     if (typeof define === 'function' && define.amd) {
         define(['backbone', 'underscore'], module);
     } else {
@@ -8,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.20.1';
+        DOMView.v = '1.21.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -624,11 +626,20 @@
             }
         });
 
-        _.forEach(['forEach', 'map', 'filter', 'find', 'size'], function (name) {
-            EachViewList.prototype[name] = function (cb) {
-                return _[name](this, cb, this);
-            };
-        });
+        _.forEach(
+            ['forEach', 'map', 'reduce',
+            'reduceRight', 'find', 'filter',
+            'reject', 'every', 'some',
+            'include', 'contains', 'invoke',
+            'max', 'min', 'toArray', 'size',
+            'without', 'difference',
+            'isEmpty', 'chain'],
+            function (name) {
+                EachViewList.prototype[name] = function (cb) {
+                    return _[name](this, cb, this);
+                };
+            }
+        );
 
         function isClass(func) {
             return has(func, '__super__');
