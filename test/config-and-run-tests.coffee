@@ -1,5 +1,5 @@
 require.config
-    urlArgs: '_=33'
+    urlArgs: '_=34'
     shim:
         jquery:
             exports: 'jQuery'

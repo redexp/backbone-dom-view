@@ -10,13 +10,17 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.21.1';
+        DOMView.v = '1.22.0';
 
         var View = BB.View,
             $ = BB.$;
 
-        function DOMView() {
+        function DOMView(ops) {
             var view = this;
+
+            if (has(ops, 'parent')) {
+                this.parent = ops.parent;
+            }
 
             view.attributes = {};
 
@@ -483,7 +487,8 @@
 
                 if (isClass(View)) {
                     var viewOps = {
-                        model: model
+                        model: model,
+                        parent: view
                     };
 
                     if (viewEl) {
