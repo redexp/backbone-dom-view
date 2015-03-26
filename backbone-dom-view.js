@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.22.0';
+        DOMView.v = '1.23.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -445,7 +445,7 @@
                     fieldClass = field.wrapper;
                 }
 
-                list = view.model.get(fieldName);
+                list = view.get(fieldName) || view.model.get(fieldName);
 
                 if (fieldClass) {
                     list = new fieldClass(list);

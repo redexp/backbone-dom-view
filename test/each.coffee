@@ -410,3 +410,67 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             views = viewList.findWhere({selected: false})
             expect(views).to.equal viewList[list.at(2).cid]
+
+        it 'should iterate over model field', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        field: 'list'
+                        view: Item
+                        el: '> *'
+
+            list = new Backbone.Collection([{name: 1}, {name: 2}, {name: 3}])
+            model = new Backbone.Model({list: list})
+
+            view = new ListView model: model
+
+            li = view.$el.children()
+
+            expect(li.length).to.equal 3
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'
+            expect(li.eq(2)).to.have.text '3'
+
+            model.get('list').add({name: 4})
+
+            expect(view.$el.children().eq(3)).to.have.text '4'
+
+        it 'should iterate over view field', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+
+                defaults:
+                    list: null
+
+                initialize: ->
+                    this.set 'list', new Backbone.Collection([{name: 1}, {name: 2}, {name: 3}])
+
+                template: '':
+                    each:
+                        field: 'list'
+                        view: Item
+                        el: '> *'
+
+            model = new Backbone.Model()
+
+            view = new ListView model: model
+
+            li = view.$el.children()
+
+            expect(li.length).to.equal 3
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'
+            expect(li.eq(2)).to.have.text '3'
+
+            view.get('list').add({name: 4})
+
+            expect(view.$el.children().eq(3)).to.have.text '4'

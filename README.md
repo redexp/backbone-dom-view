@@ -693,7 +693,7 @@ By default all views created by this helper on remove will stop listen all event
 
 **field:** `{String|Object}` Default: `null`
 
-Helper can work not only with `this.model` but also with collection in model field. Name of this filed you can set with this option
+Helper can work not only with `this.model` but also with collection in model (or in view) attributes. Name of this filed you can set with this option
 ```javascript
 var UserView = Backbone.DOMView.extend({
     template: {
