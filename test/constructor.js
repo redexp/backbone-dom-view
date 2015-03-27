@@ -160,7 +160,7 @@
         return expect(x).to.equal(1);
       });
     });
-    return describe('find()', function() {
+    describe('find()', function() {
       it('should return root node', function() {
         var View, view;
         View = DomView.extend({
@@ -194,6 +194,151 @@
         expect(view.find('{test} ~ i')).to.match('i');
         expect(view.find('{comb}')).to.match('i');
         return expect(view.find('comb')).to.match('i');
+      });
+    });
+    return describe('bind(), bindTo()', function() {
+      it('should bind events to model', function() {
+        var View, num, num2, view;
+        View = DomView.extend({
+          defaults: {
+            view_field: 1
+          }
+        });
+        model.set('model_field', 0);
+        view = new View({
+          model: model
+        });
+        num = 0;
+        view.bind('@model_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(0);
+        });
+        view.bind('@view_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(1);
+        });
+        view.bind('!@model_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(true);
+        });
+        view.bind('!@view_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(false);
+        });
+        view.bind('test', function() {
+          num++;
+          return expect(this).to.equal(view);
+        });
+        view.bind('#view', function() {
+          num++;
+          return expect(this).to.equal(view);
+        });
+        num2 = 0;
+        view.bind('@model_field @view_field !@model_field !@view_field test #view', function() {
+          num2++;
+          return expect(this).to.equal(view);
+        });
+        model.trigger('test');
+        view.trigger('view');
+        expect(num).to.equal(6);
+        return expect(num2).to.equal(6);
+      });
+      it('should bind events to external model', function() {
+        var View, model2, num, num2, view;
+        View = DomView.extend({
+          defaults: {
+            view_field: 1
+          }
+        });
+        model.set('model_field', 0);
+        model2 = new Backbone.Model({
+          model_field: 3
+        });
+        view = new View({
+          model: model
+        });
+        num = 0;
+        view.bindTo(model2, '@model_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(3);
+        });
+        view.bindTo(model2, '@view_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(1);
+        });
+        view.bindTo(model2, '!@model_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(false);
+        });
+        view.bindTo(model2, '!@view_field', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal(false);
+        });
+        view.bindTo(model2, 'test', function() {
+          num++;
+          return expect(this).to.equal(view);
+        });
+        view.bindTo(model2, '#view', function() {
+          num++;
+          return expect(this).to.equal(view);
+        });
+        num2 = 0;
+        view.bind('@model_field @view_field !@model_field !@view_field test #view', function() {
+          num2++;
+          return expect(this).to.equal(view);
+        });
+        model.trigger('test');
+        model2.trigger('test');
+        view.trigger('view');
+        expect(num).to.equal(6);
+        return expect(num2).to.equal(6);
+      });
+      return it('should handle ! event', function() {
+        var View, num, view;
+        View = DomView.extend({
+          defaults: {
+            field: false
+          }
+        });
+        view = new View({
+          model: model
+        });
+        num = 0;
+        view.bind('test', function(v) {
+          num++;
+          return expect(v).to.equal(true);
+        });
+        view.bind('!test', function(v) {
+          num++;
+          return expect(v).to.equal(false);
+        });
+        view.bind('#view', function(v) {
+          num++;
+          return expect(v).to.equal(1);
+        });
+        view.bind('!#view', function(v) {
+          num++;
+          return expect(v).to.equal(false);
+        });
+        view.bind('@field', function(v) {
+          num++;
+          return expect(v).to.equal(false);
+        });
+        view.bind('!@field', function(v) {
+          num++;
+          return expect(v).to.equal(true);
+        });
+        model.trigger('test', true);
+        view.trigger('view', 1);
+        return expect(num).to.equal(6);
       });
     });
   });

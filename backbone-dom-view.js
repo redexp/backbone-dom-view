@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.23.0';
+        DOMView.v = '1.24.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -92,9 +92,19 @@
                 return this.$el.find(selector);
             },
 
-            bind: function (events, func) {
+            bind: function (events, callback) {
                 var view = this,
                     model = view.model;
+
+                if (arguments.length === 1 && typeof events === 'object') {
+                    var ops = events;
+                    events = ops.events;
+                    callback = ops.callback;
+
+                    if (has(ops, 'model')) {
+                        model = ops.model;
+                    }
+                }
 
                 events = $.trim(events).split(/\s+/);
 
@@ -120,7 +130,7 @@
                         event = event.slice(1);
                         target = view.has(event) ? view : model;
                         argNum = 1;
-                        bindApplyFunc(target, target.get(event));
+                        bindApplyCallback(target, target.get(event));
                         event = 'change:' + event;
                     }
 
@@ -134,20 +144,30 @@
                     }
 
                     if (target === model) {
-                        view.listenTo(model, event, bindApplyFunc);
+                        view.listenTo(model, event, bindApplyCallback);
                     }
                     else {
-                        view.on(event, bindApplyFunc);
+                        view.on(event, bindApplyCallback);
                     }
 
-                    function bindApplyFunc () {
+                    function bindApplyCallback () {
                         var args = argNum === null ? arguments : [arguments[argNum]];
                         if (argNot) {
                             args[0] = !args[0];
                         }
-                        return func.apply(view, args);
+                        return callback.apply(view, args);
                     }
                 }
+
+                return this;
+            },
+
+            bindTo: function (model, events, callback) {
+                return this.bind({
+                    model: model,
+                    events: events,
+                    callback: callback
+                });
             },
 
             getModel: function () {

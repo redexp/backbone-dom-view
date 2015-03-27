@@ -150,3 +150,149 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(view.find('{test} ~ i')).to.match 'i'
             expect(view.find('{comb}')).to.match 'i'
             expect(view.find('comb')).to.match 'i'
+
+    describe 'bind(), bindTo()', ->
+
+        it 'should bind events to model', ->
+            View = DomView.extend
+                defaults:
+                    view_field: 1
+
+            model.set 'model_field', 0
+
+            view = new View model: model
+
+            num = 0
+
+            view.bind '@model_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(0)
+
+            view.bind '@view_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(1)
+
+            view.bind '!@model_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(true)
+
+            view.bind '!@view_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(false)
+
+            view.bind 'test', ->
+                num++
+                expect(this).to.equal(view)
+
+            view.bind '#view', ->
+                num++
+                expect(this).to.equal(view)
+
+            num2 = 0
+
+            view.bind '@model_field @view_field !@model_field !@view_field test #view', ->
+                num2++
+                expect(this).to.equal(view)
+
+            model.trigger('test')
+            view.trigger('view')
+
+            expect(num).to.equal(6)
+            expect(num2).to.equal(6)
+
+        it 'should bind events to external model', ->
+            View = DomView.extend
+                defaults:
+                    view_field: 1
+
+            model.set 'model_field', 0
+
+            model2 = new Backbone.Model model_field: 3
+
+            view = new View model: model
+
+            num = 0
+
+            view.bindTo model2, '@model_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(3)
+
+            view.bindTo model2, '@view_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(1)
+
+            view.bindTo model2, '!@model_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(false)
+
+            view.bindTo model2, '!@view_field', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal(false)
+
+            view.bindTo model2, 'test', ->
+                num++
+                expect(this).to.equal(view)
+
+            view.bindTo model2, '#view', ->
+                num++
+                expect(this).to.equal(view)
+
+            num2 = 0
+
+            view.bind '@model_field @view_field !@model_field !@view_field test #view', ->
+                num2++
+                expect(this).to.equal(view)
+
+            model.trigger('test')
+            model2.trigger('test')
+            view.trigger('view')
+
+            expect(num).to.equal(6)
+            expect(num2).to.equal(6)
+
+        it 'should handle ! event', ->
+            View = DomView.extend
+                defaults:
+                    field: false
+
+            view = new View model: model
+
+            num = 0
+
+            view.bind 'test', (v) ->
+                num++
+                expect(v).to.equal(true)
+
+            view.bind '!test', (v) ->
+                num++
+                expect(v).to.equal(false)
+
+            view.bind '#view', (v) ->
+                num++
+                expect(v).to.equal(1)
+
+            view.bind '!#view', (v) ->
+                num++
+                expect(v).to.equal(false)
+
+            view.bind '@field', (v) ->
+                num++
+                expect(v).to.equal(false)
+
+            view.bind '!@field', (v) ->
+                num++
+                expect(v).to.equal(true)
+
+            model.trigger('test', true)
+            view.trigger('view', 1)
+
+            expect(num).to.equal(6)
+

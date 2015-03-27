@@ -252,6 +252,19 @@ Backbone.DOMView.extend({
 ```
 Class `active` will not be added when view will be created even if model field `active` is `true`, because it will wait for `change:active` event. Instead of it class `selected` will be synced with model field `selected` on view creation because it uses `@selected` notation.
 
+### bindTo()
+
+Same as `bind()` but first argument is another then `view.model` model.
+```javascript
+Backbone.DOMView.extend({
+    initialize: function () {
+        this.bindTo(this.model.get('friends'), 'add reset #change', function () {});
+        // same as
+        this.listenTo(this.model.get('friends'), 'add reset', function () {});
+        this.on('change', function () {});
+    }
+});
+
 ### getModel()
 
 I added this method just as map function which can return model field of view. You can use it in two ways:
