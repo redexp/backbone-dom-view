@@ -264,6 +264,7 @@ Backbone.DOMView.extend({
         this.on('change', function () {});
     }
 });
+```
 
 ### getModel()
 
