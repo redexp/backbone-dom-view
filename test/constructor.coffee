@@ -100,6 +100,27 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(el3.find('span')).to.have.text 'Jack'
             expect(yView.ui.name).to.have.text 'Jack'
 
+        it 'should extend parent defaults:', ->
+            View = DomView.extend
+                defaults:
+                    test: 1
+
+            View2 = View.extend
+                defaults:
+                    name: 1
+
+            View3 = View2.extend
+                defaults: ->
+                    expect(this).to.be.instanceOf(View3)
+
+                    return {field: 1}
+
+            view = new View3
+
+            expect(view.get('test')).to.equal 1
+            expect(view.get('name')).to.equal 1
+            expect(view.get('field')).to.equal 1
+
         it 'should trigger elementEvent on setElement', ->
             x = 0
             View = DomView.extend

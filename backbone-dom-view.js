@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.25.0';
+        DOMView.v = '1.26.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -25,7 +25,7 @@
             view.attributes = {};
 
             if (view.defaults) {
-                view.set(_.result(view, 'defaults'));
+                view.set(mergeExtendedField(view, 'defaults'));
             }
 
             View.apply(view, arguments);
