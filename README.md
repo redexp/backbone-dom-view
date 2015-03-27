@@ -266,17 +266,6 @@ Backbone.DOMView.extend({
 });
 ```
 
-### getModel()
-
-I added this method just as map function which can return model field of view. You can use it in two ways:
-```javascript
-// as regular method
-this.getModel(); //> this.model
-// or as map function
-viewsArray.map(this.getModel); //> array of models
-```
-This method will be useful with `EachViewList::where` method, when you need array of models instead of array of views.
-
 ### getViewList()
 
 This is shortcut for `this.template.selector.each.viewList` see [each::viewList](#viewList).

@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.24.0';
+        DOMView.v = '1.25.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -168,10 +168,6 @@
                     events: events,
                     callback: callback
                 });
-            },
-
-            getModel: function () {
-                return arguments.length > 0 ? arguments[0].model : this.model;
             },
 
             matches: function (attrs) {
@@ -648,6 +644,11 @@
                 });
 
                 return count;
+            },
+            getModels: function () {
+                return this.map(function (view) {
+                    return view.model;
+                });
             }
         });
 
