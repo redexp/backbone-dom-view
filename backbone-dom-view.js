@@ -201,6 +201,10 @@
         DOMView.readyEvent = 'template-ready';
         DOMView.elementEvent = 'element-ready';
 
+        DOMView.model = function (view) {
+            return view.model;
+        };
+
         var helpers = DOMView.helpers = {
             'class': classHelper,
             attr: attrHelper,
@@ -646,9 +650,7 @@
                 return count;
             },
             getModels: function () {
-                return this.map(function (view) {
-                    return view.model;
-                });
+                return this.map(DOMView.model);
             }
         });
 
