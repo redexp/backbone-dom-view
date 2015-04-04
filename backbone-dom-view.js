@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.26.0';
+        DOMView.v = '1.27.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -651,6 +651,15 @@
             },
             getModels: function () {
                 return this.map(DOMView.model);
+            },
+            getByEl: function (el) {
+                if (el instanceof $) {
+                    el = el.get(0);
+                }
+
+                return this.find(function (view) {
+                    return view.el === el;
+                });
             }
         });
 

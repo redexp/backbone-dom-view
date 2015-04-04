@@ -371,46 +371,6 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(li.eq(0)).to.have.text '2'
             expect(li.eq(1)).to.have.text '3'
 
-        it 'should have viewList as EachViewList', ->
-            Item = DomView.extend
-                defaults:
-                    selected: false
-
-                initialize: ->
-                    this.set('selected', this.model.get('name') < 3)
-
-                template:
-                    'root':
-                        html: '@name'
-                        class:
-                            'selected': '@selected'
-
-            ListView = DomView.extend
-                el: '<ul><li></li></ul>'
-                template: 'root':
-                    each:
-                        view: Item
-                        el: '> *'
-
-            list = new Backbone.Collection([{name: 1}, {name: 2}, {name: 3}])
-
-            view = new ListView model: list
-
-            viewList = view.template.root.each.viewList
-            views = viewList.where({selected: true})
-
-            expect(views.length).to.equal 2
-            expect(views[0].$el).to.have.class 'selected'
-            expect(views[1].$el).to.have.class 'selected'
-            expect(viewList[list.at(2).cid].$el).not.to.have.class 'selected'
-
-            views = viewList.where({selected: /^f/})
-            expect(views.length).to.equal 1
-            expect(views[0]).to.equal viewList[list.at(2).cid]
-
-            views = viewList.findWhere({selected: false})
-            expect(views).to.equal viewList[list.at(2).cid]
-
         it 'should iterate over model field', ->
             Item = DomView.extend
                 template:
@@ -474,3 +434,49 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view.get('list').add({name: 4})
 
             expect(view.$el.children().eq(3)).to.have.text '4'
+
+        it 'should have viewList as EachViewList', ->
+            Item = DomView.extend
+                defaults:
+                    selected: false
+
+                initialize: ->
+                    this.set('selected', this.model.get('name') < 3)
+
+                template:
+                    'root':
+                        html: '@name'
+                        class:
+                            'selected': '@selected'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: 'root':
+                    each:
+                        view: Item
+                        el: '> *'
+
+            list = new Backbone.Collection([{name: 1}, {name: 2}, {name: 3}])
+
+            view = new ListView model: list
+
+            viewList = view.getViewList('root')
+            views = viewList.where({selected: true})
+
+            expect(views.length).to.equal 2
+            expect(views[0].$el).to.have.class 'selected'
+            expect(views[1].$el).to.have.class 'selected'
+            expect(viewList[list.at(2).cid].$el).not.to.have.class 'selected'
+
+            views = viewList.where({selected: /^f/})
+            expect(views.length).to.equal 1
+            expect(views[0]).to.equal viewList[list.at(2).cid]
+
+            views = viewList.findWhere({selected: false})
+            expect(views).to.equal viewList[list.at(2).cid]
+
+            views = viewList.getByEl(view.$el.children().eq(1))
+            expect(views).to.equal viewList[list.at(1).cid]
+
+            views = viewList.getByEl(view.$el.children().get(2))
+            expect(views).to.equal viewList[list.at(2).cid]
