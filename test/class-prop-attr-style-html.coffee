@@ -238,3 +238,34 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(el).not.to.have.class 'test'
             view.trigger('test', false)
             expect(el).to.have.class 'test'
+
+        it 'should accept function as return value', ->
+            View = DomView.extend
+                el: '<ul><li></li><li></li><li></li></ul>'
+                template: 'li':
+                    class: 'cTest': 'test': -> return (i, li) -> i % 2
+                    prop: 'pTest': 'test': -> return (i, value) -> i
+                    attr: 'aTest': 'test': -> return (i, value) -> i
+                    style: 'opacity': 'test': -> return (i, value) -> i / 10
+
+            view = new View model: model
+
+            model.trigger('test')
+
+            li = view.$el.find('> li')
+
+            expect(li.eq(0)).not.to.have.class 'cTest'
+            expect(li.eq(1)).to.have.class 'cTest'
+            expect(li.eq(2)).not.to.have.class 'cTest'
+
+            expect(li.eq(0)).to.have.prop 'pTest', 0
+            expect(li.eq(1)).to.have.prop 'pTest', 1
+            expect(li.eq(2)).to.have.prop 'pTest', 2
+
+            expect(li.eq(0)).to.have.attr 'aTest', '0'
+            expect(li.eq(1)).to.have.attr 'aTest', '1'
+            expect(li.eq(2)).to.have.attr 'aTest', '2'
+
+            expect(li.eq(0)).to.have.css 'opacity', '0'
+            expect(li.eq(1)).to.have.css 'opacity', '0.1'
+            expect(li.eq(2)).to.have.css 'opacity', '0.2'

@@ -303,7 +303,7 @@
         view.set('selected', false);
         return expect(el).not.to.have["class"]('test');
       });
-      return it('should return negate value on !event', function() {
+      it('should return negate value on !event', function() {
         var View, el, view;
         View = DomView.extend({
           defaults: {
@@ -334,6 +334,69 @@
         expect(el).not.to.have["class"]('test');
         view.trigger('test', false);
         return expect(el).to.have["class"]('test');
+      });
+      return it('should accept function as return value', function() {
+        var View, li, view;
+        View = DomView.extend({
+          el: '<ul><li></li><li></li><li></li></ul>',
+          template: {
+            'li': {
+              "class": {
+                'cTest': {
+                  'test': function() {
+                    return function(i, li) {
+                      return i % 2;
+                    };
+                  }
+                }
+              },
+              prop: {
+                'pTest': {
+                  'test': function() {
+                    return function(i, value) {
+                      return i;
+                    };
+                  }
+                }
+              },
+              attr: {
+                'aTest': {
+                  'test': function() {
+                    return function(i, value) {
+                      return i;
+                    };
+                  }
+                }
+              },
+              style: {
+                'opacity': {
+                  'test': function() {
+                    return function(i, value) {
+                      return i / 10;
+                    };
+                  }
+                }
+              }
+            }
+          }
+        });
+        view = new View({
+          model: model
+        });
+        model.trigger('test');
+        li = view.$el.find('> li');
+        expect(li.eq(0)).not.to.have["class"]('cTest');
+        expect(li.eq(1)).to.have["class"]('cTest');
+        expect(li.eq(2)).not.to.have["class"]('cTest');
+        expect(li.eq(0)).to.have.prop('pTest', 0);
+        expect(li.eq(1)).to.have.prop('pTest', 1);
+        expect(li.eq(2)).to.have.prop('pTest', 2);
+        expect(li.eq(0)).to.have.attr('aTest', '0');
+        expect(li.eq(1)).to.have.attr('aTest', '1');
+        expect(li.eq(2)).to.have.attr('aTest', '2');
+        expect(li.eq(0)).to.have.css('opacity', '0');
+        expect(li.eq(1)).to.have.css('opacity', '0.1');
+        return expect(li.eq(2)).to.have.css('opacity', '0.2');
       });
     });
   });

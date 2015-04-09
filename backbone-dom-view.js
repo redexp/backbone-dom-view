@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.27.0';
+        DOMView.v = '1.28.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -226,8 +226,17 @@
                 node: this.find(selector),
                 method: 'toggleClass',
                 options: options,
-                wrapper: function(v) {
-                    return !!v;
+                callback: function(ops) {
+                    var value = ops.value;
+
+                    if (typeof value === 'function') {
+                        ops.node.each(function (i, item) {
+                            $(item).toggleClass(ops.fieldName, !!value(i, item));
+                        });
+                    }
+                    else {
+                        ops.node.toggleClass(ops.fieldName, !!ops.value);
+                    }
                 }
             });
         }
@@ -351,7 +360,8 @@
         function callJqueryMethod (ops) {
             var view = ops.view,
                 model = view.model,
-                options = ops.options;
+                options = ops.options,
+                callback = ops.callback || applyJqueryMethod;
 
             ops = extend({
                 model: model
@@ -372,14 +382,14 @@
 
                 case 'function':
                     ops.value = options.apply(view, arguments);
-                    applyJqueryMethod(ops);
+                    callback(ops);
                     break;
             }
 
             function bindEvents(events, func) {
                 view.bind(events, function () {
                     ops.value = func ? func.apply(view, arguments) : arguments[0];
-                    applyJqueryMethod(ops);
+                    callback(ops);
                 });
             }
         }
@@ -388,12 +398,7 @@
             var node = ops.node,
                 method = ops.method,
                 fieldName = ops.fieldName,
-                wrapper = ops.wrapper,
                 value = ops.value;
-
-            if (wrapper) {
-                value = wrapper(value);
-            }
 
             if (fieldName) {
                 node[method](fieldName, value);
