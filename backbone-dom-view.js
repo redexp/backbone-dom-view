@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.28.0';
+        DOMView.v = '1.29.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -226,17 +226,15 @@
                 node: this.find(selector),
                 method: 'toggleClass',
                 options: options,
-                callback: function(ops) {
-                    var value = ops.value;
+                iteratorCallback: true,
+                wrapper: function (v) {
+                    if (_.isFunction(v)) {
+                        return function () {
+                            return !!v.apply(this, arguments);
+                        };
+                    }
 
-                    if (typeof value === 'function') {
-                        ops.node.each(function (i, item) {
-                            $(item).toggleClass(ops.fieldName, !!value(i, item));
-                        });
-                    }
-                    else {
-                        ops.node.toggleClass(ops.fieldName, !!ops.value);
-                    }
+                    return !!v;
                 }
             });
         }
@@ -273,7 +271,8 @@
                 view: this,
                 node: this.find(selector),
                 method: 'html',
-                options: options
+                options: options,
+                iteratorCallback: true
             });
         }
 
@@ -282,7 +281,8 @@
                 view: this,
                 node: this.find(selector),
                 method: 'text',
-                options: options
+                options: options,
+                iteratorCallback: true
             });
         }
 
@@ -360,10 +360,9 @@
         function callJqueryMethod (ops) {
             var view = ops.view,
                 model = view.model,
-                options = ops.options,
-                callback = ops.callback || applyJqueryMethod;
+                options = ops.options;
 
-            ops = extend({
+            ops = _.extend({
                 model: model
             }, ops);
 
@@ -382,14 +381,14 @@
 
                 case 'function':
                     ops.value = options.apply(view, arguments);
-                    callback(ops);
+                    applyJqueryMethod(ops);
                     break;
             }
 
             function bindEvents(events, func) {
                 view.bind(events, function () {
                     ops.value = func ? func.apply(view, arguments) : arguments[0];
-                    callback(ops);
+                    applyJqueryMethod(ops);
                 });
             }
         }
@@ -398,9 +397,24 @@
             var node = ops.node,
                 method = ops.method,
                 fieldName = ops.fieldName,
-                value = ops.value;
+                value = ops.value,
+                wrapper = ops.wrapper;
 
-            if (fieldName) {
+            if (wrapper) {
+                value = wrapper(value);
+            }
+
+            if (ops.iteratorCallback && _.isFunction(value)) {
+                node.each(function (i, item) {
+                    if (fieldName) {
+                        $(item)[method](fieldName, value(i, item));
+                    }
+                    else {
+                        $(item)[method](value(i, item));
+                    }
+                });
+            }
+            else if (fieldName) {
                 node[method](fieldName, value);
             }
             else {
@@ -634,7 +648,7 @@
 
         }
 
-        extend(EachViewList.prototype, {
+        _.extend(EachViewList.prototype, {
             where: function (attrs, first) {
                 return this[first ? 'find' : 'filter'](function (view) {
                     return view.matches(attrs);
@@ -700,7 +714,7 @@
 
         function getViewExtendedFieldList(viewClass, field, context) {
             var value = viewClass.prototype[field] || {};
-            if (typeof value === 'function') {
+            if (_.isFunction(value)) {
                 value = value.call(context);
             }
             var result = [value];
@@ -709,11 +723,7 @@
 
         function mergeExtendedField(context, field) {
             var viewClass = context.constructor;
-            return extend.apply(null, [true, {}].concat(getViewExtendedFieldList(viewClass, field, context).reverse()));
-        }
-
-        function extend() {
-            return $.extend.apply($, arguments);
+            return $.extend.apply($, [true, {}].concat(getViewExtendedFieldList(viewClass, field, context).reverse()));
         }
 
         function has(obj, field) {

@@ -247,6 +247,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     prop: 'pTest': 'test': -> return (i, value) -> i
                     attr: 'aTest': 'test': -> return (i, value) -> i
                     style: 'opacity': 'test': -> return (i, value) -> i / 10
+                    html: 'test': -> return (i, li) -> i
 
             view = new View model: model
 
@@ -269,3 +270,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(li.eq(0)).to.have.css 'opacity', '0'
             expect(li.eq(1)).to.have.css 'opacity', '0.1'
             expect(li.eq(2)).to.have.css 'opacity', '0.2'
+
+            expect(li.eq(0)).to.have.html '0'
+            expect(li.eq(1)).to.have.html '1'
+            expect(li.eq(2)).to.have.html '2'

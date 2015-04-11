@@ -376,6 +376,13 @@
                     };
                   }
                 }
+              },
+              html: {
+                'test': function() {
+                  return function(i, li) {
+                    return i;
+                  };
+                }
               }
             }
           }
@@ -396,7 +403,10 @@
         expect(li.eq(2)).to.have.attr('aTest', '2');
         expect(li.eq(0)).to.have.css('opacity', '0');
         expect(li.eq(1)).to.have.css('opacity', '0.1');
-        return expect(li.eq(2)).to.have.css('opacity', '0.2');
+        expect(li.eq(2)).to.have.css('opacity', '0.2');
+        expect(li.eq(0)).to.have.html('0');
+        expect(li.eq(1)).to.have.html('1');
+        return expect(li.eq(2)).to.have.html('2');
       });
     });
   });
