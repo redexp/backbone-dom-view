@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.29.0';
+        DOMView.v = '1.30.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -173,8 +173,6 @@
             matches: function (attrs) {
                 for (var key in attrs) {
                     if (!has(attrs, key)) continue;
-
-                    if (!this.has(key)) return false;
 
                     if (attrs[key] === this.get(key)) continue;
 
