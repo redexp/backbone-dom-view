@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.30.0';
+        DOMView.v = '1.31.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -30,10 +30,20 @@
 
             View.apply(view, arguments);
 
-            var template = view.template;
+            var template = view.template,
+                selector,
+                selectors = [];
 
-            for (var selector in template) {
-                if (!has(template, selector)) continue;
+            for (selector in template) {
+                if (has(template, selector)) {
+                    selectors.push(selector);
+                }
+            }
+
+            selectors = selectors.sort();
+
+            for (var i = 0, len = selectors.length; i < len; i++) {
+                selector = selectors[i];
 
                 var helpersList = template[selector];
 
@@ -57,18 +67,15 @@
             setElement: function () {
                 View.prototype.setElement.apply(this, arguments);
 
-                var view = this;
-
-                var ui = mergeExtendedField(view, 'ui');
-                view.ui = {};
+                var ui = this.ui = mergeExtendedField(this, 'ui');
 
                 for (var name in ui) {
                     if (!has(ui, name)) continue;
 
-                    view.ui[name] = view.find(ui[name]);
+                    ui[name] = this.find(ui[name]);
                 }
 
-                view.template = mergeExtendedField(view, 'template');
+                this.template = mergeExtendedField(this, 'template');
 
                 this.trigger(DOMView.elementEvent);
 
@@ -216,7 +223,8 @@
         };
 
         var argSelector = /\|arg\((\d+)\)/,
-            uiSelectors = /\{([^}]+)}/g;
+            uiSelectors = /\{([^}]+)}/g,
+            selectorIndex = /^(\d+)\)(.*)$/;
 
         function classHelper (selector, options) {
             callJquerySetterMethod({

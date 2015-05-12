@@ -8,16 +8,33 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
     describe 'constructor', ->
         it 'should extend parent template:', ->
             View = DomView.extend
-                template: '':
-                    html: '@name'
+                template:
+                    'root':
+                        html: '@name'
 
             XView = View.extend
-                template: '':
-                    prop: "test": '@name'
+                template:
+                    'root':
+                        prop:
+                            "test": '@name'
+
+            nTest = 1
 
             YView = XView.extend
-                template: '':
-                    attr: "test": '@name'
+                ui:
+                    'test': 'root'
+                    '1test': 'root'
+                    '2test': 'root'
+                template:
+                    'root':
+                        attr:
+                            "test": '@name'
+                    'test':
+                        prop: '3test': -> nTest++
+                    '2test':
+                        prop: '2test': -> nTest++
+                    '1test':
+                        prop: '1test': -> nTest++
 
             view = new View model: model
             el1 = view.$el
@@ -37,6 +54,10 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(el1).not.to.have.attr 'test'
             expect(el2).not.to.have.attr 'test'
             expect(el3).to.have.attr 'test', 'Jack'
+
+            expect(el3).to.have.prop '1test', 1
+            expect(el3).to.have.prop '2test', 2
+            expect(el3).to.have.prop '3test', 3
 
             ZView = YView.extend
                 template: '':
@@ -67,6 +88,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             YView = XView.extend
                 ui:
                     name: 'span'
+                    test: '{name}, {deleteButton}'
                 template:
                     name: html: '@name'
 
@@ -99,6 +121,9 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(xView.ui.name).to.be.undefined
             expect(el3.find('span')).to.have.text 'Jack'
             expect(yView.ui.name).to.have.text 'Jack'
+
+            expect(yView.ui.test.get(0)).to.equal(yView.ui.name.get(0))
+            expect(yView.ui.test.get(1)).to.equal(yView.ui.deleteButton.get(0))
 
         it 'should extend parent defaults:', ->
             View = DomView.extend

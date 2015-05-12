@@ -9,28 +9,55 @@
     });
     describe('constructor', function() {
       it('should extend parent template:', function() {
-        var View, XView, YView, ZView, el1, el2, el3, view, xView, yView, zView;
+        var View, XView, YView, ZView, el1, el2, el3, nTest, view, xView, yView, zView;
         View = DomView.extend({
           template: {
-            '': {
+            'root': {
               html: '@name'
             }
           }
         });
         XView = View.extend({
           template: {
-            '': {
+            'root': {
               prop: {
                 "test": '@name'
               }
             }
           }
         });
+        nTest = 1;
         YView = XView.extend({
+          ui: {
+            'test': 'root',
+            '1test': 'root',
+            '2test': 'root'
+          },
           template: {
-            '': {
+            'root': {
               attr: {
                 "test": '@name'
+              }
+            },
+            'test': {
+              prop: {
+                '3test': function() {
+                  return nTest++;
+                }
+              }
+            },
+            '2test': {
+              prop: {
+                '2test': function() {
+                  return nTest++;
+                }
+              }
+            },
+            '1test': {
+              prop: {
+                '1test': function() {
+                  return nTest++;
+                }
               }
             }
           }
@@ -57,6 +84,9 @@
         expect(el1).not.to.have.attr('test');
         expect(el2).not.to.have.attr('test');
         expect(el3).to.have.attr('test', 'Jack');
+        expect(el3).to.have.prop('1test', 1);
+        expect(el3).to.have.prop('2test', 2);
+        expect(el3).to.have.prop('3test', 3);
         ZView = YView.extend({
           template: {
             '': {
@@ -102,7 +132,8 @@
         });
         YView = XView.extend({
           ui: {
-            name: 'span'
+            name: 'span',
+            test: '{name}, {deleteButton}'
           },
           template: {
             name: {
@@ -140,7 +171,9 @@
         expect(el2.find('span')).not.to.have.text('Jack');
         expect(xView.ui.name).to.be.undefined;
         expect(el3.find('span')).to.have.text('Jack');
-        return expect(yView.ui.name).to.have.text('Jack');
+        expect(yView.ui.name).to.have.text('Jack');
+        expect(yView.ui.test.get(0)).to.equal(yView.ui.name.get(0));
+        return expect(yView.ui.test.get(1)).to.equal(yView.ui.deleteButton.get(0));
       });
       it('should extend parent defaults:', function() {
         var View, View2, View3, view;
