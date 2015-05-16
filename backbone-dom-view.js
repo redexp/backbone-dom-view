@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.31.0';
+        DOMView.v = '1.31.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -223,8 +223,7 @@
         };
 
         var argSelector = /\|arg\((\d+)\)/,
-            uiSelectors = /\{([^}]+)}/g,
-            selectorIndex = /^(\d+)\)(.*)$/;
+            uiSelectors = /\{([^}]+)}/g;
 
         function classHelper (selector, options) {
             callJquerySetterMethod({
@@ -734,10 +733,6 @@
 
         function has(obj, field) {
             return _.has(obj, field);
-        }
-
-        function not(v) {
-            return !v;
         }
 
         return DOMView;
