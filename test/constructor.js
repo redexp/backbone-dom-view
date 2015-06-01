@@ -33,6 +33,9 @@
             '1test': 'root',
             '2test': 'root'
           },
+          selectorsSorter: function(tpl) {
+            return _.keys(tpl).sort();
+          },
           template: {
             'root': {
               attr: {

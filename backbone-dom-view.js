@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.31.1';
+        DOMView.v = '1.32.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -31,16 +31,8 @@
             View.apply(view, arguments);
 
             var template = view.template,
-                selector,
-                selectors = [];
-
-            for (selector in template) {
-                if (has(template, selector)) {
-                    selectors.push(selector);
-                }
-            }
-
-            selectors = selectors.sort();
+                selectors = this.selectorsSorter(template),
+                selector;
 
             for (var i = 0, len = selectors.length; i < len; i++) {
                 selector = selectors[i];
@@ -63,6 +55,8 @@
             ui: {
                 root: ''
             },
+
+            selectorsSorter: _.keys,
 
             setElement: function () {
                 View.prototype.setElement.apply(this, arguments);

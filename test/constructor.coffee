@@ -25,6 +25,10 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     'test': 'root'
                     '1test': 'root'
                     '2test': 'root'
+
+                selectorsSorter: (tpl) ->
+                    return _.keys(tpl).sort()
+
                 template:
                     'root':
                         attr:
