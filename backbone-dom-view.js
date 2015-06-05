@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.32.0';
+        DOMView.v = '1.33.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -69,7 +69,7 @@
                     ui[name] = this.find(ui[name]);
                 }
 
-                this.template = mergeExtendedField(this, 'template');
+                this.template = mergeExtendedField(this, 'template', true);
 
                 this.trigger(DOMView.elementEvent);
 
@@ -720,9 +720,9 @@
             return viewClass.__super__ ? result.concat(getViewExtendedFieldList(viewClass.__super__.constructor, field, context)) : result;
         }
 
-        function mergeExtendedField(context, field) {
+        function mergeExtendedField(context, field, deep) {
             var viewClass = context.constructor;
-            return $.extend.apply($, [true, {}].concat(getViewExtendedFieldList(viewClass, field, context).reverse()));
+            return $.extend.apply($, (deep ? [true, {}] : [{}]).concat(getViewExtendedFieldList(viewClass, field, context).reverse()));
         }
 
         function has(obj, field) {
