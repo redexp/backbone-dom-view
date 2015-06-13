@@ -264,7 +264,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(list.at(2).get('name')).to.equal 3
             expect(list.at(2).get('order')).to.equal 1
 
-        it 'should iterate over plain array', ->
+        it 'should iterate over plain array with collection class', ->
             Item = DomView.extend
                 template:
                     '': html: '@name'
@@ -289,6 +289,67 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(li.eq(0)).to.have.text '1'
             expect(li.eq(1)).to.have.text '2'
+
+            model.set('list', [{name: 3}, {name: 4}, {name: 5}])
+
+            li = view.$el.children()
+
+            expect(li.length).to.equal 3
+            expect(li.eq(0)).to.have.text '3'
+            expect(li.eq(1)).to.have.text '4'
+            expect(li.eq(2)).to.have.text '5'
+
+            model.set('list', [{name: 6}])
+
+            li = view.$el.children()
+
+            expect(li.length).to.equal 1
+            expect(li.eq(0)).to.have.text '6'
+
+        it 'should iterate over plain array with wrapper function', ->
+            Item = DomView.extend
+                template:
+                    '': html: '@name'
+
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: '':
+                    each:
+                        field:
+                            name: 'list'
+                            wrapper: (list) ->
+                                expect(this).to.be.instanceOf DomView
+                                return new Backbone.Collection(list)
+                        view: Item
+                        el: '> *'
+
+            model = new Backbone.Model({
+                list: [{name: 1},{name: 2}]
+            })
+
+            view = new ListView model: model
+
+            li = view.$el.children()
+
+            expect(li.length).to.equal 2
+            expect(li.eq(0)).to.have.text '1'
+            expect(li.eq(1)).to.have.text '2'
+
+            model.set('list', [{name: 3}, {name: 4}, {name: 5}])
+
+            li = view.$el.children()
+
+            expect(li.length).to.equal 3
+            expect(li.eq(0)).to.have.text '3'
+            expect(li.eq(1)).to.have.text '4'
+            expect(li.eq(2)).to.have.text '5'
+
+            model.set('list', [{name: 6}])
+
+            li = view.$el.children()
+
+            expect(li.length).to.equal 1
+            expect(li.eq(0)).to.have.text '6'
 
         it 'should trigger added event', ->
             num = 0

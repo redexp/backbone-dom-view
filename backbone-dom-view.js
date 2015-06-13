@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.33.0';
+        DOMView.v = '1.34.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -471,12 +471,14 @@
             var view = this,
                 holder = view.find(selector),
                 viewEl = options.el ? holder.find(options.el).detach() : false,
-                list = view.model;
+                list = view.model,
+                fieldName,
+                fieldClass;
 
             if (options.field) {
-                var field = options.field,
-                    fieldName = field,
-                    fieldClass = null;
+                var field = options.field;
+
+                fieldName = field;
 
                 if (typeof field === 'object') {
                     fieldName = field.name;
@@ -484,10 +486,6 @@
                 }
 
                 list = view.get(fieldName) || view.model.get(fieldName);
-
-                if (fieldClass) {
-                    list = new fieldClass(list);
-                }
             }
 
             var viewList = options.viewList = new EachViewList();
@@ -502,10 +500,6 @@
                 delHandler = eachHelper.delHandlers[delHandler];
             }
 
-            view.listenTo(list, options.addEvent, eachAddListener);
-            view.listenTo(list, options.resetEvent, eachResetListener);
-            view.listenTo(list, options.removeEvent, eachRemoveListener);
-
             var sort = options.sort;
             if (sort) {
                 view.listenTo(list, sort.event || 'sort', eachSortHandler);
@@ -517,7 +511,35 @@
                 view.on(sortEvent, eachSortListByViewsHandler);
             }
 
-            list.each(eachAddListener);
+            if (!fieldClass) {
+                view.listenTo(list, options.addEvent, eachAddListener)
+                    .listenTo(list, options.resetEvent, eachResetListener)
+                    .listenTo(list, options.removeEvent, eachRemoveListener);
+
+                list.each(eachAddListener);
+            }
+            else { // means plain array
+                if (isClass(fieldClass)) {
+                    list = new fieldClass();
+                    view.bind('@' + fieldName, function (data) {
+                        list.each(eachRemoveListener);
+                        list.reset(data);
+                        list.each(eachAddListener);
+                    });
+                }
+                else {
+                    list = null;
+                    view.bind('@' + fieldName, function (data) {
+                        if (list) {
+                            list.each(eachRemoveListener);
+                            list.reset([]);
+                        }
+
+                        list = fieldClass.call(view, data);
+                        list.each(eachAddListener);
+                    });
+                }
+            }
 
             function eachAddListener (model) {
                 var View = isClass(options.view) ? options.view : options.view.call(view, model),
@@ -708,7 +730,7 @@
         );
 
         function isClass(func) {
-            return has(func, '__super__');
+            return has(func, 'prototype') && _.isFunction(func.prototype.initialize);
         }
 
         function getViewExtendedFieldList(viewClass, field, context) {
