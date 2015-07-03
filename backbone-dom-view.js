@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.34.0';
+        DOMView.v = '1.35.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -699,6 +699,11 @@
 
                 return this.find(function (view) {
                     return view.el === el;
+                });
+            },
+            get: function (id) {
+                return this[id] || this[id.cid] || this.find(function (item) {
+                    return item.model === id || item.model.id === id || item.model.id === id.id;
                 });
             }
         });

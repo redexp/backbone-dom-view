@@ -754,10 +754,13 @@
         });
         list = new Backbone.Collection([
           {
+            id: 1,
             name: 1
           }, {
+            id: 2,
             name: 2
           }, {
+            id: 3,
             name: 3
           }
         ]);
@@ -784,7 +787,10 @@
         views = viewList.getByEl(view.$el.children().eq(1));
         expect(views).to.equal(viewList[list.at(1).cid]);
         views = viewList.getByEl(view.$el.children().get(2));
-        return expect(views).to.equal(viewList[list.at(2).cid]);
+        expect(views).to.equal(viewList[list.at(2).cid]);
+        expect(list.at(0)).to.equal(viewList.get(list.at(0)).model);
+        expect(list.at(0)).to.equal(viewList.get(list.at(0).id).model);
+        return expect(list.at(0)).to.equal(viewList.get(list.at(0).cid).model);
       });
     });
   });
