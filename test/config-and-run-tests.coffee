@@ -1,5 +1,5 @@
 require.config
-    urlArgs: '_=44'
+    urlArgs: '_=45'
     shim:
         jquery:
             exports: 'jQuery'
@@ -38,6 +38,7 @@ require ['chai', 'chai-jquery', 'mocha'], (chai, chaiJquery, mocha) ->
         'on'
         'connect'
         'each'
+        'template'
     ]
 
     require tests, ->

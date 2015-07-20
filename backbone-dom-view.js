@@ -10,43 +10,27 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.35.0';
+        DOMView.v = '1.36.0';
 
         var View = BB.View,
             $ = BB.$;
 
         function DOMView(ops) {
-            var view = this;
-
             if (has(ops, 'parent')) {
                 this.parent = ops.parent;
             }
 
-            view.attributes = {};
+            this.attributes = {};
 
-            if (view.defaults) {
-                view.set(mergeExtendedField(view, 'defaults'));
+            if (this.defaults) {
+                this.set(mergeExtendedField(this, 'defaults'));
             }
 
-            View.apply(view, arguments);
+            View.apply(this, arguments);
 
-            var template = view.template,
-                selectors = this.selectorsSorter(template),
-                selector;
+            helpers.template.call(this, '', this.template);
 
-            for (var i = 0, len = selectors.length; i < len; i++) {
-                selector = selectors[i];
-
-                var helpersList = template[selector];
-
-                for (var helper in helpersList) {
-                    if (!has(helpersList, helper)) continue;
-
-                    helpers[helper].call(view, selector, helpersList[helper]);
-                }
-            }
-
-            view.trigger(DOMView.readyEvent);
+            this.trigger(DOMView.readyEvent);
         }
 
         BB.DOMView = View.extend({
@@ -200,11 +184,8 @@
         DOMView.readyEvent = 'template-ready';
         DOMView.elementEvent = 'element-ready';
 
-        DOMView.model = function (view) {
-            return view.model;
-        };
-
         var helpers = DOMView.helpers = {
+            template: templateHelper,
             'class': classHelper,
             attr: attrHelper,
             prop: propHelper,
@@ -218,6 +199,25 @@
 
         var argSelector = /\|arg\((\d+)\)/,
             uiSelectors = /\{([^}]+)}/g;
+
+        function templateHelper(rootSelector, template) {
+            var selectors = this.selectorsSorter(template),
+                selector;
+
+            rootSelector += rootSelector ? ' ' : '';
+
+            for (var i = 0, len = selectors.length; i < len; i++) {
+                selector = selectors[i];
+
+                var helpersList = template[selector];
+
+                for (var helper in helpersList) {
+                    if (!has(helpersList, helper)) continue;
+
+                    helpers[helper].call(this, rootSelector + selector, helpersList[helper]);
+                }
+            }
+        }
 
         function classHelper (selector, options) {
             callJquerySetterMethod({
@@ -690,7 +690,9 @@
                 return count;
             },
             getModels: function () {
-                return this.map(DOMView.model);
+                return this.map(function (view) {
+                    return view.model;
+                });
             },
             getByEl: function (el) {
                 if (el instanceof $) {
@@ -703,7 +705,7 @@
             },
             get: function (id) {
                 return this[id] || this[id.cid] || this.find(function (item) {
-                    return item.model === id || item.model.id === id || item.model.id === id.id;
+                    return item.cid === id || item.model === id || item.model.id === id || item.model.id === id.id;
                 });
             }
         });

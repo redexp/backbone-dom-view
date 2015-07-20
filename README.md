@@ -153,6 +153,13 @@ Same as `Backbone.Model::defaults` option, see [Methods](#methods) section.
 
 ## Methods
 
+* [get, set, has](#get-set-has)
+* [matches](#matches)
+* [find](#find)
+* [bind](#bind)
+* [bindTo](#bindTo)
+* [getViewList](#getViewList)
+
 `DOMView` can listen model attributes, but many times you will need extra attributes to store current state of view like `selected` or `editing`, so for this purpose view inherited `get`, `set` and `has` methods from `Backbone.Model`.
 ```javascript
 Backbone.DOMView.extend({
@@ -298,6 +305,7 @@ If you want to do some stuff before `initialize` but after `this.$el` prepared o
 * [style](#style)
 * [html](#html)
 * [text](#text)
+* [template](#template)
 * [on](#on)
 * [connect](#connect)
 * [each](#each)
@@ -465,6 +473,35 @@ Backbone.DOMView.extend({
 **jQuery alias:** `.text()`
 
 Works just like `html` helper only difference that it uses `text()` method of jQuery, which will convert all html special chars to html entities.
+
+### template
+
+This is simple helper which helps make long selectors shorter
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.user': {
+            template: {
+                '.name': {
+                    text: '@name'
+                },
+                '.age': {
+                    text: '@age'
+                }
+            }
+        },
+
+        // instead of
+
+        '.user .name': {
+            text: '@name'
+        },
+        '.user .age': {
+            text: '@age'
+        }
+    }
+});
+```
 
 ### on
 
@@ -793,9 +830,10 @@ You shouldn't pass this option, it will be created by helper. `viewList` is an o
 * where
 * findWhere
 * count
+* get
 * and almost all underscore functions applicable to objects
 
-`where` has extended functionality, it can accept regular expressions. `count` is just like `where`, only it returns count of founded views.
+`where` has extended functionality, it can accept regular expressions. `count` is just like `where`, only it returns count of founded views. `get` will return view by model or id or cid.
 ```javascript
 var ItemView = Backbone.DOMView.extend({
     defaults: {
