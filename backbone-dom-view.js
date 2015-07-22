@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.36.0';
+        DOMView.v = '1.37.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -106,14 +106,16 @@
                         event = event.slice(1);
                     }
 
-                    event = event.replace(argSelector, function(x, num) {
-                        argNum = num;
-                        return '';
-                    });
+                    if (event.charAt(0) === '=') {
+                        event = event.slice(1);
+                        target = has(view.attributes, event) ? view : model;
+                        bindApplyCallback(target.get(event));
+                        return;
+                    }
 
                     if (event.charAt(0) === '@') {
                         event = event.slice(1);
-                        target = view.has(event) ? view : model;
+                        target = has(view.attributes, event) ? view : model;
                         argNum = 1;
                         bindApplyCallback(target, target.get(event));
                         event = 'change:' + event;
@@ -137,9 +139,11 @@
 
                     function bindApplyCallback () {
                         var args = argNum === null ? arguments : [arguments[argNum]];
+
                         if (argNot) {
                             args[0] = !args[0];
                         }
+
                         return callback.apply(view, args);
                     }
                 }
@@ -197,8 +201,7 @@
             each: eachHelper
         };
 
-        var argSelector = /\|arg\((\d+)\)/,
-            uiSelectors = /\{([^}]+)}/g;
+        var uiSelectors = /\{([^}]+)}/g;
 
         function templateHelper(rootSelector, template) {
             var selectors = this.selectorsSorter(template),
