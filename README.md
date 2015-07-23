@@ -678,7 +678,15 @@ var ListView = Backbone.DOMView.extend({
             each: {
                 view: ItemView,
                 addHandler: function (ul, view) {
-                    view.$el.hide().appendTo(ul).animate({backgrounColor: 'red'});
+                    view.$el
+                        .css({
+                            height: 0
+                        })
+                        .appendTo(ul)
+                        .animate({
+                            height: 100
+                        }, 600, 'easeOutBounce')
+                    ;
                 }
             }
         }
