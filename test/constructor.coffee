@@ -194,12 +194,17 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                 ui:
                     test: 'span'
                     comb: '{test} + i'
+                    list: 'root'
+                    span: '{list} > span'
 
             view = new View
 
             expect(view.find('{test} ~ i')).to.match 'i'
             expect(view.find('{comb}')).to.match 'i'
             expect(view.find('comb')).to.match 'i'
+            expect(view.ui.list).to.match 'li'
+            expect(view.ui.span).to.match 'span'
+            expect(view.ui.list).to.equal view.ui.root
 
     describe 'bind(), bindTo()', ->
 

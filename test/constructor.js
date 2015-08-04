@@ -248,13 +248,18 @@
           el: node.find('li'),
           ui: {
             test: 'span',
-            comb: '{test} + i'
+            comb: '{test} + i',
+            list: 'root',
+            span: '{list} > span'
           }
         });
         view = new View;
         expect(view.find('{test} ~ i')).to.match('i');
         expect(view.find('{comb}')).to.match('i');
-        return expect(view.find('comb')).to.match('i');
+        expect(view.find('comb')).to.match('i');
+        expect(view.ui.list).to.match('li');
+        expect(view.ui.span).to.match('span');
+        return expect(view.ui.list).to.equal(view.ui.root);
       });
     });
     return describe('bind(), bindTo()', function() {

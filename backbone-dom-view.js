@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.37.0';
+        DOMView.v = '1.37.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -48,7 +48,7 @@
                 var ui = this.ui = mergeExtendedField(this, 'ui');
 
                 for (var name in ui) {
-                    if (!has(ui, name)) continue;
+                    if (!has(ui, name) || typeof ui[name] !== 'string') continue;
 
                     ui[name] = this.find(ui[name]);
                 }
@@ -63,14 +63,24 @@
             find: function(selector) {
                 if (!selector) return this.$el;
 
-                if (this.ui[selector]) return this.ui[selector];
+                if (this.ui[selector]) {
+                    if (typeof this.ui[selector] === 'string') {
+                        this.ui[selector] = this.find(this.ui[selector]);
+                    }
+
+                    return this.ui[selector];
+                }
 
                 if (selector.indexOf('{') > -1) {
-                    var ui = this.ui,
+                    var view = this,
                         rootSelectorLength = this.$el.selector.length;
 
                     selector = selector.replace(uiSelectors, function (x, name) {
-                        return typeof ui[name] === 'string' ? ui[name] : ui[name].selector.slice(rootSelectorLength);
+                        if (typeof view.ui[name] === 'string') {
+                            view.ui[name] = view.find(view.ui[name]);
+                        }
+
+                        return view.ui[name].selector.slice(rootSelectorLength);
                     });
                 }
 
