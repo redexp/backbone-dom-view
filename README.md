@@ -149,7 +149,7 @@ Backbone.DOMView.extend({
 
 ### defaults:
 
-Same as `Backbone.Model::defaults` option, see [Methods](#methods) section.
+Same as `Backbone.Model::defaults` option, see [get, set, has](#get-set-has) in [Methods](#methods) section.
 
 ## Methods
 
@@ -160,7 +160,7 @@ Same as `Backbone.Model::defaults` option, see [Methods](#methods) section.
 * [bindTo](#bindTo)
 * [getViewList](#getViewList)
 
-`DOMView` can listen model attributes, but many times you will need extra attributes to store current state of view like `selected` or `editing`, so for this purpose view inherited `get`, `set` and `has` methods from `Backbone.Model`.
+<a name="get-set-has"></a>`DOMView` can listen model attributes, but many times you will need extra attributes to store current state of view like `selected` or `editing`, so for this purpose view inherited `get`, `set` and `has` methods from `Backbone.Model`.
 ```javascript
 Backbone.DOMView.extend({
     defaults: {
@@ -609,19 +609,19 @@ var view = new LsitView({
     el: '#items'
 });
 
-view.$el //= <ul><li>one</li><li>two</li><li>three</li></ul>
+view.$el //= <ul><li>one</li> <li>two</li> <li>three</li></ul>
 
 list.remove(list.at(1));
 
-view.$el //= <ul><li>one</li><li>three</li></ul>
+view.$el //= <ul><li>one</li> <li>three</li></ul>
 
 list.add({title: 'four'});
 
-view.$el //= <ul><li>one</li><li>three</li><li>four</li></ul>
+view.$el //= <ul><li>one</li> <li>three</li> <li>four</li></ul>
 
 list.at(0).set('title', 'zero');
 
-view.$el //= <ul><li>zero</li><li>three</li><li>four</li></ul>
+view.$el //= <ul><li>zero</li> <li>three</li> <li>four</li></ul>
 ```
 
 #### Options
@@ -652,7 +652,7 @@ var ListView = Backbone.DOMView.extend({
 
 //...
 
-view.$el //= <ul class="items"><li><span class="title">one</span></li><li><span class="title">two</span></li><li><span class="title">three</span></li></ul>
+view.$el //= <ul class="items"><li><span class="title">one</span></li> <li><span class="title">two</span></li> <li><span class="title">three</span></li></ul>
 ```
 When you will create instance of `ListView` it will detach `ul.items > li` and use it clones as `el:` option for `ItemView`
 
@@ -678,7 +678,15 @@ var ListView = Backbone.DOMView.extend({
             each: {
                 view: ItemView,
                 addHandler: function (ul, view) {
-                    view.$el.hide().appendTo(ul).animate({backgrounColor: 'red'});
+                    view.$el
+                        .css({
+                            height: 0
+                        })
+                        .appendTo(ul)
+                        .animate({
+                            height: 100
+                        }, 600, 'easeOutBounce')
+                    ;
                 }
             }
         }
@@ -731,11 +739,11 @@ var list = new Backbone.Collection([
 
 //...
 
-view.$el //= <ul class="items"><li>one</li><li>two</li><li>three</li></ul>
+view.$el //= <ul class="items"><li>one</li> <li>two</li> <li>three</li></ul>
 
 list.at(0).set('order', 4);
 
-view.$el //= <ul class="items"><li>two</li><li>three</li><li>one</li></ul>
+view.$el //= <ul class="items"><li>two</li> <li>three</li> <li>one</li></ul>
 ```
 
 **offOnRemove:** `{Boolean}` Default: `true`
@@ -770,7 +778,7 @@ var view = new UserView({
     model: user
 });
 
-view.$el.find('.items') //= <ul class="items"><li>one</li><li>two</li><li>three</li></ul>
+view.$el.find('.items') //= <ul class="items"><li>one</li> <li>two</li> <li>three</li></ul>
 ```
 Or you can iterate over plain array, but you will need to set wrapper constructor (usually `Backbone.Collection`).
 ```javascript
@@ -873,10 +881,17 @@ var ListView = Backbone.DOMView.extend({
 
     initialize: function () {
         this.on('save', function () {
-            var views = this.template.list.each.viewList.where({name: /^test/, error: false});
-            _.invoke(views, 'set', 'error', true);
-
-            var models = views.map(this.getModel);
+            var list = this.template.list.each.viewList;
+            // or just
+            var list = this.getViewList('list');
+        
+            var views = list.where({name: /^test/, error: false});
+            
+            list.invoke('set', 'error', true);
+            
+            list.forEach(function (view, i) {
+                // ...
+            });
 
             // ...
         });
