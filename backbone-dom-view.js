@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.37.1';
+        DOMView.v = '1.37.2';
 
         var View = BB.View,
             $ = BB.$;
@@ -216,6 +216,10 @@
         function templateHelper(rootSelector, template) {
             var selectors = this.selectorsSorter(template),
                 selector;
+
+            if (rootSelector && has(this.ui, rootSelector)) {
+                rootSelector = '{' + rootSelector + '}';
+            }
 
             rootSelector += rootSelector ? ' ' : '';
 
