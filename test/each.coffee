@@ -546,3 +546,26 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(list.at(0)).to.equal viewList.get(list.at(0).id).model
             expect(list.at(0)).to.equal viewList.get(list.at(0).cid).model
 
+        it 'should handle "at" option', ->
+            View = DomView.extend
+                tagName: 'li'
+                template: '':
+                    html: '@name'
+
+            ListView = DomView.extend
+                tagName: 'ul'
+                template: '':
+                    each:
+                        view: View
+                        addHandler: 'appendAt'
+
+            list = new Backbone.Collection([{name: 'Jack'}, {name: 'Bob'}])
+
+            listView = new ListView model: list
+            el = listView.$el
+
+            expect(el).to.have.text 'JackBob'
+
+            list.add({name: 'Max'}, {at: 1})
+
+            expect(el).to.have.text 'JackMaxBob'

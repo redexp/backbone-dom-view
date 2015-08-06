@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.37.2';
+        DOMView.v = '1.38.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -558,7 +558,7 @@
                 }
             }
 
-            function eachAddListener (model) {
+            function eachAddListener (model, collection, ops) {
                 var View = isClass(options.view) ? options.view : options.view.call(view, model),
                     childView = View;
 
@@ -577,7 +577,7 @@
 
                 childView.parent = childView.parent || view;
                 viewList[model.cid] = childView;
-                addHandler.call(view, holder, childView);
+                addHandler.call(view, holder, childView, ops);
                 childView.trigger(options.addedEvent);
             }
 
@@ -652,6 +652,19 @@
         eachHelper.addHandlers = {
             append: function(ul, view) {
                 ul.append(view.$el);
+            },
+            appendAt: function(ul, view, ops) {
+                if (has(ops, 'at')) {
+                    if (ops.at === 0) {
+                        ul.prepend(view.$el);
+                    }
+                    else {
+                        view.$el.insertAfter(ul.children().get(ops.at - 1));
+                    }
+                }
+                else {
+                    ul.append(view.$el);
+                }
             },
             prepend: function(ul, view) {
                 ul.prepend(view.$el);

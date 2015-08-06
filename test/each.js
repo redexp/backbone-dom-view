@@ -723,7 +723,7 @@
         });
         return expect(view.$el.children().eq(3)).to.have.text('4');
       });
-      return it('should have viewList as EachViewList', function() {
+      it('should have viewList as EachViewList', function() {
         var Item, ListView, list, view, viewList, views;
         Item = DomView.extend({
           defaults: {
@@ -791,6 +791,46 @@
         expect(list.at(0)).to.equal(viewList.get(list.at(0)).model);
         expect(list.at(0)).to.equal(viewList.get(list.at(0).id).model);
         return expect(list.at(0)).to.equal(viewList.get(list.at(0).cid).model);
+      });
+      return it('should handle "at" option', function() {
+        var ListView, View, el, list, listView;
+        View = DomView.extend({
+          tagName: 'li',
+          template: {
+            '': {
+              html: '@name'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          tagName: 'ul',
+          template: {
+            '': {
+              each: {
+                view: View,
+                addHandler: 'appendAt'
+              }
+            }
+          }
+        });
+        list = new Backbone.Collection([
+          {
+            name: 'Jack'
+          }, {
+            name: 'Bob'
+          }
+        ]);
+        listView = new ListView({
+          model: list
+        });
+        el = listView.$el;
+        expect(el).to.have.text('JackBob');
+        list.add({
+          name: 'Max'
+        }, {
+          at: 1
+        });
+        return expect(el).to.have.text('JackMaxBob');
       });
     });
   });
