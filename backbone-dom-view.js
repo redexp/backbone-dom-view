@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.38.0';
+        DOMView.v = '1.39.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -484,6 +484,10 @@
                 sortByViews: false,
                 offOnRemove: true
             });
+
+            options.eachAddListener = eachAddListener;
+            options.eachResetListener = eachResetListener;
+            options.eachRemoveListener = eachRemoveListener;
 
             var view = this,
                 holder = view.find(selector),
