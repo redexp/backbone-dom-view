@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.39.0';
+        DOMView.v = '1.40.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -491,7 +491,7 @@
 
             var view = this,
                 holder = view.find(selector),
-                viewEl = options.el ? holder.find(options.el).detach() : false,
+                viewEl = options.$el = options.el ? holder.find(options.el).detach() : false,
                 list = view.model,
                 fieldName,
                 fieldClass;
