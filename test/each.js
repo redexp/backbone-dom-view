@@ -161,6 +161,78 @@
         expect(el.find('li').length).to.equal(2);
         return expect(el.find('li')).to.have["class"]('test');
       });
+      it('should create view with el: as object', function() {
+        var ListView, View1, View2, ViewDef, el, list, listView, viewList;
+        View1 = DomView.extend({
+          template: {
+            '': {
+              html: '@type'
+            }
+          }
+        });
+        View2 = DomView.extend({
+          template: {
+            '': {
+              html: '@type'
+            }
+          }
+        });
+        ViewDef = DomView.extend({
+          template: {
+            '': {
+              html: '@type'
+            }
+          }
+        });
+        ListView = DomView.extend({
+          el: $('<ul><li class="test1"></li><li class="test2"></li><li class="testDef"></li></ul>'),
+          template: {
+            'root': {
+              each: {
+                view: function(model) {
+                  switch (model.get('type')) {
+                    case 1:
+                      return View1;
+                    case 2:
+                      return View2;
+                    default:
+                      return ViewDef;
+                  }
+                },
+                el: {
+                  '> .test1': View1,
+                  '> .test2': View2,
+                  '> .testDef': ViewDef
+                }
+              }
+            }
+          }
+        });
+        list = new Backbone.Collection([
+          {
+            type: 1
+          }, {
+            type: 2
+          }, {
+            type: 3
+          }, {
+            type: 4
+          }
+        ]);
+        listView = new ListView({
+          model: list
+        });
+        el = listView.$el;
+        expect(el.find('li').eq(0)).to.have["class"]('test1');
+        expect(el.find('li').eq(1)).to.have["class"]('test2');
+        expect(el.find('li').eq(2)).to.have["class"]('testDef');
+        expect(el.find('li').eq(3)).to.have["class"]('testDef');
+        viewList = listView.getViewList('root');
+        expect(viewList.get(list.at(0)).constructor).equal(View1);
+        expect(viewList.get(list.at(1)).constructor).equal(View2);
+        expect(viewList.get(list.at(2)).constructor).equal(ViewDef);
+        return expect(viewList.get(list.at(3)).constructor).equal(ViewDef);
+      });
       it('should have `parent` field', function() {
         var ListView, list, listView, views;
         views = [];

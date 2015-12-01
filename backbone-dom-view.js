@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.40.0';
+        DOMView.v = '1.41.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -491,10 +491,33 @@
 
             var view = this,
                 holder = view.find(selector),
-                viewEl = options.$el = options.el ? holder.find(options.el).detach() : false,
                 list = view.model,
+                viewEl,
+                viewElMap,
                 fieldName,
                 fieldClass;
+
+            switch (typeof options.el) {
+            case 'string':
+                viewEl = options.$el = holder.find(options.el).detach();
+                break;
+
+            case 'object':
+                viewElMap = [];
+
+                _.forEach(options.el, function (target, selector) {
+                    var el = holder.find(selector).detach();
+
+                    if (target === 'default') {
+                        viewEl = el;
+                    }
+                    else {
+                        viewElMap.push({target: target, el: el});
+                    }
+                });
+
+                break;
+            }
 
             if (options.field) {
                 var field = options.field;
@@ -572,8 +595,21 @@
                         parent: view
                     };
 
-                    if (viewEl) {
-                        viewOps.el = viewEl.clone();
+                    var el;
+
+                    if (viewElMap) {
+                        el = _.findWhere(viewElMap, {target: View});
+                        if (el) {
+                            el = el.el;
+                        }
+                    }
+
+                    if (!el) {
+                        el = viewEl;
+                    }
+
+                    if (el) {
+                        viewOps.el = el.clone();
                     }
 
                     childView = new View(viewOps);
