@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.41.0';
+        DOMView.v = '1.42.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -497,9 +497,13 @@
                 fieldName,
                 fieldClass;
 
+            if (typeof options.el === 'function') {
+                options.el = options.el.call(view);
+            }
+
             switch (typeof options.el) {
             case 'string':
-                viewEl = options.$el = holder.find(options.el).detach();
+                viewEl = holder.find(options.el).detach();
                 break;
 
             case 'object':

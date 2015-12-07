@@ -121,7 +121,7 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     html: '@type'
 
             ListView = DomView.extend
-                el: $('<ul><li class="test1"></li><li class="test2"></li><li class="testDef"></li></ul>')
+                el: '<ul><li class="test1"></li><li class="test2"></li><li class="testDef"></li></ul>'
                 template: 'root':
                     each:
                         view: (model) ->
@@ -150,6 +150,25 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(viewList.get(list.at(1)).constructor).equal View2
             expect(viewList.get(list.at(2)).constructor).equal ViewDef
             expect(viewList.get(list.at(3)).constructor).equal ViewDef
+
+        it 'should create view with el: as function', ->
+            ViewDef = DomView.extend
+                template: 'root':
+                    html: '@type'
+
+            ListView = DomView.extend
+                el: '<ul><li class="test1"></li></ul>'
+                template: 'root':
+                    each:
+                        view: ViewDef
+                        el: -> '> .test1'
+
+            list = new Backbone.Collection([{type: 1},{type: 2},{type: 3},{type: 4}])
+
+            listView = new ListView model: list
+            el = listView.$el
+
+            expect(el.find('li.test1').length).to.equal 4
 
         it 'should have `parent` field', ->
             views = []
