@@ -262,7 +262,7 @@
         return expect(view.ui.list).to.equal(view.ui.root);
       });
     });
-    return describe('bind(), bindTo()', function() {
+    describe('bind(), bindTo()', function() {
       it('should bind events to model', function() {
         var View, num, num2, view;
         View = DomView.extend({
@@ -405,6 +405,51 @@
         model.trigger('test', true);
         view.trigger('view', 1);
         return expect(num).to.equal(6);
+      });
+    });
+    return describe('listenElement(), stopListeningElement()', function() {
+      return it('should stopListenElement', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          el: '<div></div>',
+          template: {
+            'root': {
+              on: {
+                'click': function() {
+                  return n++;
+                }
+              }
+            }
+          }
+        });
+        view = new View;
+        expect(view._listenElement.length).to.equal(1);
+        expect(n).to.equal(0);
+        view.$el.click();
+        expect(n).to.equal(1);
+        view.stopListeningElement();
+        expect(view._listenElement).to.be['null'];
+        view.$el.click();
+        expect(n).to.equal(1);
+        view.listenElement(view.$el, 'test-1', function() {
+          return n = 'test 1';
+        });
+        view.listenElement(view.$el, 'test-2', function() {
+          return n = 'test 2';
+        });
+        view.$el.trigger('test-1');
+        expect(n).to.equal('test 1');
+        n = 1;
+        view.stopListeningElement(view.$el, 'test-1');
+        view.$el.trigger('test-1');
+        expect(n).to.equal(1);
+        view.$el.trigger('test-2');
+        expect(n).to.equal('test 2');
+        view.stopListeningElement(view.$el);
+        n = 1;
+        view.$el.trigger('test-2');
+        return expect(n).to.equal(1);
       });
     });
   });

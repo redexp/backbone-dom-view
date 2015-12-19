@@ -351,3 +351,51 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(num).to.equal(6)
 
+    describe 'listenElement(), stopListeningElement()', ->
+
+        it 'should stopListenElement', ->
+            n = 0
+
+            View = DomView.extend
+                el: '<div></div>'
+                template:
+                    'root':
+                        on: 'click': -> n++
+
+            view = new View
+
+            expect(view._listenElement.length).to.equal 1
+
+            expect(n).to.equal 0
+            view.$el.click()
+            expect(n).to.equal 1
+
+            view.stopListeningElement()
+
+            expect(view._listenElement).to.be['null']
+
+            view.$el.click()
+            expect(n).to.equal 1
+
+            view.listenElement view.$el, 'test-1', -> n = 'test 1'
+            view.listenElement view.$el, 'test-2', -> n = 'test 2'
+
+            view.$el.trigger('test-1')
+            expect(n).to.equal 'test 1'
+
+            n = 1
+
+            view.stopListeningElement view.$el, 'test-1'
+
+            view.$el.trigger('test-1')
+            expect(n).to.equal 1
+
+            view.$el.trigger('test-2')
+            expect(n).to.equal 'test 2'
+
+            view.stopListeningElement view.$el
+
+            n = 1
+
+            view.$el.trigger('test-2')
+            expect(n).to.equal 1

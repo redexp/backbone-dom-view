@@ -10,7 +10,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.42.0';
+        DOMView.v = '1.43.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -192,6 +192,63 @@
 
             getViewList: function (selector) {
                 return this.template[selector].each.viewList;
+            },
+
+            listenElement: function (node, events) {
+                if (!this._listenElement) this._listenElement = [];
+
+                this._listenElement.push(node);
+
+                node = node instanceof $ ? node : $(node);
+
+                var args = _.rest(arguments);
+
+                var ns = '.listenBy' + this.cid;
+
+                events = events.split(/\s+/);
+
+                for (var i = 0, len = events.length; i < len; i++) {
+                    args[0] = events[i] + ns;
+                    node.on.apply(node, args);
+                }
+
+                return this;
+            },
+
+            stopListeningElement: function (node, events) {
+                if (!this._listenElement) return this;
+
+                var ns = '.listenBy' + this.cid,
+                    i, len;
+
+                switch (arguments.length) {
+                case 0:
+                    for (i = 0, len = this._listenElement.length; i < len; i++) {
+                        this._listenElement[i].off(ns);
+                    }
+                    this._listenElement = null;
+                    break;
+
+                case 1:
+                    node.off(ns);
+                    break;
+
+                default:
+                    events = events.split(/\s+/);
+                    for (i = 0, len = events.length; i < len; i++) {
+                        node.off(events[i] + ns);
+                    }
+                    break;
+                }
+
+                if (node) {
+                    i = this._listenElement.indexOf(node);
+                    if (i > -1) {
+                        this._listenElement.splice(i, 1);
+                    }
+                }
+
+                return this;
             }
         });
 
@@ -326,12 +383,12 @@
 
             function onHelperBindEvent (event, target, func) {
                 if (typeof target === 'string') {
-                    node.on(event, target, function() {
+                    view.listenElement(node, event, target, function() {
                         return func.apply(view, arguments);
                     });
                 }
                 else {
-                    node.on(event, function() {
+                    view.listenElement(node, event, function() {
                         return target.apply(view, arguments);
                     });
                 }
@@ -359,7 +416,7 @@
 
                 var target = view.has(field) ? view : view.model;
 
-                node.on(event, function() {
+                view.listenElement(node, event, function() {
                     target.set(field, node.prop(prop));
                 });
 
@@ -645,6 +702,7 @@
                     subView
                         .off()
                         .stopListening()
+                        .stopListeningElement()
                     ;
                 }
 
