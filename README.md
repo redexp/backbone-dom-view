@@ -933,3 +933,7 @@ var ListView = Backbone.DOMView.extend({
     }
 });
 ```
+
+### Best practices for creating classes
+
+In `each` helper you need set `view:`
