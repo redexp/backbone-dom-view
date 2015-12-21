@@ -4,7 +4,9 @@
     "gulp": "3.*",
     "gulp-uglifyjs": "0.*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp-replace": "^0.5.4"
+  },
   "scripts": {
     "min": "gulp"
   },

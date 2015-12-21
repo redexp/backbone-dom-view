@@ -2,6 +2,8 @@
 
     "strict mode";
 
+    var _DEV_ = true; // false in min file
+
     if (typeof define === 'function' && define.amd) {
         define(['backbone', 'underscore'], module);
     } else {
@@ -10,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.43.0';
+        DOMView.v = '1.44.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -473,6 +475,12 @@
                 value = ops.value,
                 wrapper = ops.wrapper;
 
+            if (_DEV_) {
+                if (node.length === 0) {
+                    console.error('Empty node. Be sure that you set correct selector to template.');
+                }
+            }
+
             if (wrapper) {
                 value = wrapper(value);
             }
@@ -617,6 +625,16 @@
             }
 
             if (!fieldClass) {
+                if (_DEV_) {
+                    if (!list) {
+                        throw Error('Collection is not specified');
+                    }
+
+                    if (list instanceof BB.Collection === false) {
+                        throw Error('Object is not instance of Backbone Collection');
+                    }
+                }
+
                 view.listenTo(list, options.addEvent, eachAddListener)
                     .listenTo(list, options.resetEvent, eachResetListener)
                     .listenTo(list, options.removeEvent, eachRemoveListener);
@@ -874,21 +892,43 @@
 
         function getViewExtendedFieldList(viewClass, field, context) {
             var value = viewClass.prototype[field] || {};
+
             if (_.isFunction(value)) {
-                value = value.call(context);
+                value = value.call(context, cloneDeep);
             }
+
             var result = [value];
+
             return viewClass.__super__ ? result.concat(getViewExtendedFieldList(viewClass.__super__.constructor, field, context)) : result;
         }
 
         function mergeExtendedField(context, field, deep) {
             var viewClass = context.constructor;
-            return $.extend.apply($, (deep ? [true, {}] : [{}]).concat(getViewExtendedFieldList(viewClass, field, context).reverse()));
+
+            return (deep ? cloneDeep : clone).apply(null, getViewExtendedFieldList(viewClass, field, context).reverse());
         }
 
-        function has(obj, field) {
-            return _.has(obj, field);
+        function clone() {
+            var target = {};
+
+            for (var i = 0, len = arguments.length; i < len; i++) {
+                $.extend(target, arguments[i]);
+            }
+
+            return target;
         }
+
+        function cloneDeep() {
+            var target = {};
+
+            for (var i = 0, len = arguments.length; i < len; i++) {
+                $.extend(true, target, arguments[i]);
+            }
+
+            return target;
+        }
+
+        var has = _.has;
 
         return DOMView;
     }
