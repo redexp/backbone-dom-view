@@ -59,7 +59,7 @@ Bower:
 
 ### ui:
 
-Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector, you will change it only in one place. As value of `ui:` you can use `Object` or `Function` (which should return an object). Also you can use this alias in `template:` instead of selectors. When you extend views, `ui:` field will be merged with all parents prototypes.
+Used to create alias of jQuery selectors. Instead of calling dozen times `this.$('.title')` you can use `this.ui.title`, so if you need to change selector in extended classs, you will change it only in one place. As value of `ui:` you can use `Object` or `Function` (which should return an object). Also you can use this alias in `template:` instead of selectors. When you extend views, `ui:` field will be merged with all parents prototypes.
 
 You can use names of aliases in other aliases selector.
 ```javascript
@@ -87,11 +87,11 @@ Backbone.DOMView.extend({
     }
 });
 ```
-Default value of this field is `root: ""`. Empty selector means `this.$el` (see [find()](#find)) so to select root node use `root` alias.
+Empty selector means `this.$el` (see [find()](#find)) so to select root node use `root` alias.
 
 ### template:
 
-Hash where keys are jQuery selectors or `ui` fields names or both of them but then you need put `ui` names in curly brackets. Values of `template:` fields are hashes of [helpers](#helpers). When you extend views, `template:` field will be merged with all parents `template` field. Merged result will written as own view `template` property and will be available in `initialize` function before processing, so you can do last modification to it. When `template` will be prepared, will be triggered [template-ready](#template-ready) event.
+Hash where keys are jQuery selectors or `ui` fields names or both of them but then you need put `ui` names in curly brackets. Values of `template:` fields are hashes of [helpers](#helpers) names. When you extend views, `template:` field will be merged with all parent `template` fields. Merged result will written as own `view.template` property and will be available in `initialize` function before processing template, so you can do last modification to it. When `template` will be prepared, will be triggered [template-ready](#template-ready) event.
 ```javascript
 Backbone.DOMView.extend({
     ui: {
@@ -151,6 +151,10 @@ Backbone.DOMView.extend({
 
 Same as `Backbone.Model::defaults` option, see [get, set, has](#get-set-has) in [Methods](#methods) section.
 
+### parent
+
+[each](#each) helper will add to children views field `parent` which is link to current view.
+
 ## Methods
 
 * [get, set, has](#get-set-has)
@@ -158,6 +162,8 @@ Same as `Backbone.Model::defaults` option, see [get, set, has](#get-set-has) in 
 * [find](#find)
 * [bind](#bind)
 * [bindTo](#bindTo)
+* [listenElement](#listenElement)
+* [stopListeningElement](#stopListeningElement)
 * [getViewList](#getViewList)
 
 <a name="get-set-has"></a>`DOMView` can listen model attributes, but many times you will need extra attributes to store current state of view like `selected` or `editing`, so for this purpose view inherited `get`, `set` and `has` methods from `Backbone.Model`.
@@ -211,6 +217,7 @@ Backbone.DOMView.extend({
     },
     template: {
         "": { /* <div> */ },
+        "root": { /* <div> */ },
         "name": { /* <span> */ },
         "{name} ~ button": { /* <button> */ }
     },
@@ -292,9 +299,19 @@ Backbone.DOMView.extend({
 });
 ```
 
-### getViewList()
+### listenElement(element, event, callback)
 
-This is shortcut for `this.template.selector.each.viewList` see [each::viewList](#viewList).
+Just like `listenTo()` only for html elements. Instead of `element.on(event, callback)` you can use `view.listenElement(element, event, callback)` and `this` in `callback` will be `view` and when you will need to remove `callback` from `elemet` you can use `view.stopListeningElement(element)`. Useful for memory management.
+
+Also you can pass `selector` like with `element.on(event, selector, callback)` same here `view.listenElement(element, event, selector, callback)`
+
+### stopListeningElement()
+
+Just like `stopListening()`. If you pass no arguments, it will off all events from all elements. If you pass just element, then it will off all events from this element. If you pass element and event name, then it will off only this event.
+
+### getViewList(selector)
+
+This is shortcut for `this.template[selector].each.viewList` see [each::viewList](#viewList).
 
 ## Internal Events
 
@@ -302,7 +319,7 @@ View has several internal events
 
 ### template-ready
 
-By default `template` will be executed only after `initialize` callback, so if you want to do some stuff after it you can use `template-ready` event or `Backbone.DOMView.readyEvent`
+By default `template` will be executed only after `initialize` callback, so if you want to do some stuff after it, you can use `template-ready` event or `Backbone.DOMView.readyEvent`
 ```javascript
 Backbone.DOMView.extend({
     initialize: function () {
@@ -916,3 +933,7 @@ var ListView = Backbone.DOMView.extend({
     }
 });
 ```
+
+### Best practices for creating classes
+
+In `each` helper you need set `view:`
