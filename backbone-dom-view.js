@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.44.1';
+        DOMView.v = '1.44.2';
 
         var View = BB.View,
             $ = BB.$;
@@ -204,6 +204,8 @@
                 node = node instanceof $ ? node : $(node);
 
                 var args = _.rest(arguments);
+
+                args[args.length - 1] = args[args.length - 1].bind(this);
 
                 var ns = '.listenBy' + this.cid;
 

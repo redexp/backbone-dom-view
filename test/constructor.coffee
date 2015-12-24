@@ -360,7 +360,9 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                 el: '<div></div>'
                 template:
                     'root':
-                        on: 'click': -> n++
+                        on: 'click': ->
+                            expect(this).to.equal view
+                            n++
 
             view = new View
 

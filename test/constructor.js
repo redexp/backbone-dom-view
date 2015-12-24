@@ -417,6 +417,7 @@
             'root': {
               on: {
                 'click': function() {
+                  expect(this).to.equal(view);
                   return n++;
                 }
               }
