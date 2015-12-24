@@ -1,7 +1,7 @@
 {
   "name": "backbone-dom-view",
   "main": "backbone-dom-view.js",
-  "version": "1.44.0",
+  "version": "1.44.1",
   "homepage": "https://github.com/redexp/backbone-dom-view",
   "authors": [
     "Sergii Kliuchnyk <sergiikliuchnyk@gmail.com>"

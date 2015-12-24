@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.44.0';
+        DOMView.v = '1.44.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -220,6 +220,16 @@
             stopListeningElement: function (node, events) {
                 if (!this._listenElement) return this;
 
+                if (node) {
+                    var index = this._listenElement.indexOf(node);
+
+                    if (index > -1) {
+                        this._listenElement.splice(index, 1);
+                    }
+
+                    node = node instanceof $ ? node : $(node);
+                }
+
                 var ns = '.listenBy' + this.cid,
                     i, len;
 
@@ -241,13 +251,6 @@
                         node.off(events[i] + ns);
                     }
                     break;
-                }
-
-                if (node) {
-                    i = this._listenElement.indexOf(node);
-                    if (i > -1) {
-                        this._listenElement.splice(i, 1);
-                    }
                 }
 
                 return this;
