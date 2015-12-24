@@ -936,4 +936,68 @@ var ListView = Backbone.DOMView.extend({
 
 ### Best practices for creating classes
 
-In `each` helper you need set `view:`
+In `each` helper you need set `view:`, but if you create classes like `var ClassName = Backbone....extend()` then first you will need to create child view and after that list view (upside down class definition). To solve this problem you can create classes like this
+```javascript
+function ClassName() {
+    Backbone.Model.apply(this, arguments);
+}
+
+Backbone.Model.extend({
+    constructor: ClassName,
+    
+    // initialize: function () {....}
+});
+```
+In this case `ClassName` will be available in all you current scope, dosen't matter where it was defined, so you can use it first and define it after.
+```javascript
+function UsersList() {
+    Backbone.Collection.apply(this, arguments);
+}
+
+Backbone.Collection.extend({
+    constructor: UsersList,
+    model: User
+});
+
+function User() {
+    Backbone.Model.apply(this, arguments);
+}
+
+Backbone.Model.extend({
+    constructor: User
+});
+```
+And use it in `view:` option
+```javascript
+function UsersListView() {
+    Backbone.DOMView.apply(this, arguments);
+}
+
+Backbone.DOMView.extend({
+    constructor: UsersListView,
+    
+    template: {
+        'ul': {
+            each: {
+                view: UserView,
+                el: '> li'
+            }
+        }
+    }
+});
+
+function UserView() {
+    Backbone.DOMView.apply(this, arguments);
+}
+
+Backbone.DOMView.extend({
+    constructor: UserView,
+    
+    template: {
+        'root': {
+            text: '=name'
+        }
+    }
+});
+
+```
