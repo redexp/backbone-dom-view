@@ -8,15 +8,16 @@
       return model = new Backbone.Model();
     });
     return describe('on helper', function() {
-      it('should run function on dom event', function(done) {
-        var View, view;
+      it('should run function on dom event', function() {
+        var View, n, view;
+        n = 0;
         View = DomView.extend({
           template: {
             '': {
               on: {
                 'click': function() {
                   expect(this).to.be.instanceOf(View);
-                  return done();
+                  return n++;
                 }
               }
             }
@@ -25,9 +26,10 @@
         view = new View({
           model: model
         });
-        return view.$el.click();
+        view.$el.click();
+        return expect(n).to.equal(1);
       });
-      return it('should run function on delegate event', function() {
+      it('should run function on delegate event', function() {
         var View, eventsCalled, view;
         eventsCalled = 0;
         View = DomView.extend({
@@ -58,6 +60,33 @@
         view.$el.find('a').click();
         view.$el.find('button').click();
         return expect(eventsCalled).to.be.equal(2);
+      });
+      return it('should run view method if string passed', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          test: function() {
+            return n++;
+          },
+          run: function() {
+            return n = 'test';
+          },
+          template: {
+            'root': {
+              on: {
+                'click': 'test',
+                'test': 'run'
+              }
+            }
+          }
+        });
+        view = new View({
+          model: model
+        });
+        view.$el.click();
+        expect(n).to.equal(1);
+        view.$el.trigger('test');
+        return expect(n).to.equal('test');
       });
     });
   });

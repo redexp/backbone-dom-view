@@ -6,15 +6,19 @@ define ['chai', 'backbone', 'backbone-dom-view', 'jquery'], ({expect}, Backbone,
         model = new Backbone.Model()
 
     describe 'on helper', ->
-        it 'should run function on dom event', (done) ->
+        it 'should run function on dom event', () ->
+            n = 0
+
             View = DomView.extend
                 template: '':
                     on: 'click': ->
                         expect(this).to.be.instanceOf View
-                        done()
+                        n++
 
             view = new View model: model
             view.$el.click()
+
+            expect(n).to.equal 1
 
         it 'should run function on delegate event', ->
             eventsCalled = 0
@@ -39,3 +43,25 @@ define ['chai', 'backbone', 'backbone-dom-view', 'jquery'], ({expect}, Backbone,
             view.$el.find('button').click()
 
             expect(eventsCalled).to.be.equal 2
+
+        it 'should run view method if string passed', ->
+            n = 0
+
+            View = DomView.extend
+                test: -> n++
+
+                run: -> n = 'test'
+
+                template: 'root':
+                    on:
+                        'click': 'test'
+                        'test': 'run'
+
+            view = new View model: model
+            view.$el.click()
+
+            expect(n).to.equal 1
+
+            view.$el.trigger('test')
+
+            expect(n).to.equal 'test'

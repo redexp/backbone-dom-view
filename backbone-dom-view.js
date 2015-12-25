@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.44.2';
+        DOMView.v = '1.45.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -238,7 +238,7 @@
                 switch (arguments.length) {
                 case 0:
                     for (i = 0, len = this._listenElement.length; i < len; i++) {
-                        this._listenElement[i].off(ns);
+                        $(this._listenElement[i]).off(ns);
                     }
                     this._listenElement = null;
                     break;
@@ -368,7 +368,7 @@
 
         function onHelper (selector, options) {
             var view = this,
-                node = view.find(selector),
+                node = this.find(selector),
                 ops;
 
             for (var event in options) {
@@ -376,28 +376,32 @@
 
                 ops = options[event];
 
-                if (typeof ops === 'object') {
+                switch (typeof ops) {
+                case 'function':
+                    this.listenElement(node, event, ops);
+                    break;
+
+                case 'object':
                     for (var target in ops) {
                         if (!has(ops, target)) continue;
 
-                        onHelperBindEvent(event, target, ops[target]);
+                        this.listenElement(node, event, target, ops[target]);
                     }
-                }
-                else {
-                    onHelperBindEvent(event, ops);
-                }
-            }
+                    break;
 
-            function onHelperBindEvent (event, target, func) {
-                if (typeof target === 'string') {
-                    view.listenElement(node, event, target, function() {
-                        return func.apply(view, arguments);
-                    });
-                }
-                else {
-                    view.listenElement(node, event, function() {
-                        return target.apply(view, arguments);
-                    });
+                case 'string':
+                    if (_DEV_) {
+                        if (typeof this[ops] !== 'function') {
+                            console.error('View "%s" do not have method "%s"', this.constructor.name, ops);
+                        }
+                    }
+
+                    (function (method) {
+                        view.listenElement(node, event, function () {
+                            this[method]();
+                        });
+                    })(ops);
+                    break;
                 }
             }
         }
