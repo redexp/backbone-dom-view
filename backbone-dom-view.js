@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.45.0';
+        DOMView.v = '1.45.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -139,7 +139,7 @@
                     }
 
                     if (!event) {
-                        console.error('Empty event name');
+                        console.warn('Empty event name');
                     }
 
                     if (target === model) {
@@ -392,7 +392,7 @@
                 case 'string':
                     if (_DEV_) {
                         if (typeof this[ops] !== 'function') {
-                            console.error('View "%s" do not have method "%s"', this.constructor.name, ops);
+                            console.warn('View "%s" do not have method "%s"', this.constructor.name, ops);
                         }
                     }
 
@@ -486,7 +486,7 @@
 
             if (_DEV_) {
                 if (node.length === 0) {
-                    console.error('Empty node. Be sure that you set correct selector to template.');
+                    console.warn('Empty node. Be sure that you set correct selector to template.');
                 }
             }
 
