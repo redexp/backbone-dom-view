@@ -540,7 +540,21 @@ Used to bind callbacks to dom events.
 It is a hash where keys are space separated dom events and values are callbacks or hash of selectors and callbacks. Callback will get same arguments as jQuery `.on()` callback. `this` in callbacks will be current view.
 ```javascript
 Backbone.DOMView.extend({
+    open: function () {
+        //...
+    },
+
     template: {
+        '.open': {
+            on: {
+                'click': 'open',
+                // same as
+                'click': function () {
+                    this.open();
+                }
+            }
+        },
+    
         '.remove': {
             'on': {
                 'click': function (e) {
@@ -598,7 +612,7 @@ Helper to render collections.
 var ItemView = Backbone.DOMView.extend({
     tagName: 'li',
     template: {
-        '': {
+        'root': {
             text: '@title'
         }
     }
@@ -607,7 +621,7 @@ var ItemView = Backbone.DOMView.extend({
 var ListView = Backbone.DOMView.extend({
     tagName: 'ul',
     template: {
-        '': {
+        'root': {
             each: {
                 view: ItemView
             }
@@ -647,9 +661,9 @@ view.$el //= <ul><li>zero</li> <li>three</li> <li>four</li></ul>
 
 If `view:` value is `Backbone.View` class (or extended form it) then helper will create instances from this class for each model added to collection. If `view:` value is `Function` then helper will call it for each model and expect view instance from it (helpful if you need different views in same collection).
 
-**el:** `{String}` Default: `null`
+**el:** `{String|Object}` Default: `null`
 
-Selector for `el:` option fo `view:` class. You can use it when template for `ItemView` is in `ul.items`
+Selector for `el:` option fo `view:` class.
 ```html
 <ul class="items">
     <li><span class="title"></span></li>
@@ -671,7 +685,39 @@ var ListView = Backbone.DOMView.extend({
 
 view.$el //= <ul class="items"><li><span class="title">one</span></li> <li><span class="title">two</span></li> <li><span class="title">three</span></li></ul>
 ```
-When you will create instance of `ListView` it will detach `ul.items > li` and use it clones as `el:` option for `ItemView`
+When you will create instance of `ListView` it will detach `ul.items > li` and use it clone as `el:` option for `ItemView`.
+
+If your collection should be rendered with different views and different `el:` for them, then you can use object with selectors.
+```html
+<ul>
+    <li data-type="1"><span></span></li>
+    <li data-type="second"><input /></li>
+    <li data-type="last"><div></div></li>
+</ul>
+```
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: function (model) {
+                    switch (model.get('type')) {
+                        case '1': return FirstView;
+                        case 'second': return InputView;
+                        default: return DefaultView;
+                    }
+                },
+                el: {
+                    '> [data-type="1"]': FirstView,
+                    '> [data-type="second"]': InputView,
+                    '> [data-type="last"]': 'default'
+                }
+            }
+        }
+    }
+});
+```
+This means that helper will detach three elements and will create map object, it whill show which view should get which element. So if `view:` function will return `FirstView` class then it will get `ui.items > [data-type="1"]` clone, `InputView` - `ui.items > [data-type="second"]` and `'default'` means that any other view class will get `ui.items > [data-type="last"]` clone.
 
 **addEvent:** `{String}` Default: `'add'`
 
@@ -683,7 +729,7 @@ Same as previous only for `remove` event.
 
 **addedEvent:** `{String}` Default: `'added'`
 
-This event will be triggered in sub view when `addHandler` will be called
+This event will be triggered in sub view when `addHandler` will be called. It useful when you need to be sure that your `view.$el` is in DOM.
 
 **addHandler:** `{String|Function}` Default: `'append'`
 
@@ -765,11 +811,11 @@ view.$el //= <ul class="items"><li>two</li> <li>three</li> <li>one</li></ul>
 
 **offOnRemove:** `{Boolean}` Default: `true`
 
-By default all views created by this helper on remove will stop listen all events (`.off()` and `.stopListening()`). You can disable it by set this option to `false`.
+By default all views created by this helper on remove will stop listen all events (`.off().stopListening().stopListeningElement()`). You can disable it by set this option to `false`.
 
 **field:** `{String|Object}` Default: `null`
 
-Helper can work not only with `this.model` but also with collection in model (or in view) attributes. Name of this filed you can set with this option
+Helper can work not only with `this.model` but also with collection in model (or in view). Name of this filed you can set with this option
 ```javascript
 var UserView = Backbone.DOMView.extend({
     template: {
@@ -863,13 +909,14 @@ var UserView = Backbone.DOMView.extend({
 
 You shouldn't pass this option, it will be created by helper. `viewList` is an object, instance of `DOMView.helpers.each.EachViewList` constructor. In this object `each` will store generated views for each model. Fields of this object are models `cid` and values are views of this models. `viewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
 
-* where
-* findWhere
-* count
-* get
+* `where` has extended functionality, it can accept regular expressions.
+* `findWhere`
+* `count` is just like `where`, only it returns count of founded views.
+* `get` will return view by model or id or cid.
+* `getByEl` return view by jquery object or native element
+* `getModels` returns array of models in `viewList`
 * and almost all underscore functions applicable to objects
 
-`where` has extended functionality, it can accept regular expressions. `count` is just like `where`, only it returns count of founded views. `get` will return view by model or id or cid.
 ```javascript
 var ItemView = Backbone.DOMView.extend({
     defaults: {
@@ -903,6 +950,8 @@ var ListView = Backbone.DOMView.extend({
             var list = this.getViewList('list');
         
             var views = list.where({name: /^test/, error: false});
+            
+            var view = list.get(this.model.at(0));
             
             list.invoke('set', 'error', true);
             
