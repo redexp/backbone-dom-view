@@ -903,7 +903,7 @@
         expect(list.at(0)).to.equal(viewList.get(list.at(0).id).model);
         return expect(list.at(0)).to.equal(viewList.get(list.at(0).cid).model);
       });
-      return it('should handle "at" option', function() {
+      it('should handle "at" option', function() {
         var ListView, View, el, list, listView;
         View = DomView.extend({
           tagName: 'li',
@@ -942,6 +942,24 @@
           at: 1
         });
         return expect(el).to.have.text('JackMaxBob');
+      });
+      return it('should create view own prop with viewList', function() {
+        var ListView, view;
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          template: {
+            'root': {
+              each: {
+                view: DomView,
+                viewProp: 'list'
+              }
+            }
+          }
+        });
+        view = new ListView({
+          model: new Backbone.Collection([{}, {}])
+        });
+        return expect(view.list).to.equal(view.getViewList('root'));
       });
     });
   });

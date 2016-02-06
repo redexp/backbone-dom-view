@@ -164,7 +164,8 @@ Same as `Backbone.Model::defaults` option, see [get, set, has](#get-set-has) in 
 * [bindTo](#bindTo)
 * [listenElement](#listenElement)
 * [stopListeningElement](#stopListeningElement)
-* [getViewList](#getViewList)
+
+### get, set, has
 
 <a name="get-set-has"></a>`DOMView` can listen model attributes, but many times you will need extra attributes to store current state of view like `selected` or `editing`, so for this purpose view inherited `get`, `set` and `has` methods from `Backbone.Model`.
 ```javascript
@@ -308,10 +309,6 @@ Also you can pass `selector` like with `element.on(event, selector, callback)` s
 ### stopListeningElement()
 
 Just like `stopListening()`. If you pass no arguments, it will off all events from all elements. If you pass just element, then it will off all events from this element. If you pass element and event name, then it will off only this event.
-
-### getViewList(selector)
-
-This is shortcut for `this.template[selector].each.viewList` see [each::viewList](#viewList).
 
 ## Internal Events
 
@@ -905,22 +902,21 @@ var UserView = Backbone.DOMView.extend({
 });
 ```
 
-<a name="viewList"></a>**viewList** `{DOMView.eachHelper.EachViewList}`
+**viewProp:** `{String}` Default: `null`
 
-You shouldn't pass this option, it will be created by helper. `viewList` is an object, instance of `DOMView.helpers.each.EachViewList` constructor. In this object `each` will store generated views for each model. Fields of this object are models `cid` and values are views of this models. `viewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
+All generated views for models in collection `each` will store in object of `DOMView.eachHelper.EachViewList` class. Access to this object you can get by setting `viewProp:` option with name of property which should be added to view with with `EachViewList` object. Own properties of this object are models `cid` and values are views of this models. `EachViewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
 
 * `where` has extended functionality, it can accept regular expressions.
 * `findWhere`
 * `count` is just like `where`, only it returns count of founded views.
 * `get` will return view by model or id or cid.
 * `getByEl` return view by jquery object or native element
-* `getModels` returns array of models in `viewList`
+* `getModels` returns array of models in `EachViewList`
 * and almost all underscore functions applicable to objects
 
 ```javascript
 var ItemView = Backbone.DOMView.extend({
     defaults: {
-        name: '',
         error: false
     },
 
@@ -929,54 +925,31 @@ var ItemView = Backbone.DOMView.extend({
             'class': {
                 'error': '@error'
             }
-        },
-        'input': {
-            connect: {
-                value: 'name'
-            }
         }
     }
 });
 
 var ListView = Backbone.DOMView.extend({
-    ui: {
-        list: '.items'
-    },
-
     initialize: function () {
-        this.on('save', function () {
-            var list = this.template.list.each.viewList;
-            // or just
-            var list = this.getViewList('list');
-        
-            var views = list.where({name: /^test/, error: false});
+        this.on('template-ready', function () {
+            var views = this.items.where({error: false});
             
-            var view = list.get(this.model.at(0));
+            var view = this.items.get(this.model.at(0));
             
-            list.invoke('set', 'error', true);
+            this.items.invoke('set', 'error', true);
             
-            list.forEach(function (view, i) {
+            this.items.forEach(function (view, i) {
                 // ...
             });
-
-            // ...
         });
     },
 
     template: {
-        'root': {
-            on: {
-                'submit': function (e) {
-                    e.preventDefault();
-
-                    this.trigger('save');
-                }
-            }
-        },
-        'list': {
+        'ul.items': {
             each: {
                 view: ItemView,
-                el: '> *'
+                el: '> *',
+                viewProp: 'items'
             }
         }
     }

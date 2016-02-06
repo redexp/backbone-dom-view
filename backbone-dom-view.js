@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.45.1';
+        DOMView.v = '1.46.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -540,6 +540,7 @@
          * @property {Boolean} offOnRemove
          * @property {EachViewList} viewList
          * @property {String|Object} sortByViews
+         * @property {String} viewProp
          */
 
         /**
@@ -671,6 +672,16 @@
                         list.each(eachAddListener);
                     });
                 }
+            }
+
+            if (options.viewProp) {
+                if (_DEV_) {
+                    if (this[options.viewProp]) {
+                        console.warn('view already has property "' + options.viewProp + '"');
+                    }
+                }
+
+                this[options.viewProp] = viewList;
             }
 
             function eachAddListener (model, collection, ops) {

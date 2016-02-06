@@ -632,3 +632,15 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             list.add({name: 'Max'}, {at: 1})
 
             expect(el).to.have.text 'JackMaxBob'
+
+        it 'should create view own prop with viewList', ->
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                template: 'root':
+                    each:
+                        view: DomView
+                        viewProp: 'list'
+
+            view = new ListView model: new Backbone.Collection([{}, {}])
+
+            expect(view.list).to.equal view.getViewList('root')
