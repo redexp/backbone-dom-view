@@ -11,10 +11,6 @@
 
     todos.fetch({reset: true});
 
-    app.router = new app.TodoRouter();
-
-    Backbone.history.start();
-
     app.dispatcher.on('remove-todo', function (todo) {
         if (!_.isArray(todo)) {
             todo = [todo];
@@ -54,5 +50,9 @@
         _.invoke(filteredModels, 'set', 'filtered', true);
         _.invoke(todos.difference(filteredModels), 'set', 'filtered', false);
     });
+
+    app.router = new app.TodoRouter();
+
+    Backbone.history.start();
 
 })(window.app);
