@@ -6,6 +6,7 @@
     });
 
     todos.view = new app.AppView({
+        el: '#todoapp',
         model: todos
     });
 

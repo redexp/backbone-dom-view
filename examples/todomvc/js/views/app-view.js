@@ -2,8 +2,6 @@
     'use strict';
 
     app.AppView = Backbone.DOMView.extend({
-        el: '#todoapp',
-
         ui: {
             'toggleAll': '#toggle-all',
             'newTitle': '#new-todo'
