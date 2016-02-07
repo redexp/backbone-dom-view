@@ -97,6 +97,7 @@
                     el: '> *'
                 }
             },
+
             "#main, #footer": {
                 'class': {
                     'hidden': {
@@ -106,9 +107,11 @@
                     }
                 }
             },
+
             "#todo-count strong": {
                 text: '@remaining'
             },
+
             "#todo-count span": {
                 text: {
                     "@remaining": function(count){
@@ -116,6 +119,7 @@
                     }
                 }
             },
+
             "#clear-completed": {
                 'class': {
                     "hidden": '!@completed'
@@ -127,32 +131,20 @@
                     }
                 }
             },
+
             "#clear-completed span": {
                 text: '@completed'
             },
-            "#filters [href='#/']": {
+
+            "#filters [href]": {
                 'class': {
                     "selected": {
                         "@filter": function(filter){
-                            return !filter;
-                        }
-                    }
-                }
-            },
-            "#filters [href='#/active']": {
-                'class': {
-                    "selected": {
-                        "@filter": function(filter){
-                            return filter === 'active';
-                        }
-                    }
-                }
-            },
-            "#filters [href='#/completed']": {
-                'class': {
-                    "selected": {
-                        "@filter": function(filter){
-                            return filter === 'completed';
+                            filter = filter || '';
+
+                            return function (i, link) {
+                                return link.getAttribute('href') === '#/' + filter;
+                            };
                         }
                     }
                 }
