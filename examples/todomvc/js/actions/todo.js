@@ -15,6 +15,10 @@
 
         remove: function (model) {
             app.dispatcher.trigger('remove-todo', model);
+        },
+
+        filter: function (param) {
+            app.dispatcher.trigger('filter-todos', param);
         }
     };
 

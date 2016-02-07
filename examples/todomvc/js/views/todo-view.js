@@ -1,111 +1,111 @@
-;(function (app) {
-	'use strict';
+;(function(app){
+    'use strict';
 
-	app.TodoView = Backbone.DOMView.extend({
-		ui: {
-			title: '.edit',
-			completed: '.toggle'
-		},
+    app.TodoView = Backbone.DOMView.extend({
+        ui: {
+            title: '.edit',
+            completed: '.toggle'
+        },
 
-		changeTitle: function () {
-			var title = this.ui.title.val().trim();
+        defaults: {
+            edit: false,
+            is_valid: true
+        },
 
-			if (!title) {
-				this.trigger('not-valid', true);
-				return;
-			}
+        isValid: function () {
+            return !!this.ui.title.val().trim();
+        },
 
-			app.actions.todo.save(this.model, {
-				title: title
-			});
-		},
+        changeTitle: function(){
+            var title = this.ui.title.val().trim();
 
-		changeCompleted: function () {
-			app.actions.todo.save(this.model, {
-				completed: this.ui.completed.prop('checked')
-			});
-		},
+            app.actions.todo.save(this.model, {
+                title: title
+            });
+        },
 
-		removeModel: function () {
-			app.actions.todo.remove(this.model);
-		},
+        changeCompleted: function(){
+            app.actions.todo.save(this.model, {
+                completed: this.ui.completed.prop('checked')
+            });
+        },
 
-		startEdit: function () {
-			this.trigger('edit', true);
-		},
+        removeModel: function(){
+            app.actions.todo.remove(this.model);
+        },
 
-		stopEdit: function () {
-			this.trigger('edit', false);
-		},
+        startEdit: function(){
+            this.set('edit', true);
+        },
 
-		template: {
-			"": {
-				"class": {
-					"completed": "@completed",
-					"editing": "#edit",
-					"not-valid": "#not-valid"
-				}
-			},
+        stopEdit: function(){
+            this.set('edit', false);
+        },
 
-			"completed": {
-				prop: {
-					'checked': '@completed'
-				},
-				on: {
-					'change': function () {
-						this.changeCompleted();
-					}
-				}
-			},
+        template: {
+            "root": {
+                "class": {
+                    "completed": "@completed",
+                    "editing": "@edit",
+                    "not-valid": "!@is_valid",
+                    "hidden": '@filtered'
+                }
+            },
 
-			"label": {
-				text: '@title',
-				on: {
-					"dblclick": function () {
-					    this.startEdit();
-					}
-				}
-			},
+            "completed": {
+                prop: {
+                    'checked': '@completed'
+                },
+                on: {
+                    'change': 'changeCompleted'
+                }
+            },
 
-			"title": {
-				prop: {
-					'value': {
-						'#edit': function (edit) {
-							if (edit) {
-								this.ui.title.focus();
-							}
+            "label": {
+                text: '@title',
+                on: {
+                    "dblclick": 'startEdit'
+                }
+            },
 
-						    return this.model.get('title')
-						}
-					}
-				},
-				on: {
-					'keydown': function (e) {
-					    switch (e.which) {
-							case ENTER_KEY:
-								e.preventDefault();
-								this.changeTitle();
-								this.stopEdit();
-								break;
+            "title": {
+                prop: {
+                    'value': {
+                        '@edit': function(edit){
+                            if (edit) {
+                                this.ui.title.focus();
+                            }
 
-							case ESC_KEY:
-								this.stopEdit();
-								break;
-						}
-					},
-					'blur': function () {
-					    this.stopEdit();
-					}
-				}
-			},
+                            return this.model.get('title');
+                        }
+                    }
+                },
+                on: {
+                    'keydown': function(e){
+                        switch (e.which) {
+                        case app.ENTER_KEY:
+                            e.preventDefault();
 
-			".destroy": {
-				on: {
-					'click': function () {
-					    this.removeModel();
-					}
-				}
-			}
-		}
-	});
+                            if (!this.isValid()) return;
+
+                            this.changeTitle();
+                            this.startEdit();
+                            break;
+
+                        case app.ESC_KEY:
+                            this.stopEdit();
+                            break;
+                        }
+                    },
+                    'blur': 'stopEdit'
+                }
+            },
+
+            ".destroy": {
+                on: {
+                    'click': 'removeModel'
+                }
+            }
+        }
+    });
 })(window.app);

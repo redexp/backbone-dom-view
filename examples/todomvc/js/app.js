@@ -1,23 +1,11 @@
-var ENTER_KEY = 13;
-var ESC_KEY = 27;
+;(function(){
+    'use strict';
 
-window.app = {
-	dispatcher: new Backbone.Events(),
-	actions: {}
-};
+    window.app = {
+        ENTER_KEY: 13,
+        ESC_KEY: 27,
+        dispatcher: _.clone(Backbone.Events),
+        actions: {}
+    };
 
-jQuery(function () {
-	'use strict';
-
-	var app = window.app;
-
-	var todos = new app.Todos([], {
-		dispatcher: app.dispatcher
-	});
-
-	new app.AppView({
-		model: todos
-	});
-
-	todos.fetch({reset: true});
-});
+})();

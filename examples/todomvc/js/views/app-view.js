@@ -1,181 +1,162 @@
-;(function (app) {
-	'use strict';
+;(function(app){
+    'use strict';
 
-	app.AppView = Backbone.DOMView.extend({
-		el: '#todoapp',
+    app.AppView = Backbone.DOMView.extend({
+        el: '#todoapp',
 
-		ui: {
-			'toggleAll': '#toggle-all',
-			'newTitle': '#new-todo'
-		},
+        ui: {
+            'toggleAll': '#toggle-all',
+            'newTitle': '#new-todo'
+        },
 
-		initialize: function () {
-			this.completed = 0;
-			this.remaining = 0;
+        defaults: {
+            completed: 0,
+            remaining: 0,
+            filter: ''
+        },
 
-			this.bind('#template-ready add remove reset change:completed', function () {
-				this.cacheStats();
-				this.trigger('list-changed');
-			});
-		},
+        initialize: function(){
+            this.bind('#template-ready add remove reset change:completed', function(){
+                this.set({
+                    completed: this.model.completed().length,
+                    remaining: this.model.remaining().length
+                });
+            });
+        },
 
-		cacheStats: function () {
-			this.completed = this.model.completed().length;
-			this.remaining = this.model.remaining().length;
-		},
+        createNewTodo: function(){
+            app.actions.todo.create({
+                title: this.ui.newTitle.val().trim()
+            });
+        },
 
-		createNewTodo: function () {
-			app.actions.todo.create({
-				title: this.ui.newTitle.val().trim()
-			});
-		},
+        removeCompleted: function(){
+            app.actions.todo.remove(this.model.completed());
+        },
 
-		removeCompleted: function () {
-			app.actions.todo.remove(this.model.completed());
-		},
+        changeAllCompleted: function(){
+            app.actions.todo.saveAll({
+                completed: this.ui.toggleAll.prop('checked')
+            });
+        },
 
-		changeAllCompleted: function () {
-			app.actions.todo.saveAll({
-				completed: this.ui.toggleAll.prop('checked')
-			});
-		},
+        template: {
+            "root": {
+                'class': {
+                    'all-filter': {
+                        '@filter': function(filter){
+                            return !filter;
+                        }
+                    },
+                    'active-filter': {
+                        '@filter': function(filter){
+                            return filter === 'active';
+                        }
+                    },
+                    'completed-filter': {
+                        '@filter': function(filter){
+                            return filter === 'completed';
+                        }
+                    }
+                }
+            },
 
-		template: {
-			"": {
-				'class': {
-					'all-filter': {
-						'filter': function (path) {
-						    return !path;
-						}
-					},
-					'active-filter': {
-						'filter': function (path) {
-						    return path === 'active';
-						}
-					},
-					'completed-filter': {
-						'filter': function (path) {
-						    return path === 'completed';
-						}
-					}
-				}
-			},
+            "newTitle": {
+                on: {
+                    'keydown': function(e){
+                        switch (e.which) {
+                        case app.ENTER_KEY:
+                            e.preventDefault();
 
-			"newTitle": {
-				on: {
-					'keydown': function (e) {
-					    switch (e.which) {
-							case ENTER_KEY:
-								e.preventDefault();
+                            var title = this.ui.newTitle.val().trim();
 
-								var title = this.ui.newTitle.val().trim();
+                            if (!title) return;
 
-								if (!title) return;
+                            this.createNewTodo();
 
-								this.createNewTodo();
+                            this.ui.newTitle.val('');
+                            break;
+                        }
+                    }
+                }
+            },
 
-								this.ui.newTitle.val('');
-								break;
-						}
-					}
-				}
-			},
+            "toggleAll": {
+                prop: {
+                    "checked": '!@remaining'
+                },
 
-			"toggleAll": {
-				prop: {
-					"checked": {
-						"#list-changed": function () {
-							return !this.remaining;
-						}
-					}
-				},
+                on: {
+                    'change': 'changeAllCompleted'
+                }
+            },
 
-				on: {
-					'change': function () {
-					    this.changeAllCompleted();
-					}
-				}
-			},
-
-			"#todo-list": {
-				each: {
-					view: app.TodoView,
-					el: '> *'
-				}
-			},
-			"#main, #footer": {
-				'class': {
-					'hidden': {
-						"#template-ready add remove reset": function () {
-						    return this.model.length === 0;
-						}
-					}
-				}
-			},
-			"#todo-count strong": {
-				text: {
-					// event #list-changed triggered in initialize function
-					"#list-changed": function () {
-					    return this.remaining;
-					}
-				}
-			},
-			"#todo-count span": {
-				text: {
-					"#list-changed": function () {
-					    return (this.remaining === 1 ? 'item' : 'items') + ' left';
-					}
-				}
-			},
-			"#clear-completed": {
-				'class': {
-					"hidden": {
-						"#list-changed": function () {
-							return this.completed === 0;
-						}
-					}
-				},
-				on: {
-					'click': function (e) {
-						e.preventDefault();
-					    this.removeCompleted();
-					}
-				}
-			},
-			"#clear-completed span": {
-				text: {
-					"#list-changed": function () {
-						return this.completed;
-					}
-				}
-			},
-			"#filters [href='#/']": {
-				'class': {
-					"selected": {
-						"filter": function (path) {
-							return !path;
-						}
-					}
-				}
-			},
-			"#filters [href='#/active']": {
-				'class': {
-					"selected": {
-						"filter": function (path) {
-							return path === 'active';
-						}
-					}
-				}
-			},
-			"#filters [href='#/completed']": {
-				'class': {
-					"selected": {
-						"filter": function (path) {
-							return path === 'completed';
-						}
-					}
-				}
-			}
-		}
-	});
+            "#todo-list": {
+                each: {
+                    view: app.TodoView,
+                    el: '> *'
+                }
+            },
+            "#main, #footer": {
+                'class': {
+                    'hidden': {
+                        "#template-ready add remove reset": function(){
+                            return this.model.length === 0;
+                        }
+                    }
+                }
+            },
+            "#todo-count strong": {
+                text: '@remaining'
+            },
+            "#todo-count span": {
+                text: {
+                    "@remaining": function(count){
+                        return (count === 1 ? 'item' : 'items') + ' left';
+                    }
+                }
+            },
+            "#clear-completed": {
+                'class': {
+                    "hidden": '!@completed'
+                },
+                on: {
+                    'click': function(e){
+                        e.preventDefault();
+                        this.removeCompleted();
+                    }
+                }
+            },
+            "#clear-completed span": {
+                text: '@completed'
+            },
+            "#filters [href='#/']": {
+                'class': {
+                    "selected": {
+                        "@filter": function(filter){
+                            return !filter;
+                        }
+                    }
+                }
+            },
+            "#filters [href='#/active']": {
+                'class': {
+                    "selected": {
+                        "@filter": function(filter){
+                            return filter === 'active';
+                        }
+                    }
+                }
+            },
+            "#filters [href='#/completed']": {
+                'class': {
+                    "selected": {
+                        "@filter": function(filter){
+                            return filter === 'completed';
+                        }
+                    }
+                }
+            }
+        }
+    });
 })(window.app);
