@@ -654,7 +654,21 @@ view.$el //= <ul><li>zero</li> <li>three</li> <li>four</li></ul>
 
 #### Options
 
-**view:** `{View|Function}`
+* [view:](#each-view)
+* [el:](#each-el)
+* [field:](#each-field)
+* [viewProp:](#each-view-prop)
+* [sort:](#each-sort)
+* [sortByViews:](#each-sort-by-views)
+* [addHandler:](#each-add-handler)
+* [delHandler:](#each-del-handler)
+* [addEvent:](#each-add-event)
+* [removeEvent:](#each-remove-event)
+* [resetEvent:](#each-reset-event)
+* [addedEvent:](#each-added-event)
+* [offOnRemove:](#each-off-on-remove)
+
+<a name="each-view"></a>**view:** `{View|Function}`
 
 If `view:` value is `Backbone.View` class (or extended form it) then helper will create instances from this class for each model added to collection. If `view:` value is `Function` then helper will call it for each model and expect view instance from it (helpful if you need different views in same collection).
 
@@ -716,101 +730,7 @@ var ListView = Backbone.DOMView.extend({
 ```
 This means that helper will detach three elements and will create map object, it whill show which view should get which element. So if `view:` function will return `FirstView` class then it will get `ui.items > [data-type="1"]` clone, `InputView` - `ui.items > [data-type="second"]` and `'default'` means that any other view class will get `ui.items > [data-type="last"]` clone.
 
-**addEvent:** `{String}` Default: `'add'`
-
-By default helper will listen for `add` event to add new view, but you can change it with this option
-
-**removeEvent:** `{String}` Default: `'remove'`
-
-Same as previous only for `remove` event.
-
-**addedEvent:** `{String}` Default: `'added'`
-
-This event will be triggered in sub view when `addHandler` will be called. It useful when you need to be sure that your `view.$el` is in DOM.
-
-**addHandler:** `{String|Function}` Default: `'append'`
-
-By default helper will use `.append()` jQuery method to add views to `ul.items`, you can chenge it with three predefined jQuery methods and pass it as a string for this option: `prepend`, `fadeIn`, `slideDown`. Or you can use function and add view in custom way.
-```javascript
-var ListView = Backbone.DOMView.extend({
-    template: {
-        'ul.items': {
-            each: {
-                view: ItemView,
-                addHandler: function (ul, view) {
-                    view.$el
-                        .css({
-                            height: 0
-                        })
-                        .appendTo(ul)
-                        .animate({
-                            height: 100
-                        }, 600, 'easeOutBounce')
-                    ;
-                }
-            }
-        }
-    }
-});
-```
-
-**delHandler:** `{String|Function}` Default: `'remove'`
-
-Same as `addHandler` only for removing views. Default method is `remove`. Predefined methods: `fadeOut`, `slideUp`.
-
-**sort:** `{Boolean|Object}` Default: `false`
-
-Elements in `ul.items` can be sorted and sync with models in collection. If `sort:` is `true` then helper will listen for `sort` event and will change order of views in `ul.items` or you can set custom event name with object.
-```javascript
-var ListView = Backbone.DOMView.extend({
-    template: {
-        'ul.items': {
-            each: {
-                view: ItemView,
-                sort: {
-                    event: 'change-order'
-                }
-            }
-        }
-    }
-});
-```
-Also you can change views order by some models field value not by their index in collection.
-```javascript
-var ListView = Backbone.DOMView.extend({
-    template: {
-        'ul.items': {
-            each: {
-                view: ItemView,
-                sort: {
-                    event: 'change:order',
-                    field: 'order'
-                }
-            }
-        }
-    }
-});
-
-var list = new Backbone.Collection([
-    {title: 'one', order: 1},
-    {title: 'two', order: 2},
-    {title: 'three', order: 3}
-]);
-
-//...
-
-view.$el //= <ul class="items"><li>one</li> <li>two</li> <li>three</li></ul>
-
-list.at(0).set('order', 4);
-
-view.$el //= <ul class="items"><li>two</li> <li>three</li> <li>one</li></ul>
-```
-
-**offOnRemove:** `{Boolean}` Default: `true`
-
-By default all views created by this helper on remove will stop listen all events (`.off().stopListening().stopListeningElement()`). You can disable it by set this option to `false`.
-
-**field:** `{String|Object}` Default: `null`
+<a name="each-field"></a>**field:** `{String|Object}` Default: `null`
 
 Helper can work not only with `this.model` but also with collection in model (or in view). Name of this filed you can set with this option
 ```javascript
@@ -902,7 +822,7 @@ var UserView = Backbone.DOMView.extend({
 });
 ```
 
-**viewProp:** `{String}` Default: `null`
+<a name="each-view-prop"></a>**viewProp:** `{String}` Default: `null`
 
 All generated views for models in collection `each` will store in object of `DOMView.eachHelper.EachViewList` class. Access to this object you can get by setting `viewProp:` option with name of property which should be added to view with with `EachViewList` object. Own properties of this object are models `cid` and values are views of this models. `EachViewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
 
@@ -933,11 +853,11 @@ var ListView = Backbone.DOMView.extend({
     initialize: function () {
         this.on('template-ready', function () {
             var views = this.items.where({error: false});
-            
+
             var view = this.items.get(this.model.at(0));
-            
+
             this.items.invoke('set', 'error', true);
-            
+
             this.items.forEach(function (view, i) {
                 // ...
             });
@@ -955,6 +875,120 @@ var ListView = Backbone.DOMView.extend({
     }
 });
 ```
+
+<a name="each-sort"></a>**sort:** `{Boolean|Object}` Default: `false`
+
+Elements in `ul.items` can be sorted and sync with models in collection. If `sort:` is `true` then helper will listen for `sort` event and will change order of views in `ul.items` or you can set custom event name with object.
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: ItemView,
+                sort: {
+                    event: 'change-order'
+                }
+            }
+        }
+    }
+});
+```
+Also you can change views order by some models field value not by their index in collection.
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: ItemView,
+                sort: {
+                    event: 'change:order',
+                    field: 'order'
+                }
+            }
+        }
+    }
+});
+
+var list = new Backbone.Collection([
+    {title: 'one', order: 1},
+    {title: 'two', order: 2},
+    {title: 'three', order: 3}
+]);
+
+//...
+
+view.$el //= <ul class="items"><li>one</li> <li>two</li> <li>three</li></ul>
+
+list.at(0).set('order', 4);
+
+view.$el //= <ul class="items"><li>two</li> <li>three</li> <li>one</li></ul>
+```
+
+<a name="each-sort-by-views"></a>**sortByViews:** `{String|Object}` Default: `null`
+
+`each` can sort models in collection by current views position in DOM. All you need is to trigger an event in parent view. Config is same as for `sort:`
+```javascript
+sortByViews: 'sortable-update'
+// or
+sortByViews: {
+    event: 'sortable-update'
+}
+// or if you want to set order in some field
+sortByViews: {
+    event: 'sortable-update',
+    field: 'index'
+}
+```
+
+<a name="each-add-handler"></a>**addHandler:** `{String|Function}` Default: `'append'`
+
+By default helper will use `.append()` jQuery method to add views to `ul.items`, you can chenge it with three predefined jQuery methods and pass it as a string for this option: `prepend`, `fadeIn`, `slideDown`. Or you can use function and add view in custom way.
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: ItemView,
+                addHandler: function (ul, view) {
+                    view.$el
+                        .css({
+                            height: 0
+                        })
+                        .appendTo(ul)
+                        .animate({
+                            height: 100
+                        }, 600, 'easeOutBounce')
+                    ;
+                }
+            }
+        }
+    }
+});
+```
+
+<a name="each-del-handler"></a>**delHandler:** `{String|Function}` Default: `'remove'`
+
+Same as `addHandler` only for removing views. Default method is `remove`. Predefined methods: `fadeOut`, `slideUp`.
+
+<a name="each-add-event"></a>**addEvent:** `{String}` Default: `'add'`
+
+By default helper will listen for `add` event to add new view, but you can change it with this option
+
+<a name="each-remove-event"></a>**removeEvent:** `{String}` Default: `'remove'`
+
+Same as `addEvent` only for remove view.
+
+<a name="each-reset-event"></a>**resetEvent:** `{String}` Default: `'reset'`
+
+Same as `addEvent` only for reset collection.
+
+<a name="each-added-event"></a>**addedEvent:** `{String}` Default: `'added'`
+
+This event will be triggered in sub view when `addHandler` will be called. It useful when you need to be sure that your `view.$el` is in DOM.
+
+<a name="each-off-on-remove"></a>**offOnRemove:** `{Boolean}` Default: `true`
+
+By default all views created by this helper on remove will stop listen all events (`.off().stopListening().stopListeningElement()`). You can disable it by set this option to `false`.
 
 ### Best practices for creating classes
 
