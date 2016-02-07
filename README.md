@@ -824,7 +824,7 @@ var UserView = Backbone.DOMView.extend({
 
 <a name="each-view-prop"></a>**viewProp:** `{String}` Default: `null`
 
-All generated views for models in collection `each` will store in object of `DOMView.eachHelper.EachViewList` class. Access to this object you can get by setting `viewProp:` option with name of property which should be added to view with with `EachViewList` object. Own properties of this object are models `cid` and values are views of this models. `EachViewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
+All generated views for models in collection `each` will store in object of `DOMView.eachHelper.EachViewList` class. Access to this object you can get by setting `viewProp:` option with name of property which should be added to view with `EachViewList` object. Own properties of this object are models `cid` and values are views of this models. `EachViewList` has few most useful methods which works just like `Backbone.Collection` methods only for views:
 
 * `where` has extended functionality, it can accept regular expressions.
 * `findWhere`
