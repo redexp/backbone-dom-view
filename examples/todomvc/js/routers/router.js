@@ -7,9 +7,6 @@
         },
 
         setFilter: function(param){
-            // Set the current filter to be used
-            app.TodoFilter = param || '';
-
             app.actions.todo.filter(param);
         }
     });
