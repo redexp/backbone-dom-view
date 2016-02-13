@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Toggle buttons</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css"/>
+</head>
+<body>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Radio group</div>
+  <div class="panel-body">
+    <div id="radio-group" class="btn-group">
+      <button type="button" class="btn btn-primary" data-value="1">One</button>
+      <button type="button" class="btn btn-primary" data-value="2">Two</button>
+      <button type="button" class="btn btn-primary" data-value="3">Three</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Checkbox group</div>
+  <div class="panel-body">
+    <div id="checkbox-group" class="btn-group">
+      <button type="button" class="btn btn-primary" data-value="1">One</button>
+      <button type="button" class="btn btn-primary" data-value="2">Two</button>
+      <button type="button" class="btn btn-primary" data-value="3">Three</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/libs/jquery/dist/jquery.min.js"></script>
+<script src="js/libs/underscore/underscore-min.js"></script>
+<script src="js/libs/backbone/backbone.js"></script>
+<script src="../../backbone-dom-view.js"></script>
+
+<script src="js/app.js"></script>
+<script src="js/view/radio-group.js"></script>
+<script src="js/view/checkbox-group.js"></script>
+<script src="js/controller.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "toggle-buttons",
+  "version": "1.0.0",
+  "dependencies": {
+    "backbone": "~1.2.3",
+    "underscore": "~1.8.0",
+    "jquery": "~2.2.0"
+  }
+}
