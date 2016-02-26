@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.46.0';
+        DOMView.v = '1.46.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -295,6 +295,12 @@
                 for (var helper in helpersList) {
                     if (!has(helpersList, helper)) continue;
 
+                    if (_DEV_) {
+                        if (!has(helpers, helper)) {
+                            throw new Error('Unknown helper "' + helper + '" in template of ' + this.constructor.name);
+                        }
+                    }
+
                     helpers[helper].call(this, rootSelector + selector, helpersList[helper]);
                 }
             }
@@ -467,6 +473,9 @@
                     ops.value = options.apply(view, arguments);
                     applyJqueryMethod(ops);
                     break;
+
+                default:
+                    throw new Error('Unknown options type');
             }
 
             function bindEvents(events, func) {
@@ -486,7 +495,7 @@
 
             if (_DEV_) {
                 if (node.length === 0) {
-                    console.warn('Empty node. Be sure that you set correct selector to template.');
+                    console.warn('Empty node. Be sure that you set correct selector to template of ' + this.constructor.name);
                 }
             }
 
@@ -637,11 +646,11 @@
             if (!fieldClass) {
                 if (_DEV_) {
                     if (!list) {
-                        throw Error('Collection is not specified');
+                        throw new Error('Collection is not specified');
                     }
 
                     if (list instanceof BB.Collection === false) {
-                        throw Error('Object is not instance of Backbone Collection');
+                        throw new Error('Object is not instance of Backbone Collection');
                     }
                 }
 
