@@ -943,7 +943,7 @@
         });
         return expect(el).to.have.text('JackMaxBob');
       });
-      return it('should create view own prop with viewList', function() {
+      it('should create view own prop with viewList', function() {
         var ListView, view;
         ListView = DomView.extend({
           el: '<ul><li></li></ul>',
@@ -960,6 +960,40 @@
           model: new Backbone.Collection([{}, {}])
         });
         return expect(view.list).to.equal(view.getViewList('root'));
+      });
+      return it('should trigger change:field', function() {
+        var ListView, num, view;
+        ListView = DomView.extend({
+          el: '<ul><li></li></ul>',
+          defaults: function() {
+            return {
+              list: new Backbone.Collection()
+            };
+          },
+          template: {
+            'root': {
+              each: {
+                field: 'list',
+                view: DomView,
+                el: '> *'
+              }
+            }
+          }
+        });
+        view = new ListView();
+        num = 0;
+        view.bind('@list', function() {
+          return num++;
+        });
+        expect(num).to.equal(1);
+        view.get('list').add({
+          id: 1
+        });
+        expect(num).to.equal(2);
+        view.get('list').remove(1);
+        expect(num).to.equal(3);
+        view.get('list').reset([{}, {}, {}]);
+        return expect(num).to.equal(4);
       });
     });
   });

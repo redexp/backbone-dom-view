@@ -658,6 +658,10 @@
                     .listenTo(list, options.resetEvent, eachResetListener)
                     .listenTo(list, options.removeEvent, eachRemoveListener);
 
+                if (options.field) {
+                    view.listenTo(list, [options.addEvent, options.removeEvent, options.resetEvent].join(' '), eachTriggerChangeEvent);
+                }
+
                 list.each(eachAddListener);
             }
             else { // means plain array
@@ -754,6 +758,10 @@
                 }
 
                 delete viewList[model.cid];
+            }
+
+            function eachTriggerChangeEvent() {
+                view.trigger('change:' + options.field, view, list);
             }
 
             function eachSortHandler() {

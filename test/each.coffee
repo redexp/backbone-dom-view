@@ -644,3 +644,35 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view = new ListView model: new Backbone.Collection([{}, {}])
 
             expect(view.list).to.equal view.getViewList('root')
+
+        it 'should trigger change:field', ->
+            ListView = DomView.extend
+                el: '<ul><li></li></ul>'
+                defaults: ->
+                    list: new Backbone.Collection()
+
+                template: 'root':
+                    each:
+                        field: 'list'
+                        view: DomView
+                        el: '> *'
+
+            view = new ListView()
+
+            num = 0
+
+            view.bind '@list', -> num++
+
+            expect(num).to.equal 1
+
+            view.get('list').add({id: 1})
+
+            expect(num).to.equal 2
+
+            view.get('list').remove(1)
+
+            expect(num).to.equal 3
+
+            view.get('list').reset([{}, {}, {}])
+
+            expect(num).to.equal 4
