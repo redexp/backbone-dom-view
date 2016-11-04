@@ -961,7 +961,7 @@
         });
         return expect(view.list).to.equal(view.getViewList('root'));
       });
-      return it('should trigger change:field', function() {
+      it('should trigger change:field', function() {
         var ListView, num, view;
         ListView = DomView.extend({
           el: '<ul><li></li></ul>',
@@ -994,6 +994,31 @@
         expect(num).to.equal(3);
         view.get('list').reset([{}, {}, {}]);
         return expect(num).to.equal(4);
+      });
+      return it('should accept el as jQuery object', function() {
+        var ListView, view;
+        ListView = DomView.extend({
+          el: '<div></div>',
+          defaults: function() {
+            return {
+              list: new Backbone.Collection()
+            };
+          },
+          template: {
+            'root': {
+              each: {
+                field: 'list',
+                view: DomView,
+                el: function() {
+                  return jQuery('<span>');
+                }
+              }
+            }
+          }
+        });
+        view = new ListView();
+        view.get('list').add([{}, {}]);
+        return expect(view.$el.find('> span').length).to.equal(2);
       });
     });
   });

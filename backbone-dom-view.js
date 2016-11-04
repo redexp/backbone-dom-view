@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.46.1';
+        DOMView.v = '1.48.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -591,18 +591,23 @@
                 break;
 
             case 'object':
-                viewElMap = [];
+                if (options.el instanceof $) {
+                    viewEl = options.el.detach();
+                }
+                else {
+                    viewElMap = [];
 
-                _.forEach(options.el, function (target, selector) {
-                    var el = holder.find(selector).detach();
+                    _.forEach(options.el, function (target, selector) {
+                        var el = holder.find(selector).detach();
 
-                    if (target === 'default') {
-                        viewEl = el;
-                    }
-                    else {
-                        viewElMap.push({target: target, el: el});
-                    }
-                });
+                        if (target === 'default') {
+                            viewEl = el;
+                        }
+                        else {
+                            viewElMap.push({target: target, el: el});
+                        }
+                    });
+                }
 
                 break;
             }

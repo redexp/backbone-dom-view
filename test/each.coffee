@@ -676,3 +676,21 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view.get('list').reset([{}, {}, {}])
 
             expect(num).to.equal 4
+
+        it 'should accept el as jQuery object', ->
+            ListView = DomView.extend
+                el: '<div></div>'
+                defaults: ->
+                    list: new Backbone.Collection()
+
+                template: 'root':
+                    each:
+                        field: 'list'
+                        view: DomView
+                        el: ->
+                            return jQuery('<span>')
+
+            view = new ListView()
+            view.get('list').add([{}, {}])
+
+            expect(view.$el.find('> span').length).to.equal(2)
