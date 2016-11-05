@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.48.0';
+        DOMView.v = '1.48.1';
 
         var View = BB.View,
             $ = BB.$;
