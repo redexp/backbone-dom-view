@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.48.1';
+        DOMView.v = '1.49.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -269,6 +269,7 @@
             prop: propHelper,
             style: styleHelper,
             html: htmlHelper,
+            safeHtml: safeHtmlHelper,
             text: textHelper,
             on: onHelper,
             connect: connectHelper,
@@ -362,13 +363,41 @@
             });
         }
 
+        function safeHtmlHelper(selector, options) {
+            var isOnAttr = /^on\w+/,
+                scriptTag = /<\/?script\b[^>]*>/g,
+                tag = /<([\w\-]+\s+)([^>]+)>/g;
+
+            callJqueryMethod({
+                view: this,
+                node: this.find(selector),
+                method: 'html',
+                options: options,
+                iteratorCallback: true,
+                wrapper: function (html) {
+                    return html
+                        .replace(scriptTag, '')
+                        .replace(tag, function (tag, name, body) {
+                            body = body.split(/\s+/).filter(function (attr) {
+                                return !isOnAttr.test(attr);
+                            }).join(' ');
+
+                            return '<' + name + body + '>';
+                        });
+                }
+            });
+        }
+
         function textHelper (selector, options) {
             callJqueryMethod({
                 view: this,
                 node: this.find(selector),
                 method: 'text',
                 options: options,
-                iteratorCallback: true
+                iteratorCallback: true,
+                wrapper: function (value) {
+                    return _.isNull(value) || _.isUndefined(value) ? '' : value;
+                }
             });
         }
 

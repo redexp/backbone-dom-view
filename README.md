@@ -337,6 +337,7 @@ If you want to do some stuff before `initialize` but after `this.$el` prepared o
 * [prop](#prop)
 * [style](#style)
 * [html](#html)
+* [safeHtml](#safeHtml)
 * [text](#text)
 * [template](#template)
 * [on](#on)
@@ -492,6 +493,10 @@ Backbone.DOMView.extend({
     } 
 });
 ```
+
+### safeHtml
+
+Just like `html` only it will filter all `<script>` tags and `on*=` attributes like `onclick=` and so on.
 
 ### text
 

@@ -35,6 +35,7 @@ require ['chai', 'chai-jquery', 'mocha'], (chai, chaiJquery, mocha) ->
     tests = [
         'constructor'
         'class-prop-attr-style-html'
+        'html-text'
         'on'
         'connect'
         'each'

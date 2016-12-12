@@ -33,7 +33,7 @@
     var tests;
     chai.use(chaiJquery);
     mocha.setup('bdd');
-    tests = ['constructor', 'class-prop-attr-style-html', 'on', 'connect', 'each', 'template'];
+    tests = ['constructor', 'class-prop-attr-style-html', 'html-text', 'on', 'connect', 'each', 'template'];
     return require(tests, function() {
       return mocha.run();
     });
