@@ -698,9 +698,10 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
         it 'should accept el as array', ->
             TestView1 = DomView.extend()
             TestView2 = DomView.extend()
+            TestView3 = DomView.extend()
 
             ListView = DomView.extend
-                el: '<div><span class="test1"></span><span class="test2"></span></div>'
+                el: '<div><span class="test1"></span><span class="test2"></span><span class="test3"></span></div>'
                 defaults: ->
                     list: new Backbone.Collection()
 
@@ -711,19 +712,22 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                             switch model.get('type')
                                 when 'test1' then TestView1
                                 when 'test2' then TestView2
+                                when 'test3' then TestView3
                                 else DomView
                         el: -> [
                             {view: TestView1, el: '.test1'}
                             {view: TestView2, el: this.find('.test2')}
-                            {view: 'default', el: '<span class="test3"></span>'}
+                            {view: TestView3, el: this.find('.test3').get(0)}
+                            {view: 'default', el: '<span class="test4"></span>'}
                         ]
 
             view = new ListView()
-            view.get('list').add([{type: 'test1'}, {type: 'test2'}, {type: 'test3'}])
+            view.get('list').add([{type: 'test1'}, {type: 'test2'}, {type: 'test3'}, {type: 'test4'}])
 
             items = view.$el.children()
 
-            expect(items.length).to.equal(3)
+            expect(items.length).to.equal(4)
             expect(items.eq(0)).to.have.class 'test1'
             expect(items.eq(1)).to.have.class 'test2'
             expect(items.eq(2)).to.have.class 'test3'
+            expect(items.eq(3)).to.have.class 'test4'

@@ -1021,11 +1021,12 @@
         return expect(view.$el.find('> span').length).to.equal(2);
       });
       return it('should accept el as array', function() {
-        var ListView, TestView1, TestView2, items, view;
+        var ListView, TestView1, TestView2, TestView3, items, view;
         TestView1 = DomView.extend();
         TestView2 = DomView.extend();
+        TestView3 = DomView.extend();
         ListView = DomView.extend({
-          el: '<div><span class="test1"></span><span class="test2"></span></div>',
+          el: '<div><span class="test1"></span><span class="test2"></span><span class="test3"></span></div>',
           defaults: function() {
             return {
               list: new Backbone.Collection()
@@ -1041,6 +1042,8 @@
                       return TestView1;
                     case 'test2':
                       return TestView2;
+                    case 'test3':
+                      return TestView3;
                     default:
                       return DomView;
                   }
@@ -1054,8 +1057,11 @@
                       view: TestView2,
                       el: this.find('.test2')
                     }, {
+                      view: TestView3,
+                      el: this.find('.test3').get(0)
+                    }, {
                       view: 'default',
-                      el: '<span class="test3"></span>'
+                      el: '<span class="test4"></span>'
                     }
                   ];
                 }
@@ -1071,13 +1077,16 @@
             type: 'test2'
           }, {
             type: 'test3'
+          }, {
+            type: 'test4'
           }
         ]);
         items = view.$el.children();
-        expect(items.length).to.equal(3);
+        expect(items.length).to.equal(4);
         expect(items.eq(0)).to.have["class"]('test1');
         expect(items.eq(1)).to.have["class"]('test2');
-        return expect(items.eq(2)).to.have["class"]('test3');
+        expect(items.eq(2)).to.have["class"]('test3');
+        return expect(items.eq(3)).to.have["class"]('test4');
       });
     });
   });

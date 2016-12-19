@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.50.0';
+        DOMView.v = '1.50.1';
 
         var View = BB.View,
             $ = BB.$;
@@ -629,14 +629,14 @@
 
                         if (typeof el === 'string') {
                             if (el.trim().charAt(0) === '<') {
-                                el = $(el.trim());
+                                el = el.trim();
                             }
                             else {
                                 el = holder.find(el);
                             }
                         }
 
-                        item.el = el.detach();
+                        item.el = $(el).detach();
 
                         if (item.view === 'default') {
                             viewEl = item.el;
