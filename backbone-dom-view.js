@@ -12,7 +12,7 @@
 
     function module (BB, _) {
 
-        DOMView.v = '1.49.0';
+        DOMView.v = '1.50.0';
 
         var View = BB.View,
             $ = BB.$;
@@ -103,7 +103,7 @@
                     }
                 }
 
-                events = $.trim(events).split(/\s+/);
+                events = events.trim().split(/\s+/);
 
                 for (var i = 0, len = events.length; i < len; i++) {
                     parseEvent(events[i]);
@@ -623,17 +623,39 @@
                 if (options.el instanceof $) {
                     viewEl = options.el.detach();
                 }
+                else if (_.isArray(options.el)) {
+                    viewElMap = options.el.map(function (item) {
+                        var el = item.el;
+
+                        if (typeof el === 'string') {
+                            if (el.trim().charAt(0) === '<') {
+                                el = $(el.trim());
+                            }
+                            else {
+                                el = holder.find(el);
+                            }
+                        }
+
+                        item.el = el.detach();
+
+                        if (item.view === 'default') {
+                            viewEl = item.el;
+                        }
+
+                        return item;
+                    });
+                }
                 else {
                     viewElMap = [];
 
-                    _.forEach(options.el, function (target, selector) {
+                    _.forEach(options.el, function (view, selector) {
                         var el = holder.find(selector).detach();
 
-                        if (target === 'default') {
+                        if (view === 'default') {
                             viewEl = el;
                         }
                         else {
-                            viewElMap.push({target: target, el: el});
+                            viewElMap.push({view: view, el: el});
                         }
                     });
                 }
@@ -744,7 +766,7 @@
                     var el;
 
                     if (viewElMap) {
-                        el = _.findWhere(viewElMap, {target: View});
+                        el = _.findWhere(viewElMap, {view: View});
                         if (el) {
                             el = el.el;
                         }

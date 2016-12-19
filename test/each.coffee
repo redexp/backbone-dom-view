@@ -694,3 +694,36 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view.get('list').add([{}, {}])
 
             expect(view.$el.find('> span').length).to.equal(2)
+
+        it 'should accept el as array', ->
+            TestView1 = DomView.extend()
+            TestView2 = DomView.extend()
+
+            ListView = DomView.extend
+                el: '<div><span class="test1"></span><span class="test2"></span></div>'
+                defaults: ->
+                    list: new Backbone.Collection()
+
+                template: 'root':
+                    each:
+                        field: 'list'
+                        view: (model) ->
+                            switch model.get('type')
+                                when 'test1' then TestView1
+                                when 'test2' then TestView2
+                                else DomView
+                        el: -> [
+                            {view: TestView1, el: '.test1'}
+                            {view: TestView2, el: this.find('.test2')}
+                            {view: 'default', el: '<span class="test3"></span>'}
+                        ]
+
+            view = new ListView()
+            view.get('list').add([{type: 'test1'}, {type: 'test2'}, {type: 'test3'}])
+
+            items = view.$el.children()
+
+            expect(items.length).to.equal(3)
+            expect(items.eq(0)).to.have.class 'test1'
+            expect(items.eq(1)).to.have.class 'test2'
+            expect(items.eq(2)).to.have.class 'test3'

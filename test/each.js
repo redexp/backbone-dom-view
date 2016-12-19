@@ -995,7 +995,7 @@
         view.get('list').reset([{}, {}, {}]);
         return expect(num).to.equal(4);
       });
-      return it('should accept el as jQuery object', function() {
+      it('should accept el as jQuery object', function() {
         var ListView, view;
         ListView = DomView.extend({
           el: '<div></div>',
@@ -1019,6 +1019,65 @@
         view = new ListView();
         view.get('list').add([{}, {}]);
         return expect(view.$el.find('> span').length).to.equal(2);
+      });
+      return it('should accept el as array', function() {
+        var ListView, TestView1, TestView2, items, view;
+        TestView1 = DomView.extend();
+        TestView2 = DomView.extend();
+        ListView = DomView.extend({
+          el: '<div><span class="test1"></span><span class="test2"></span></div>',
+          defaults: function() {
+            return {
+              list: new Backbone.Collection()
+            };
+          },
+          template: {
+            'root': {
+              each: {
+                field: 'list',
+                view: function(model) {
+                  switch (model.get('type')) {
+                    case 'test1':
+                      return TestView1;
+                    case 'test2':
+                      return TestView2;
+                    default:
+                      return DomView;
+                  }
+                },
+                el: function() {
+                  return [
+                    {
+                      view: TestView1,
+                      el: '.test1'
+                    }, {
+                      view: TestView2,
+                      el: this.find('.test2')
+                    }, {
+                      view: 'default',
+                      el: '<span class="test3"></span>'
+                    }
+                  ];
+                }
+              }
+            }
+          }
+        });
+        view = new ListView();
+        view.get('list').add([
+          {
+            type: 'test1'
+          }, {
+            type: 'test2'
+          }, {
+            type: 'test3'
+          }
+        ]);
+        items = view.$el.children();
+        expect(items.length).to.equal(3);
+        expect(items.eq(0)).to.have["class"]('test1');
+        expect(items.eq(1)).to.have["class"]('test2');
+        return expect(items.eq(2)).to.have["class"]('test3');
       });
     });
   });
