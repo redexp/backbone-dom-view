@@ -107,50 +107,6 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(el.find('li')).to.have.class 'test'
 
-        it 'should create view with el: as object', ->
-            View1 = DomView.extend
-                template: '':
-                    html: '@type'
-
-            View2 = DomView.extend
-                template: '':
-                    html: '@type'
-
-            ViewDef = DomView.extend
-                template: '':
-                    html: '@type'
-
-            ListView = DomView.extend
-                el: '<ul><li class="test1"></li><li class="test2"></li><li class="testDef"></li></ul>'
-                template: 'root':
-                    each:
-                        view: (model) ->
-                            switch model.get('type')
-                                when 1 then View1
-                                when 2 then View2
-                                else ViewDef
-                        el:
-                            '> .test1': View1
-                            '> .test2': View2
-                            '> .testDef': ViewDef
-
-            list = new Backbone.Collection([{type: 1},{type: 2},{type: 3},{type: 4}])
-
-            listView = new ListView model: list
-            el = listView.$el
-
-            expect(el.find('li').eq(0)).to.have.class 'test1'
-            expect(el.find('li').eq(1)).to.have.class 'test2'
-            expect(el.find('li').eq(2)).to.have.class 'testDef'
-            expect(el.find('li').eq(3)).to.have.class 'testDef'
-
-            viewList = listView.getViewList('root')
-
-            expect(viewList.get(list.at(0)).constructor).equal View1
-            expect(viewList.get(list.at(1)).constructor).equal View2
-            expect(viewList.get(list.at(2)).constructor).equal ViewDef
-            expect(viewList.get(list.at(3)).constructor).equal ViewDef
-
         it 'should create view with el: as function', ->
             ViewDef = DomView.extend
                 template: 'root':
@@ -695,39 +651,27 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(view.$el.find('> span').length).to.equal(2)
 
-        it 'should accept el as array', ->
-            TestView1 = DomView.extend()
-            TestView2 = DomView.extend()
-            TestView3 = DomView.extend()
-
+        it 'should accept el as object of types', ->
             ListView = DomView.extend
-                el: '<div><span class="test1"></span><span class="test2"></span><span class="test3"></span></div>'
+                el: '<div><span class="type-test1"></span><span data-type="test2"></span><span data-type="test3"></span></div>'
                 defaults: ->
                     list: new Backbone.Collection()
 
                 template: 'root':
                     each:
                         field: 'list'
-                        view: (model) ->
-                            switch model.get('type')
-                                when 'test1' then TestView1
-                                when 'test2' then TestView2
-                                when 'test3' then TestView3
-                                else DomView
-                        el: -> [
-                            {view: TestView1, el: '.test1'}
-                            {view: TestView2, el: this.find('.test2')}
-                            {view: TestView3, el: this.find('.test3').get(0)}
-                            {view: 'default', el: '<span class="test4"></span>'}
-                        ]
+                        view: DomView
+                        el:
+                            'data-type': 'type'
+                            'class': (model) -> 'type-' + model.get('type')
 
             view = new ListView()
-            view.get('list').add([{type: 'test1'}, {type: 'test2'}, {type: 'test3'}, {type: 'test4'}])
+            view.get('list').add([{type: 'test2'}, {type: 'test3'}, {type: 'test1'}])
 
             items = view.$el.children()
 
-            expect(items.length).to.equal(4)
-            expect(items.eq(0)).to.have.class 'test1'
-            expect(items.eq(1)).to.have.class 'test2'
-            expect(items.eq(2)).to.have.class 'test3'
-            expect(items.eq(3)).to.have.class 'test4'
+            expect(items.length).to.equal(3)
+            expect(items.eq(0)).to.have.attr 'data-type', 'test2'
+            expect(items.eq(1)).to.have.attr 'data-type', 'test3'
+            expect(items.eq(2)).to.have.class 'type-test1'
+
