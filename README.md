@@ -679,7 +679,7 @@ view.$el //= <ul><li>zero</li> <li>three</li> <li>four</li></ul>
 
 If `view:` value is `Backbone.View` class (or extended form it) then helper will create instances from this class for each model added to collection. If `view:` value is `Function` then helper will call it for each model and expect View class or view instance from it (helpful if you need different views in same collection).
 
-**el:** `{String|Object}` Default: `null`
+**el:** `{String|Object|Function}` Default: `null`
 
 Selector for `el:` option for `view:` class.
 ```html
@@ -765,6 +765,7 @@ var ListView = Backbone.DOMView.extend({
     }
 });
 ```
+Also you can use function for `el:` which should return jQuery object or selector or object described above.
 
 <a name="each-field"></a>**field:** `{String|Object}` Default: `null`
 
