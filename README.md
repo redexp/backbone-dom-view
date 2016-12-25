@@ -55,7 +55,7 @@ Bower:
 
 **AMD ready**
 
-## Fields
+## Properties
 
 ### ui:
 
@@ -151,9 +151,9 @@ Backbone.DOMView.extend({
 
 Same as `Backbone.Model::defaults` option, see [get, set, has](#get-set-has) in [Methods](#methods) section.
 
-### parent
+### .parent
 
-[each](#each) helper will add to children views field `parent` which is link to current view.
+[each](#each) helper will add to children views field `parent` which will be link to current view.
 
 ## Methods
 
@@ -195,16 +195,6 @@ Backbone.DOMView.extend({
         }
     }
 });
-```
-
-### matches()
-
-Same as `Backbone.Model::matches` but it not uses `_.matches` (which makes proxy function) and can accept regular expressions.
-```javascript
-var view = new Backbone.DOMView();
-view.set('name', 'test');
-view.matches({name: /^t/}); //> true
-view.matches({name: 'test'}); //> true
 ```
 
 ### find()
@@ -316,12 +306,12 @@ View has several internal events
 
 ### template-ready
 
-By default `template` will be executed only after `initialize` callback, so if you want to do some stuff after it, you can use `template-ready` event or `Backbone.DOMView.readyEvent`
+By default `template` will be executed only after `initialize` callback, so if you want to do some stuff after it, you can use `template-ready` event or `Backbone.DOMView.readyEvent`. You can change `Backbone.DOMView.readyEvent`
 ```javascript
 Backbone.DOMView.extend({
     initialize: function () {
-        this.on('template-ready', function () { /*...*/ });
-        this.on(Backbone.DOMView.readyEvent, function () { /*...*/ });
+        this.once('template-ready', function () { /*...*/ });
+        this.once(Backbone.DOMView.readyEvent, function () { /*...*/ });
     }
 });
 ```
@@ -353,7 +343,7 @@ Arguments passed to helpers are `selector` and `options`.
 
 It will add css class to element if first argument of event will be truthy and remove if not.
 
-It is a hash where keys are space separated css class names and values are: event name or hash of events and callbacks or function. If value is event name, then helper will create callback for you where it will take first argument.
+It is a hash where keys are space separated css class names and values are event name or hash of events and callbacks or function. If value is event name, then helper will create callback for you where it will take first argument.
 ```javascript
 Backbone.DOMView.extend({
     template: {
@@ -371,7 +361,7 @@ Backbone.DOMView.extend({
     } 
 });
 ```
-If value is function it means css class should be initialized once only on view creation.
+If value is function it means css class should be initialized once on view creation.
 ```javascript
 Backbone.DOMView.extend({
     template: {
@@ -385,6 +375,18 @@ Backbone.DOMView.extend({
     } 
 });
 ```
+With `@attribute_name` event you can initialize class name on view creation and listen to changes of `attribute_name`
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.title': {
+            'class': {
+                'hidden': '@hide'
+            }
+        }
+    } 
+});
+```
 
 ### attr
 
@@ -392,7 +394,7 @@ Backbone.DOMView.extend({
 
 Used to change attributes values.
 
-It is a hash where keys are attributes names and values same as in [class](#class) helper only values from callbacks will be used as values for attributes.
+It is a hash where the keys are attributes names and values same as in [class](#class) helper only values from callbacks will be used as values for attributes.
 ```javascript
 Backbone.DOMView.extend({
     template: {
@@ -496,7 +498,7 @@ Backbone.DOMView.extend({
 
 ### safeHtml
 
-Just like `html` only it will filter all `<script>` tags and `on*=` attributes like `onclick=` and so on.
+Just like `html` only it will replace tags `script`, `style`, `link`, `meta`, `iframe`, `frame` with tag `<div style="display: none;">` and will replace `on*=` attributes like `onclick=` with `data-on*=` like `data-onclick=`.
 
 ### text
 
@@ -539,7 +541,7 @@ Backbone.DOMView.extend({
 
 Used to bind callbacks to dom events.
 
-It is a hash where keys are space separated dom events and values are callbacks or hash of selectors and callbacks. Callback will get same arguments as jQuery `.on()` callback. `this` in callbacks will be current view.
+It is a hash where keys are space separated dom events and values are string names of view methods or callbacks or hash of selectors and callbacks (to implement `.on('event', 'selector', callback)` pattern). Callback will get same arguments as jQuery `.on()` callback. `this` in callbacks will be current view.
 ```javascript
 Backbone.DOMView.extend({
     open: function () {
@@ -577,7 +579,7 @@ Backbone.DOMView.extend({
 
 ### connect
 
-This helper gives you two way binding with element property and view or model field. By default helper will listen for `chnage` event in element and `change:field_name` in view or model
+This helper gives you two way binding with element property and view or model attribute. By default helper will listen for `chnage` event in element and `change:field_name` in view or model.
 ```javascript
 Backbone.DOMView.extend({
     defaults: {
@@ -598,7 +600,7 @@ Backbone.DOMView.extend({
     }
 });
 ```
-So when `input.title` element will trigger `change` event, helper will take `value` property and set it to model's `title` field and when model trigger `change:title`, helper will change `value` with new `title`. Same with view's `active` field.
+So when `input.title` element will trigger `change` event, helper will take `value` property and set it to model's `title` field and when model trigger `change:title`, helper will change `value` with new `title`. Same with view's `active` attribute.
 
 If you want to listen different event in element then you can use `property|event` notation
 ```javascript
@@ -675,11 +677,11 @@ view.$el //= <ul><li>zero</li> <li>three</li> <li>four</li></ul>
 
 <a name="each-view"></a>**view:** `{View|Function}`
 
-If `view:` value is `Backbone.View` class (or extended form it) then helper will create instances from this class for each model added to collection. If `view:` value is `Function` then helper will call it for each model and expect view instance from it (helpful if you need different views in same collection).
+If `view:` value is `Backbone.View` class (or extended form it) then helper will create instances from this class for each model added to collection. If `view:` value is `Function` then helper will call it for each model and expect View class or view instance from it (helpful if you need different views in same collection).
 
 **el:** `{String|Object}` Default: `null`
 
-Selector for `el:` option fo `view:` class.
+Selector for `el:` option for `view:` class.
 ```html
 <ul class="items">
     <li><span class="title"></span></li>
@@ -703,7 +705,7 @@ view.$el //= <ul class="items"><li><span class="title">one</span></li> <li><span
 ```
 When you will create instance of `ListView` it will detach `ul.items > li` and use it clone as `el:` option for `ItemView`.
 
-If your collection should be rendered with different views and different `el:` for them, then you can use object with selectors.
+If your collection should be rendered with different views and different `el:` for them, then you can use object with tags attributes names and model attributes.
 ```html
 <ul>
     <li data-type="1"><span></span></li>
@@ -720,20 +722,49 @@ var ListView = Backbone.DOMView.extend({
                     switch (model.get('type')) {
                         case '1': return FirstView;
                         case 'second': return InputView;
-                        default: return DefaultView;
+                        case 'last': return DefaultView;
                     }
                 },
                 el: {
-                    '> [data-type="1"]': FirstView,
-                    '> [data-type="second"]': InputView,
-                    '> [data-type="last"]': 'default'
+                    'data-type': 'type'
                 }
             }
         }
     }
 });
 ```
-This means that helper will detach three elements and will create map object, it whill show which view should get which element. So if `view:` function will return `FirstView` class then it will get `ui.items > [data-type="1"]` clone, `InputView` - `ui.items > [data-type="second"]` and `'default'` means that any other view class will get `ui.items > [data-type="last"]` clone.
+This means that helper will detach all `ul.items > [data-type]` elements and when new model will be added to collection it will take it `type` attribute value and find element with same `data-type` attribute value and will use it clone for new child view as `el:` option.
+
+Instead of model's attribute name you can also use function which should return elements attribute value
+```html
+<ul>
+    <li class="type-one"><span></span></li>
+    <li class="type-two"><input /></li>
+    <li class="type-three"><div></div></li>
+</ul>
+```
+```javascript
+var ListView = Backbone.DOMView.extend({
+    template: {
+        'ul.items': {
+            each: {
+                view: function (model) {
+                    switch (model.get('type')) {
+                        case 'one': return FirstView;
+                        case 'two': return InputView;
+                        case 'three': return DefaultView;
+                    }
+                },
+                el: {
+                    'class': function (model) {
+                        return 'type-' + model.get('type');
+                    }
+                }
+            }
+        }
+    }
+});
+```
 
 <a name="each-field"></a>**field:** `{String|Object}` Default: `null`
 
