@@ -87,7 +87,7 @@ Backbone.DOMView.extend({
     }
 });
 ```
-Empty selector means `this.$el` (see [find()](#find)) so to select root node use `root` alias.
+By default `ui:` has one alias `root` which is alias to `this.$el`.
 
 ### template:
 
@@ -121,10 +121,10 @@ Backbone.DOMView.extend({
     }
 });
 ```
-As value of `template:` you can use `Object` or `Function` (which should return an object).
+As value of `template:` you can use `Object` or `Function` (which should return an object). Function will get utility `extendDeep` as first argument
 ```javascript
 Backbone.DOMView.extend({
-    template: function () {
+    template: function (extendDeep) {
         var tpl = {
             'root': {
                 'class': {
