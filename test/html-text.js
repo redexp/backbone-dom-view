@@ -71,12 +71,12 @@
             }
           }
         });
-        model.set('name', 'Test <script src="app.js"/> <script src="app.js"></script> <div onclick="alert()" class="test"><font color="red">Name</font></div>');
+        model.set('name', 'Test <script src="app.js"/> <script src="app.js"></script> <div onclick = "1 > 2; \'<div>\'; alert()" class="test" onkeyup=><font color="red" onclick = alert onkeyup=\'alert()\'>Name</font></div>');
         view = new View({
           model: model
         });
         el = view.$el;
-        return expect(el).to.have.html('Test   <div class="test"><font color="red">Name</font></div>');
+        return expect(el).to.have.html('Test <div style="display: none;" src="app.js"></div> <div style="display: none;" src="app.js"></div> <div x-click="1 > 2; \'<div>\'; alert()" class="test" x-keyup=""><font color="red" x-click="alert" x-keyup="alert()">Name</font></div>');
       });
     });
   });

@@ -498,7 +498,7 @@ Backbone.DOMView.extend({
 
 ### safeHtml
 
-Just like `html` only it will replace tags `script`, `style`, `link`, `meta`, `iframe`, `frame` with tag `<div style="display: none;">` and will replace `on*=` attributes like `onclick=` with `data-on*=` like `data-onclick=`.
+Just like `html` only it will replace tags `script`, `style`, `link`, `meta`, `iframe`, `frame` with tag `<div style="display: none;">` and will replace `on*=` attributes like `onclick=` with `x-*=` like `x-click=`.
 
 ### text
 

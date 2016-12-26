@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.51.0';
+	DOMView.v = '1.52.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -362,9 +362,9 @@
 	}
 
 	function safeHtmlHelper(selector, options) {
-		var isOnAttr = /^on\w+/,
-			scriptTag = /<\/?script\b[^>]*>/g,
-			tag = /<([\w\-]+\s+)([^>]+)>/g;
+		var dangerTagStart = /<(?:script|style|link|meta|iframe|frame)\b/ig,
+			dangerTagEnd = /<\/(?:script|style|link|meta|iframe|frame)\b/ig,
+			isWord = /\w/;
 
 		callJqueryMethod({
 			view: this,
@@ -373,15 +373,57 @@
 			options: options,
 			iteratorCallback: true,
 			wrapper: function (html) {
-				return html
-					.replace(scriptTag, '')
-					.replace(tag, function (tag, name, body) {
-						body = body.split(/\s+/).filter(function (attr) {
-							return !isOnAttr.test(attr);
-						}).join(' ');
+				html = html
+					.replace(dangerTagStart, '<div style="display: none;"')
+					.replace(dangerTagEnd, '</div');
 
-						return '<' + name + body + '>';
-					});
+				/**
+				 * 0 - text
+				 * 1 - tag
+				 * 2 - attribute name start
+				 * 3 - attribute name
+				 * 4 - attribute value start
+				 * 5 - attribute value
+				 */
+				var context = 0;
+				var attr;
+				var char;
+
+				for (var i = 0, len = html.length; i < len; i++) {
+					char = html[i];
+					if (context === 0 && char === '<' && isWord.test(html[i + 1])) {
+						context = 1;
+					}
+					else if (char === '>' && (context !== 5 || attr === ' ')) {
+						context = 0;
+					}
+					else if (char === ' ' && context === 1) {
+						context = 2;
+					}
+					else if (char !== ' ' && context === 2) {
+						context = 3;
+						if (char === 'o' && html[i + 1] === 'n') {
+							html = html.slice(0, i) + 'x-' + html.slice(i + 2);
+						}
+					}
+					else if (char === '=' && context === 3) {
+						context = 4;
+					}
+					else if ((char === '"' || char === "'") && context === 4) {
+						attr = char;
+						context = 5;
+					}
+					else if (char !== ' ' && context === 4) {
+						attr = ' ';
+						context = 5;
+					}
+					else if (char === attr && context === 5) {
+						attr = false;
+						context = 2;
+					}
+				}
+
+				return html;
 			}
 		});
 	}
