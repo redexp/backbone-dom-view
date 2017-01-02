@@ -517,7 +517,7 @@ Backbone.DOMView.extend({
                 '.name': {
                     text: '@name'
                 },
-                '.age': {
+                '&.age': {
                     text: '@age'
                 }
             }
@@ -528,12 +528,52 @@ Backbone.DOMView.extend({
         '.user .name': {
             text: '@name'
         },
-        '.user .age': {
+        '.user.age': {
             text: '@age'
         }
     }
 });
 ```
+You can write this even shorter, just start all your sub selectors with `&` and you can omit `template:` helper.
+Basically it means if helper name starts with `&` then recognize it as selector.
+```html
+<div class="user">
+  <h2 class="title"></h2>
+  <span class="user-name"></span>
+  <div data-toolbar>
+    <button data-toolbar-edit></button>
+  </div>
+</div>
+```
+```javascript
+Backbone.DOMView.extend({
+    template: {
+        '.user': {
+            '& .title': {
+                text: '@title'
+            },
+            '&-name': {
+                text: '@name'
+            },
+            '& [data-toolbar': {
+                '&-edit]': {
+                    on: {
+                        'click': function() {
+                            //...
+                        }
+                    }
+                }
+            },
+            on: {
+                'click': function() {
+                    //...
+                }
+            }
+        }
+    }
+});
+```
+
 
 ### on
 

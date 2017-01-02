@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.52.0';
+	DOMView.v = '1.53.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -284,15 +284,29 @@
 			rootSelector = '{' + rootSelector + '}';
 		}
 
-		rootSelector += rootSelector ? ' ' : '';
-
 		for (var i = 0, len = selectors.length; i < len; i++) {
 			selector = selectors[i];
 
 			var helpersList = template[selector];
 
+			if (rootSelector) {
+				if (selector.charAt(0) === '&') {
+					selector = selector.slice(1);
+				}
+				else {
+					selector = ' ' + selector;
+				}
+			}
+
 			for (var helper in helpersList) {
 				if (!has(helpersList, helper)) continue;
+
+				if (helper.charAt(0) === '&') {
+					var ops = {};
+					ops[helper] = helpersList[helper];
+					templateHelper.call(this, rootSelector + selector, ops);
+					continue;
+				}
 
 				if (_DEV_) {
 					if (!has(helpers, helper)) {
@@ -564,7 +578,7 @@
 
 		if (_DEV_) {
 			if (node.length === 0) {
-				console.warn('Empty node. Be sure that you set correct selector to template of ' + this.constructor.name);
+				console.warn('Empty node. Be sure that you set correct selector to template of ' + ops.view.constructor.name);
 			}
 		}
 
@@ -929,9 +943,7 @@
 
 	eachHelper.EachViewList = EachViewList;
 
-	function EachViewList() {
-
-	}
+	function EachViewList() {}
 
 	_.extend(EachViewList.prototype, {
 		where: function (attrs, first) {

@@ -8,7 +8,7 @@
       return model = new Backbone.Model();
     });
     return describe('template helper', function() {
-      return it('should combine parent selector and children selectors', function() {
+      it('should combine parent selector and children selectors', function() {
         var View, view;
         View = DomView.extend({
           el: '<div>\n    <div data-item>\n        <div data-name></div>\n        <div data-count>\n            <div data-value></div>\n        </div>\n    </div>\n    <div data-title></div>\n    <div data-test>\n        <div data-name></div>\n    </div>\n</div>',
@@ -55,6 +55,67 @@
         expect(view.$('[data-item] [data-count] [data-value]')).to.have.text('2');
         expect(view.$('[data-title]')).to.have.text('3');
         return expect(view.$('[data-test] [data-name]')).to.have.text('4');
+      });
+      return it('should handle & in subselectors', function() {
+        var View, view;
+        View = DomView.extend({
+          el: '<div>\n    <div data-item>\n        <div data-item-test>\n            <span></span>\n            <div data-item-test-value></div>\n        </div>\n        <div data-item-name></div>\n        <div data-item-count>\n            <div data-value></div>\n        </div>\n    </div>\n    <div data-title></div>\n    <div data-test></div>\n    <div data-test data-name></div>\n</div>',
+          ui: {
+            test: '[data-test]'
+          },
+          template: {
+            '[data-item': {
+              '&-test': {
+                '&] span': {
+                  text: function() {
+                    return 0.1;
+                  }
+                },
+                '&-value]': {
+                  text: function() {
+                    return 0.2;
+                  }
+                }
+              },
+              template: {
+                '&-name]': {
+                  text: function() {
+                    return 1;
+                  }
+                },
+                '&-count]': {
+                  '& [data-value]': {
+                    text: function() {
+                      return 2;
+                    }
+                  }
+                }
+              }
+            },
+            '[data-title]': {
+              text: function() {
+                return 3;
+              }
+            },
+            'test': {
+              template: {
+                '&[data-name]': {
+                  text: function() {
+                    return 4;
+                  }
+                }
+              }
+            }
+          }
+        });
+        view = new View();
+        expect(view.$('[data-item-test] span')).to.have.text('0.1');
+        expect(view.$('[data-item-test-value]')).to.have.text('0.2');
+        expect(view.$('[data-item-name]')).to.have.text('1');
+        expect(view.$('[data-item-count] [data-value]')).to.have.text('2');
+        expect(view.$('[data-title]')).to.have.text('3');
+        expect(view.$('[data-test]').eq(0)).to.have.text('');
+        return expect(view.$('[data-test][data-name]')).to.have.text('4');
       });
     });
   });
