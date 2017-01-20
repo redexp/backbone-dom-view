@@ -73,6 +73,38 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(zView.$el).to.have.attr 'test', '20'
 
+        it 'should handle null in template values as ignore', ->
+            View = DomView.extend
+                template:
+                    'root':
+                        text: '@name'
+                        attr:
+                            'test': '@name'
+
+            XView = DomView.extend
+                template:
+                    'root':
+                        text: null
+                        attr:
+                            'test': null
+                            'test2': '@name'
+
+            model.set('name', 'Jack')
+
+            view = new View model: model
+            el = view.$el
+
+            expect(el).to.have.text 'Jack'
+            expect(el).to.have.attr 'test', 'Jack'
+            expect(el).not.to.have.attr 'test2'
+
+            view = new XView model: model
+            el = view.$el
+
+            expect(el).to.have.text ''
+            expect(el).not.to.have.attr 'test'
+            expect(el).to.have.attr 'test2', 'Jack'
+
         it 'should extend parent ui:', ->
             View = DomView.extend
                 el: '<li><span></span><a href="#"><i></i></a></li>'

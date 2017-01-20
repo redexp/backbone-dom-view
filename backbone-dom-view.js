@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.53.0';
+	DOMView.v = '1.54.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -545,8 +545,10 @@
 			break;
 
 		case 'object':
+			if (options === null) break;
+
 			for (var events in options) {
-				if (!has(options, events)) continue;
+				if (!has(options, events) || options[events] === null) continue;
 
 				bindEvents(events, options[events]);
 			}
