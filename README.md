@@ -162,8 +162,9 @@ Same as `Backbone.Model::defaults` option, see [get, set, has](#get-set-has) in 
 * [find](#find)
 * [bind](#bind)
 * [bindTo](#bindTo)
-* [listenElement](#listenElement)
-* [stopListeningElement](#stopListeningElement)
+* [listenElement](#listenelementelement-event-callback)
+* [listenElementOnce](#listenelementonce)
+* [stopListeningElement](#stoplisteningelement)
 
 ### get, set, has
 
@@ -292,13 +293,17 @@ Backbone.DOMView.extend({
 
 ### listenElement(element, event, callback)
 
-Just like `listenTo()` only for html elements. Instead of `element.on(event, callback)` you can use `view.listenElement(element, event, callback)` and `this` in `callback` will be `view` and when you will need to remove `callback` from `elemet` you can use `view.stopListeningElement(element)`. Useful for memory management.
+Like `listenTo()` only for html elements. Instead of `element.on(event, callback)` you can use `view.listenElement(element, event, callback)` and `this` in `callback` will be `view` and when you will need to remove `callback` from `elemet` you can use `view.stopListeningElement(element)`. Useful for memory management.
 
 Also you can pass `selector` like with `element.on(event, selector, callback)` same here `view.listenElement(element, event, selector, callback)`
 
+### listenElementOnce()
+
+Like `listenElement()` but it will trigger handler only once.
+
 ### stopListeningElement()
 
-Just like `stopListening()`. If you pass no arguments, it will off all events from all elements. If you pass just element, then it will off all events from this element. If you pass element and event name, then it will off only this event.
+Like `stopListening()`. If you pass no arguments, it will off all events from all elements. If you pass just element, then it will off all events from this element. If you pass element and event name, then it will off only this event.
 
 ## Internal Events
 

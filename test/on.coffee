@@ -16,9 +16,12 @@ define ['chai', 'backbone', 'backbone-dom-view', 'jquery'], ({expect}, Backbone,
                         n++
 
             view = new View model: model
-            view.$el.click()
 
+            view.$el.click()
             expect(n).to.equal 1
+
+            view.$el.click()
+            expect(n).to.equal 2
 
         it 'should run function on delegate event', ->
             eventsCalled = 0

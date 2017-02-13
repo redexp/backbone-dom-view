@@ -27,7 +27,9 @@
           model: model
         });
         view.$el.click();
-        return expect(n).to.equal(1);
+        expect(n).to.equal(1);
+        view.$el.click();
+        return expect(n).to.equal(2);
       });
       it('should run function on delegate event', function() {
         var View, eventsCalled, view;

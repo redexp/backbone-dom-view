@@ -385,6 +385,40 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
     describe 'listenElement(), stopListeningElement()', ->
 
+        it 'should listenElement', () ->
+            n = 0
+
+            View = DomView.extend
+                initialize: ->
+                    this.listenElement this.$el, 'click', ->
+                        expect(this).to.be.instanceOf View
+                        n++
+
+            view = new View model: model
+
+            view.$el.click()
+            expect(n).to.equal 1
+
+            view.$el.click()
+            expect(n).to.equal 2
+
+        it 'should listenElementOnce', () ->
+            n = 0
+
+            View = DomView.extend
+                initialize: ->
+                    this.listenElementOnce this.$el, 'click', ->
+                        expect(this).to.be.instanceOf View
+                        n++
+
+            view = new View model: model
+
+            view.$el.click()
+            expect(n).to.equal 1
+
+            view.$el.click()
+            expect(n).to.equal 1
+
         it 'should stopListenElement', ->
             n = 0
 
@@ -433,3 +467,34 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             view.$el.trigger('test-2')
             expect(n).to.equal 1
+
+        it 'should stopListenElement by function', () ->
+            View = DomView.extend()
+
+            view = new View model: model
+
+            f1n = 0
+
+            f1 = ->
+                expect(this).to.be.instanceOf View
+                f1n++
+
+            f2n = 0
+
+            f2 = ->
+                expect(this).to.be.instanceOf View
+                f2n++
+
+            view.listenElement view.$el, 'click', f1
+            view.listenElement view.$el, 'click', f2
+
+            view.$el.click()
+            view.$el.click()
+            expect(f1n).to.equal 2
+            expect(f2n).to.equal 2
+
+            view.stopListeningElement view.$el, 'click', f1
+
+            view.$el.click()
+            expect(f1n).to.equal 2
+            expect(f2n).to.equal 3

@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.54.0';
+	DOMView.v = '1.55.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -194,44 +194,30 @@
 			return this.template[selector].each.viewList;
 		},
 
-		listenElement: function (node, events) {
-			if (!this._listenElement) this._listenElement = [];
+		listenElement: listenElement('on'),
 
-			this._listenElement.push(node);
-
-			node = node instanceof $ ? node : $(node);
-
-			var args = _.rest(arguments);
-
-			args[args.length - 1] = args[args.length - 1].bind(this);
-
-			var ns = '.listenBy' + this.cid;
-
-			events = events.split(/\s+/);
-
-			for (var i = 0, len = events.length; i < len; i++) {
-				args[0] = events[i] + ns;
-				node.on.apply(node, args);
-			}
-
-			return this;
-		},
+		listenElementOnce: listenElement('one'),
 
 		stopListeningElement: function (node, events) {
 			if (!this._listenElement) return this;
 
+			var ns = '.listenBy' + this.cid;
+
 			if (node) {
-				var index = this._listenElement.indexOf(node);
-
-				if (index > -1) {
-					this._listenElement.splice(index, 1);
-				}
-
 				node = node instanceof $ ? node : $(node);
 			}
 
-			var ns = '.listenBy' + this.cid,
-				i, len;
+			if (events) {
+				events = events
+					.split(/\s+/)
+					.map(function (event) {
+						return event + ns;
+					})
+					.join(' ')
+				;
+			}
+
+			var i, len;
 
 			switch (arguments.length) {
 			case 0:
@@ -245,17 +231,78 @@
 				node.off(ns);
 				break;
 
+			case 2:
+				node.off(events);
+				break;
+
 			default:
-				events = events.split(/\s+/);
-				for (i = 0, len = events.length; i < len; i++) {
-					node.off(events[i] + ns);
-				}
+				var view = this;
+
+				var args = _.rest(arguments).map(function (arg) {
+					if (typeof arg === 'function' && arg['_bindWith' + view.cid]) {
+						return arg['_bindWith' + view.cid];
+					}
+					else {
+						return arg;
+					}
+				});
+
+				args[0] = events;
+
+				node.off.apply(node, args);
 				break;
 			}
 
 			return this;
 		}
 	});
+
+	function listenElement(method) {
+		return function (node, events) {
+			if (_DEV_) {
+				if (node instanceof $ === false && node instanceof window.HTMLElement === false) {
+					throw new Error("node should be instance of jQuery or HTMLElement");
+				}
+			}
+
+			if (!this._listenElement) this._listenElement = [];
+
+			var ns = '.listenBy' + this.cid;
+
+			if (this._listenElement.indexOf(node) === -1) {
+				this._listenElement.push(node);
+			}
+
+			node = node instanceof $ ? node : $(node);
+
+			if (events) {
+				events = events
+					.split(/\s+/)
+					.map(function (event) {
+						return event + ns;
+					})
+					.join(' ')
+				;
+			}
+
+			var view = this;
+
+			var args = _.rest(arguments).map(function (arg) {
+				if (typeof arg === 'function' && !arg['_bindWith' + view.cid]) {
+					return arg['_bindWith' + view.cid] = _.bind(arg, view);
+				}
+				else {
+					return arg;
+				}
+			});
+
+			args[0] = events;
+
+			node[method].apply(node, args);
+
+			return this;
+		}
+	}
 
 	DOMView.readyEvent = 'template-ready';
 	DOMView.elementEvent = 'element-ready';

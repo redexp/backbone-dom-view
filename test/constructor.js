@@ -447,7 +447,45 @@
       });
     });
     return describe('listenElement(), stopListeningElement()', function() {
-      return it('should stopListenElement', function() {
+      it('should listenElement', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          initialize: function() {
+            return this.listenElement(this.$el, 'click', function() {
+              expect(this).to.be.instanceOf(View);
+              return n++;
+            });
+          }
+        });
+        view = new View({
+          model: model
+        });
+        view.$el.click();
+        expect(n).to.equal(1);
+        view.$el.click();
+        return expect(n).to.equal(2);
+      });
+      it('should listenElementOnce', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          initialize: function() {
+            return this.listenElementOnce(this.$el, 'click', function() {
+              expect(this).to.be.instanceOf(View);
+              return n++;
+            });
+          }
+        });
+        view = new View({
+          model: model
+        });
+        view.$el.click();
+        expect(n).to.equal(1);
+        view.$el.click();
+        return expect(n).to.equal(1);
+      });
+      it('should stopListenElement', function() {
         var View, n, view;
         n = 0;
         View = DomView.extend({
@@ -490,6 +528,33 @@
         n = 1;
         view.$el.trigger('test-2');
         return expect(n).to.equal(1);
+      });
+      return it('should stopListenElement by function', function() {
+        var View, f1, f1n, f2, f2n, view;
+        View = DomView.extend();
+        view = new View({
+          model: model
+        });
+        f1n = 0;
+        f1 = function() {
+          expect(this).to.be.instanceOf(View);
+          return f1n++;
+        };
+        f2n = 0;
+        f2 = function() {
+          expect(this).to.be.instanceOf(View);
+          return f2n++;
+        };
+        view.listenElement(view.$el, 'click', f1);
+        view.listenElement(view.$el, 'click', f2);
+        view.$el.click();
+        view.$el.click();
+        expect(f1n).to.equal(2);
+        expect(f2n).to.equal(2);
+        view.stopListeningElement(view.$el, 'click', f1);
+        view.$el.click();
+        expect(f1n).to.equal(2);
+        return expect(f2n).to.equal(3);
       });
     });
   });
