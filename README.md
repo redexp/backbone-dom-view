@@ -336,6 +336,7 @@ If you want to do some stuff before `initialize` but after `this.$el` prepared o
 * [text](#text)
 * [template](#template)
 * [on](#on)
+* [once](#once)
 * [connect](#connect)
 * [each](#each)
 
@@ -621,6 +622,12 @@ Backbone.DOMView.extend({
     } 
 });
 ```
+
+### once
+
+**jQuery alias:** `.one()`
+
+Same as `on` helper, only it will unbind handler of event after first trigger of it.
 
 ### connect
 

@@ -7,7 +7,7 @@
     beforeEach(function() {
       return model = new Backbone.Model();
     });
-    return describe('on helper', function() {
+    return describe('on/once helpers', function() {
       it('should run function on dom event', function() {
         var View, n, view;
         n = 0;
@@ -63,7 +63,7 @@
         view.$el.find('button').click();
         return expect(eventsCalled).to.be.equal(2);
       });
-      return it('should run view method if string passed', function() {
+      it('should run view method if string passed', function() {
         var View, n, view;
         n = 0;
         View = DomView.extend({
@@ -89,6 +89,29 @@
         expect(n).to.equal(1);
         view.$el.trigger('test');
         return expect(n).to.equal('test');
+      });
+      return it('should run function once', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          test: function() {
+            return n++;
+          },
+          template: {
+            'root': {
+              once: {
+                'click': 'test'
+              }
+            }
+          }
+        });
+        view = new View({
+          model: model
+        });
+        view.$el.click();
+        expect(n).to.equal(1);
+        view.$el.click();
+        return expect(n).to.equal(1);
       });
     });
   });

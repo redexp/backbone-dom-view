@@ -5,7 +5,7 @@ define ['chai', 'backbone', 'backbone-dom-view', 'jquery'], ({expect}, Backbone,
     beforeEach ->
         model = new Backbone.Model()
 
-    describe 'on helper', ->
+    describe 'on/once helpers', ->
         it 'should run function on dom event', () ->
             n = 0
 
@@ -61,10 +61,27 @@ define ['chai', 'backbone', 'backbone-dom-view', 'jquery'], ({expect}, Backbone,
                         'test': 'run'
 
             view = new View model: model
-            view.$el.click()
 
+            view.$el.click()
             expect(n).to.equal 1
 
             view.$el.trigger('test')
-
             expect(n).to.equal 'test'
+
+        it 'should run function once', ->
+            n = 0
+
+            View = DomView.extend
+                test: -> n++
+
+                template: 'root':
+                    once:
+                        'click': 'test'
+
+            view = new View model: model
+
+            view.$el.click()
+            expect(n).to.equal 1
+
+            view.$el.click()
+            expect(n).to.equal 1

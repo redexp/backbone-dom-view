@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.55.0';
+	DOMView.v = '1.56.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -316,7 +316,8 @@
 		html: htmlHelper,
 		safeHtml: safeHtmlHelper,
 		text: textHelper,
-		on: onHelper,
+		on: onHelper('listenElement'),
+		once: onHelper('listenElementOnce'),
 		connect: connectHelper,
 		each: eachHelper
 	};
@@ -502,44 +503,46 @@
 		});
 	}
 
-	function onHelper(selector, options) {
-		var view = this,
-			node = this.find(selector),
-			ops;
+	function onHelper(listenMethod) {
+	    return function (selector, options) {
+			var view = this,
+				node = this.find(selector),
+				ops;
 
-		for (var event in options) {
-			if (!has(options, event)) continue;
+			for (var event in options) {
+				if (!has(options, event)) continue;
 
-			ops = options[event];
+				ops = options[event];
 
-			switch (typeof ops) {
-			case 'function':
-				this.listenElement(node, event, ops);
-				break;
+				switch (typeof ops) {
+					case 'function':
+						this[listenMethod](node, event, ops);
+						break;
 
-			case 'object':
-				for (var target in ops) {
-					if (!has(ops, target)) continue;
+					case 'object':
+						for (var target in ops) {
+							if (!has(ops, target)) continue;
 
-					this.listenElement(node, event, target, ops[target]);
+							this[listenMethod](node, event, target, ops[target]);
+						}
+						break;
+
+					case 'string':
+						if (_DEV_) {
+							if (typeof this[ops] !== 'function') {
+								console.warn('View "%s" do not have method "%s"', this.constructor.name, ops);
+							}
+						}
+
+						(function (method) {
+							view[listenMethod](node, event, function () {
+								this[method]();
+							});
+						})(ops);
+						break;
 				}
-				break;
-
-			case 'string':
-				if (_DEV_) {
-					if (typeof this[ops] !== 'function') {
-						console.warn('View "%s" do not have method "%s"', this.constructor.name, ops);
-					}
-				}
-
-				(function (method) {
-					view.listenElement(node, event, function () {
-						this[method]();
-					});
-				})(ops);
-				break;
 			}
-		}
+		};
 	}
 
 	function connectHelper(selector, options) {
