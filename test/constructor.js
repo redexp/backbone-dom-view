@@ -242,7 +242,7 @@
         expect(view.get('name')).to.equal(1);
         return expect(view.get('field')).to.equal(1);
       });
-      return it('should trigger elementEvent on setElement', function() {
+      it('should trigger elementEvent on setElement', function() {
         var View, view, x;
         x = 0;
         View = DomView.extend({
@@ -258,6 +258,20 @@
         });
         view = new View;
         return expect(x).to.equal(1);
+      });
+      return it('should create callbacks', function() {
+        var test1, test2, view;
+        test1 = function() {};
+        test2 = function() {};
+        view = new DomView({
+          test1: test1,
+          test2: test2,
+          test3: 1
+        });
+        return expect(view.callbacks).to.deep.equal({
+          test1: test1,
+          test2: test2
+        });
       });
     });
     describe('find()', function() {

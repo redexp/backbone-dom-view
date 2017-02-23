@@ -151,6 +151,38 @@ Backbone.DOMView.extend({
 
 Same as `Backbone.Model::defaults` option, see [get, set, has](#get-set-has) in [Methods](#methods) section.
 
+### .callbacks
+
+I'v added this property because it useful to return control from view back to your controller. You can pass callbacks with options when you create new instance or just add functions by your self and save one indentation
+```javascript
+var View = Backbone.DOMView.extend({
+    initialize: function () {
+        this.listenElement(this.find('button'), 'click', function () {
+            this.callbacks.onSomeAction();
+        });
+    }
+});
+```
+```javascript
+var view = new View({
+    el: '#test',
+    onSomeAction: function () {
+        // ...
+    }
+});
+
+view.callbacks.onSomeAction //> function
+```
+```javascript
+var view = new View({
+    el: '#test'
+});
+
+view.callbacks.onSomeAction = function () {
+    // ...
+};
+```
+
 ### .parent
 
 [each](#each) helper will add to children views field `parent` which will be link to current view.
@@ -593,6 +625,9 @@ Backbone.DOMView.extend({
     open: function () {
         //...
     },
+    close: function () {
+        //...
+    },
 
     template: {
         '.open': {
@@ -605,12 +640,16 @@ Backbone.DOMView.extend({
             }
         },
     
-        '.remove': {
-            'on': {
+        '.close': {
+            on: {
+                'click': '!close',
+                // same as
                 'click': function (e) {
-                    e.preventDefault();
-                    return this.model.remove();
+                	e.preventDefault();
+                	this.close();
                 },
+                // or if you just want to call preventDefault
+                'click': '!',
                 
                 'change': {
                     'input.name': function (e) {

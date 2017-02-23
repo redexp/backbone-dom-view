@@ -198,6 +198,17 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(x).to.equal 1
 
+        it 'should create callbacks', ->
+            test1 = ->
+            test2 = ->
+
+            view = new DomView
+                test1: test1
+                test2: test2
+                test3: 1
+
+            expect(view.callbacks).to.deep.equal({test1: test1, test2: test2})
+
     describe 'find()', ->
 
         it 'should return root node', ->

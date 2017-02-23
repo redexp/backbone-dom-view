@@ -90,7 +90,7 @@
         view.$el.trigger('test');
         return expect(n).to.equal('test');
       });
-      return it('should run function once', function() {
+      it('should run function once', function() {
         var View, n, view;
         n = 0;
         View = DomView.extend({
@@ -112,6 +112,36 @@
         expect(n).to.equal(1);
         view.$el.click();
         return expect(n).to.equal(1);
+      });
+      return it('should handle ! as preventDefault', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          test: function() {
+            return n++;
+          },
+          template: {
+            'root': {
+              on: {
+                'click': '!test',
+                'test': '!'
+              }
+            }
+          }
+        });
+        view = new View;
+        view.$el.on('click', function(e) {
+          n++;
+          return expect(e.isDefaultPrevented()).to.equal(true);
+        });
+        view.$el.on('test', function(e) {
+          n = 'test';
+          return expect(e.isDefaultPrevented()).to.equal(true);
+        });
+        view.$el.click();
+        expect(n).to.equal(2);
+        view.$el.trigger('test');
+        return expect(n).to.equal('test');
       });
     });
   });

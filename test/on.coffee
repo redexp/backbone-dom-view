@@ -85,3 +85,32 @@ define ['chai', 'backbone', 'backbone-dom-view', 'jquery'], ({expect}, Backbone,
 
             view.$el.click()
             expect(n).to.equal 1
+
+        it 'should handle ! as preventDefault', ->
+            n = 0
+
+            View = DomView.extend
+                test: -> n++
+
+                template: 'root':
+                    on:
+                        'click': '!test'
+                        'test': '!'
+
+            view = new View
+
+            view.$el.on 'click', (e) ->
+                n++
+                expect(e.isDefaultPrevented()).to.equal true
+
+            view.$el.on 'test', (e) ->
+                n = 'test'
+                expect(e.isDefaultPrevented()).to.equal true
+
+            view.$el.click()
+
+            expect(n).to.equal 2
+
+            view.$el.trigger('test')
+
+            expect(n).to.equal 'test'

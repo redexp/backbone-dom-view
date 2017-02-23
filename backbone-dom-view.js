@@ -10,17 +10,28 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.56.0';
+	DOMView.v = '1.57.0';
 
 	var View = BB.View,
 		$ = BB.$;
 
 	function DOMView(ops) {
+		ops = ops || {};
+
 		if (has(ops, 'parent')) {
 			this.parent = ops.parent;
 		}
 
 		this.attributes = {};
+		this.callbacks = {};
+
+		for (var name in ops) {
+			if (!has(ops, name)) continue;
+
+			if (typeof ops[name] === 'function') {
+				this.callbacks[name] = ops[name];
+			}
+		}
 
 		if (this.defaults) {
 			this.set(mergeExtendedField(this, 'defaults'));
@@ -528,15 +539,26 @@
 						break;
 
 					case 'string':
-						if (_DEV_) {
-							if (typeof this[ops] !== 'function') {
-								console.warn('View "%s" do not have method "%s"', this.constructor.name, ops);
-							}
-						}
-
 						(function (method) {
-							view[listenMethod](node, event, function () {
-								this[method]();
+							var prevent = method.charAt(0) === '!';
+
+							if (prevent) {
+								method = method.slice(1);
+							}
+
+							if (_DEV_) {
+								if (method && typeof view[method] !== 'function') {
+									console.warn('View "%s" do not have method "%s"', view.constructor.name, method);
+								}
+							}
+
+							view[listenMethod](node, event, function (e) {
+								if (prevent) {
+									e.preventDefault();
+								}
+								if (method) {
+									this[method]();
+								}
 							});
 						})(ops);
 						break;
