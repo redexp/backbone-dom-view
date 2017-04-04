@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.57.0';
+	DOMView.v = '1.57.1';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -61,7 +61,7 @@
 			for (var name in ui) {
 				if (!has(ui, name) || typeof ui[name] !== 'string') continue;
 
-				ui[name] = this.find(ui[name]);
+				ensureUI(this, name);
 			}
 
 			this.template = mergeExtendedField(this, 'template', true);
@@ -75,27 +75,28 @@
 			if (!selector) return this.$el;
 
 			if (this.ui[selector]) {
-				if (typeof this.ui[selector] === 'string') {
-					this.ui[selector] = this.find(this.ui[selector]);
-				}
-
-				return this.ui[selector];
+				return ensureUI(this, selector);
 			}
 
 			if (selector.indexOf('{') > -1) {
 				var view = this,
-					rootSelectorLength = this.$el.selector.length;
+					rootSelectorLength = this.$el.selector && this.$el.selector.length;
 
 				selector = selector.replace(uiSelectors, function (x, name) {
-					if (typeof view.ui[name] === 'string') {
-						view.ui[name] = view.find(view.ui[name]);
-					}
+					var selector = ensureUI(view, name).selector || '';
 
-					return view.ui[name].selector.slice(rootSelectorLength);
+					return rootSelectorLength ? selector.slice(rootSelectorLength) : selector;
 				});
 			}
 
-			return this.$el.find(selector);
+			var node = this.$el.find(selector);
+
+			// bring back deprecated .selector
+			if (!node.selector) {
+				node.selector = selector;
+			}
+
+			return node;
 		},
 
 		bind: function (events, callback) {
@@ -267,6 +268,16 @@
 			return this;
 		}
 	});
+
+	function ensureUI(view, name) {
+		var selector = view.ui[name];
+
+		if (typeof selector === 'string') {
+			view.ui[name] = view.find(selector);
+		}
+
+		return view.ui[name];
+	}
 
 	function listenElement(method) {
 		return function (node, events) {
