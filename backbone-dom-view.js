@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.58.0';
+	DOMView.v = '1.58.1';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -621,6 +621,7 @@
 			node: this.find(selector),
 			method: 'css',
 			options: {'display': options},
+			iteratorCallback: true,
 			wrapper: function (v) {
 				return v ? '' : 'none';
 			}
@@ -633,6 +634,7 @@
 			node: this.find(selector),
 			method: 'css',
 			options: {'display': options},
+			iteratorCallback: true,
 			wrapper: function (v) {
 				return v ? 'none': '';
 			}
@@ -693,25 +695,33 @@
 			}
 		}
 
-		if (wrapper) {
-			value = wrapper(value);
-		}
-
 		if (ops.iteratorCallback && _.isFunction(value)) {
 			node.each(function (i, item) {
+				var val = value(i, item);
+
+				if (wrapper) {
+					val = wrapper(val);
+				}
+
 				if (fieldName) {
-					$(item)[method](fieldName, value(i, item));
+					$(item)[method](fieldName, val);
 				}
 				else {
-					$(item)[method](value(i, item));
+					$(item)[method](val);
 				}
 			});
 		}
-		else if (fieldName) {
-			node[method](fieldName, value);
-		}
 		else {
-			node[method](value);
+			if (wrapper) {
+				value = wrapper(value);
+			}
+
+			if (fieldName) {
+				node[method](fieldName, value);
+			}
+			else {
+				node[method](value);
+			}
 		}
 	}
 
