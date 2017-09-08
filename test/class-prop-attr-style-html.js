@@ -320,7 +320,7 @@
         expect(el).to.have["class"]('test');
         return expect(el).to.have["class"]('active');
       });
-      return it('should accept function as return value', function() {
+      it('should accept function as return value', function() {
         var View, li, view;
         View = DomView.extend({
           el: '<ul><li></li><li></li><li></li></ul>',
@@ -392,6 +392,46 @@
         expect(li.eq(0)).to.have.html('0');
         expect(li.eq(1)).to.have.html('1');
         return expect(li.eq(2)).to.have.html('2');
+      });
+      it('should be visible', function() {
+        var View, view;
+        View = DomView.extend({
+          el: '<div>',
+          defaults: {
+            'test': 1
+          },
+          template: {
+            'root': {
+              'visible': '@test'
+            }
+          }
+        });
+        view = new View();
+        expect(view.$el).to.have.css('display', '');
+        view.set('test', 0);
+        expect(view.$el).to.have.css('display', 'none');
+        view.set('test', 'a');
+        return expect(view.$el).to.have.css('display', '');
+      });
+      return it('should be hidden', function() {
+        var View, view;
+        View = DomView.extend({
+          el: '<div>',
+          defaults: {
+            'test': 1
+          },
+          template: {
+            'root': {
+              'hidden': '@test'
+            }
+          }
+        });
+        view = new View();
+        expect(view.$el).to.have.css('display', 'none');
+        view.set('test', '');
+        expect(view.$el).to.have.css('display', '');
+        view.set('test', {});
+        return expect(view.$el).to.have.css('display', 'none');
       });
     });
   });

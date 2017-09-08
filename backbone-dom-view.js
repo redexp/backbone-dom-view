@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.57.1';
+	DOMView.v = '1.58.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -341,6 +341,8 @@
 		on: onHelper('listenElement'),
 		once: onHelper('listenElementOnce'),
 		connect: connectHelper,
+		visible: visibleHelper,
+		hidden: hiddenHelper,
 		each: eachHelper
 	};
 
@@ -611,6 +613,30 @@
 
 			node.prop(prop, target.get(field));
 		}
+	}
+
+	function visibleHelper(selector, options) {
+		callJquerySetterMethod({
+			view: this,
+			node: this.find(selector),
+			method: 'css',
+			options: {'display': options},
+			wrapper: function (v) {
+				return v ? '' : 'none';
+			}
+		});
+	}
+
+	function hiddenHelper(selector, options) {
+		callJquerySetterMethod({
+			view: this,
+			node: this.find(selector),
+			method: 'css',
+			options: {'display': options},
+			wrapper: function (v) {
+				return v ? 'none': '';
+			}
+		});
 	}
 
 	function callJqueryMethod(ops) {

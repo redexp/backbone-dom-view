@@ -265,3 +265,34 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(li.eq(1)).to.have.html '1'
             expect(li.eq(2)).to.have.html '2'
 
+        it 'should be visible', ->
+            View = DomView.extend
+                el: '<div>'
+                defaults:
+                    'test': 1
+                template:
+                    'root':
+                        'visible': '@test'
+
+            view = new View()
+            expect(view.$el).to.have.css 'display', ''
+            view.set('test', 0)
+            expect(view.$el).to.have.css 'display', 'none'
+            view.set('test', 'a')
+            expect(view.$el).to.have.css 'display', ''
+
+        it 'should be hidden', ->
+            View = DomView.extend
+                el: '<div>'
+                defaults:
+                    'test': 1
+                template:
+                    'root':
+                        'hidden': '@test'
+
+            view = new View()
+            expect(view.$el).to.have.css 'display', 'none'
+            view.set('test', '')
+            expect(view.$el).to.have.css 'display', ''
+            view.set('test', {})
+            expect(view.$el).to.have.css 'display', 'none'
