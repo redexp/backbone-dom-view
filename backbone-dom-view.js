@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.58.1';
+	DOMView.v = '1.58.2';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -310,8 +310,14 @@
 			var view = this;
 
 			var args = _.rest(arguments).map(function (arg) {
-				if (typeof arg === 'function' && !arg['_bindWith' + view.cid]) {
-					return arg['_bindWith' + view.cid] = _.bind(arg, view);
+				if (typeof arg === 'function') {
+					var key = '_bindWith' + view.cid;
+
+					if (!arg[key]) {
+						arg[key] = _.bind(arg, view);
+					}
+
+					return arg[key];
 				}
 				else {
 					return arg;
