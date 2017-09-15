@@ -404,7 +404,6 @@
 			node: this.find(selector),
 			method: 'toggleClass',
 			options: options,
-			iteratorCallback: true,
 			wrapper: function (v) {
 				if (_.isFunction(v)) {
 					return function () {
@@ -449,8 +448,7 @@
 			view: this,
 			node: this.find(selector),
 			method: 'html',
-			options: options,
-			iteratorCallback: true
+			options: options
 		});
 	}
 
@@ -464,7 +462,6 @@
 			node: this.find(selector),
 			method: 'html',
 			options: options,
-			iteratorCallback: true,
 			wrapper: function (html) {
 				html = html
 					.replace(dangerTagStart, '<div style="display: none;"')
@@ -527,7 +524,6 @@
 			node: this.find(selector),
 			method: 'text',
 			options: options,
-			iteratorCallback: true,
 			wrapper: function (value) {
 				return _.isNull(value) || _.isUndefined(value) ? '' : value;
 			}
@@ -628,7 +624,6 @@
 			node: this.find(selector),
 			method: 'css',
 			options: {'display': options},
-			iteratorCallback: true,
 			wrapper: function (v) {
 				return v ? '' : 'none';
 			}
@@ -641,7 +636,6 @@
 			node: this.find(selector),
 			method: 'css',
 			options: {'display': options},
-			iteratorCallback: true,
 			wrapper: function (v) {
 				return v ? 'none': '';
 			}
@@ -690,7 +684,8 @@
 	}
 
 	function applyJqueryMethod(ops) {
-		var node = ops.node,
+		var view = ops.view,
+			node = ops.node,
 			method = ops.method,
 			fieldName = ops.fieldName,
 			value = ops.value,
@@ -702,9 +697,9 @@
 			}
 		}
 
-		if (ops.iteratorCallback && _.isFunction(value)) {
+		if (_.isFunction(value)) {
 			node.each(function (i, item) {
-				var val = value(i, item);
+				var val = value.call(view, i, item);
 
 				if (wrapper) {
 					val = wrapper(val);
