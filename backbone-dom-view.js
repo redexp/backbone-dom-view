@@ -338,6 +338,7 @@
 	var helpers = DOMView.helpers = {
 		template: templateHelper,
 		'class': classHelper,
+		toggleClass: classHelper,
 		attr: attrHelper,
 		prop: propHelper,
 		style: styleHelper,
