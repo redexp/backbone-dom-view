@@ -113,7 +113,7 @@
         view.$el.click();
         return expect(n).to.equal(1);
       });
-      return it('should handle ! as preventDefault', function() {
+      it('should handle ! as preventDefault', function() {
         var View, n, view;
         n = 0;
         View = DomView.extend({
@@ -142,6 +142,23 @@
         expect(n).to.equal(2);
         view.$el.trigger('test');
         return expect(n).to.equal('test');
+      });
+      return it('should handle click helper', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          test: function() {
+            return n++;
+          },
+          template: {
+            'root': {
+              click: 'test'
+            }
+          }
+        });
+        view = new View;
+        view.$el.click();
+        return expect(n).to.equal(1);
       });
     });
   });

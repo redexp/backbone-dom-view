@@ -114,3 +114,16 @@ define ['chai', 'backbone', 'backbone-dom-view', 'jquery'], ({expect}, Backbone,
             view.$el.trigger('test')
 
             expect(n).to.equal 'test'
+
+        it 'should handle click helper', ->
+            n = 0
+
+            View = DomView.extend
+                test: -> n++
+
+                template: 'root':
+                    click: 'test'
+
+            view = new View
+            view.$el.click()
+            expect(n).to.equal 1

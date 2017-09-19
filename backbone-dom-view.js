@@ -347,6 +347,7 @@
 		text: textHelper,
 		on: onHelper('listenElement'),
 		once: onHelper('listenElementOnce'),
+		click: clickHelper,
 		connect: connectHelper,
 		visible: visibleHelper,
 		hidden: hiddenHelper,
@@ -581,6 +582,10 @@
 				}
 			}
 		};
+	}
+
+	function clickHelper(selector, options) {
+		helpers['on'].call(this, selector, {click: options});
 	}
 
 	function connectHelper(selector, options) {
