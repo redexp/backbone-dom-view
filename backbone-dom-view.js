@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.58.2';
+	DOMView.v = '1.61.1';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -609,14 +609,12 @@
 
 			var target = view.has(field) ? view : view.model;
 
-			view.listenElement(node, event, function () {
-				target.set(field, node.prop(prop));
+			view.listenElement(node, event, function (e) {
+				target.set(field, e.currentTarget[prop]);
 			});
 
 			view.listenTo(target, 'change:' + field, function (model, value) {
-				if (value !== node.prop(prop)) {
-					node.prop(prop, value);
-				}
+				node.prop(prop, value);
 			});
 
 			node.prop(prop, target.get(field));

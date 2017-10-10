@@ -62,7 +62,7 @@
         expect(el).to.have.prop('value', 'bob');
         return expect(model.get('name')).to.be.equal('x');
       });
-      return it('should bind prop and field with custom node event', function() {
+      it('should bind prop and field with custom node event', function() {
         var View, el, view;
         View = DomView.extend({
           template: {
@@ -84,6 +84,37 @@
         expect(model.get('id')).to.be.equal('max');
         model.set('id', 'bob');
         return expect(el).to.have.prop('id', 'bob');
+      });
+      return it('should handle more than one node', function() {
+        var View, el, view;
+        View = DomView.extend({
+          el: '<div><input type="text"/><input type="text"/></div>',
+          template: {
+            'input': {
+              connect: {
+                'value': 'text'
+              }
+            }
+          }
+        });
+        model.set('text', 'test');
+        view = new View({
+          model: model
+        });
+        el = view.$el.find('input');
+        expect(el.eq(0)).to.have.prop('value', 'test');
+        expect(el.eq(1)).to.have.prop('value', 'test');
+        model.set('text', 'test2');
+        expect(el.eq(0)).to.have.prop('value', 'test2');
+        expect(el.eq(1)).to.have.prop('value', 'test2');
+        el.eq(0).val('val1').change();
+        expect(model.get('text')).to.equal('val1');
+        expect(el.eq(0)).to.have.prop('value', 'val1');
+        expect(el.eq(1)).to.have.prop('value', 'val1');
+        el.eq(1).val('val2').change();
+        expect(model.get('text')).to.equal('val2');
+        expect(el.eq(0)).to.have.prop('value', 'val2');
+        return expect(el.eq(1)).to.have.prop('value', 'val2');
       });
     });
   });
