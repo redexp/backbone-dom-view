@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.61.1';
+	DOMView.v = '1.62.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -759,6 +759,7 @@
 	 * @property {EachViewList} viewList
 	 * @property {String|Object} sortByViews
 	 * @property {String} viewProp
+	 * @property {String} removeClass
 	 */
 
 	/**
@@ -791,7 +792,7 @@
 			fieldClass;
 
 		if (typeof options.el === 'function') {
-			options.el = options.el.call(view);
+			options.el = options.el.call(view, holder);
 		}
 
 		switch (typeof options.el) {
@@ -819,6 +820,17 @@
 			}
 
 			break;
+		}
+
+		if (options.removeClass) {
+			if (viewEl) {
+				viewEl.removeClass(options.removeClass);
+			}
+			else if (viewElMap) {
+				viewElMap.forEach(function (item) {
+					_.invoke(item.nodes, 'removeClass', options.removeClass);
+				});
+			}
 		}
 
 		if (options.field) {

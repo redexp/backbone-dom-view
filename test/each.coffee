@@ -643,7 +643,9 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                     each:
                         field: 'list'
                         view: DomView
-                        el: ->
+                        el: (ul) ->
+                            expect(this).to.be.an.instanceof(ListView)
+                            expect(ul).to.be.an.instanceof(jQuery)
                             return jQuery('<span>')
 
             view = new ListView()
@@ -675,3 +677,20 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             expect(items.eq(1)).to.have.attr 'data-type', 'test3'
             expect(items.eq(2)).to.have.class 'type-test1'
 
+        it 'should remove class from clone', ->
+            ListView = DomView.extend
+                el: '<ul><li class="hidden test"></li></ul>'
+                defaults: ->
+                    list: new Backbone.Collection([{}, {}])
+
+                template: 'root':
+                    each:
+                        field: 'list'
+                        view: DomView
+                        el: '> *'
+                        removeClass: 'hidden'
+
+            view = new ListView()
+            expect(view.$el.children().length).to.equal(2)
+            expect(view.$el.find('.hidden').length).to.equal(0)
+            expect(view.$el.find('.test').length).to.equal(2)

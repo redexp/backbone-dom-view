@@ -937,7 +937,9 @@
               each: {
                 field: 'list',
                 view: DomView,
-                el: function() {
+                el: function(ul) {
+                  expect(this).to.be.an["instanceof"](ListView);
+                  expect(ul).to.be.an["instanceof"](jQuery);
                   return jQuery('<span>');
                 }
               }
@@ -948,7 +950,7 @@
         view.get('list').add([{}, {}]);
         return expect(view.$el.find('> span').length).to.equal(2);
       });
-      return it('should accept el as object of types', function() {
+      it('should accept el as object of types', function() {
         var ListView, items, view;
         ListView = DomView.extend({
           el: '<div><span class="type-test1"></span><span data-type="test2"></span><span data-type="test3"></span></div>',
@@ -987,6 +989,31 @@
         expect(items.eq(0)).to.have.attr('data-type', 'test2');
         expect(items.eq(1)).to.have.attr('data-type', 'test3');
         return expect(items.eq(2)).to.have["class"]('type-test1');
+      });
+      return it('should remove class from clone', function() {
+        var ListView, view;
+        ListView = DomView.extend({
+          el: '<ul><li class="hidden test"></li></ul>',
+          defaults: function() {
+            return {
+              list: new Backbone.Collection([{}, {}])
+            };
+          },
+          template: {
+            'root': {
+              each: {
+                field: 'list',
+                view: DomView,
+                el: '> *',
+                removeClass: 'hidden'
+              }
+            }
+          }
+        });
+        view = new ListView();
+        expect(view.$el.children().length).to.equal(2);
+        expect(view.$el.find('.hidden').length).to.equal(0);
+        return expect(view.$el.find('.test').length).to.equal(2);
       });
     });
   });

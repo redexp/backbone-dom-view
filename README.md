@@ -765,6 +765,7 @@ view.$el //= <ul><li>zero</li> <li>three</li> <li>four</li></ul>
 * [resetEvent:](#each-reset-event)
 * [addedEvent:](#each-added-event)
 * [offOnRemove:](#each-off-on-remove)
+* [removeClass:](#each-remove-class)
 
 <a name="each-view"></a>**view:** `{View|Function}`
 
@@ -1117,6 +1118,10 @@ This event will be triggered in sub view when `addHandler` will be called. It us
 <a name="each-off-on-remove"></a>**offOnRemove:** `{Boolean}` Default: `true`
 
 By default all views created by this helper on remove will stop listen all events (`.off().stopListening().stopListeningElement()`). You can disable it by set this option to `false`.
+
+<a name="each-remove-class"></a>**removeClass:** `{String}` Default: `undefined`
+
+This option is name of class assigned to `el` which will be removed before creating new sub view.
 
 ### Best practices for creating classes
 
