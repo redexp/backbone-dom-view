@@ -320,10 +320,12 @@
         var View, num, num2, view;
         View = DomView.extend({
           defaults: {
-            view_field: 1
+            view_field: 1,
+            view_field2: 'view'
           }
         });
         model.set('model_field', 0);
+        model.set('model_field2', 'model');
         view = new View({
           model: model
         });
@@ -337,6 +339,16 @@
           num++;
           expect(this).to.equal(view);
           return expect(v).to.equal(1);
+        });
+        view.bind('/model_field2', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal('model2');
+        });
+        view.bind('/view_field2', function(v) {
+          num++;
+          expect(this).to.equal(view);
+          return expect(v).to.equal('view2');
         });
         view.bind('!@model_field', function(v) {
           num++;
@@ -364,7 +376,11 @@
         model.trigger('test');
         view.trigger('view');
         expect(num).to.equal(6);
-        return expect(num2).to.equal(6);
+        expect(num2).to.equal(6);
+        view.set('view_field2', 'view2');
+        expect(num).to.equal(7);
+        model.set('model_field2', 'model2');
+        return expect(num).to.equal(8);
       });
       it('should bind events to external model', function() {
         var View, model2, num, num2, view;
@@ -420,7 +436,7 @@
         expect(num).to.equal(6);
         return expect(num2).to.equal(6);
       });
-      return it('should handle ! event', function() {
+      it('should handle ! event', function() {
         var View, num, view;
         View = DomView.extend({
           defaults: {
@@ -458,6 +474,30 @@
         model.trigger('test', true);
         view.trigger('view', 1);
         return expect(num).to.equal(6);
+      });
+      return it('should handle >', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          template: {
+            'root': {
+              text: {
+                '> #test #test2': function() {
+                  return n++;
+                }
+              }
+            }
+          }
+        });
+        view = new View;
+        expect(n).to.equal(1);
+        expect(view.$el).to.have.text('0');
+        view.trigger('test');
+        expect(n).to.equal(2);
+        expect(view.$el).to.have.text('1');
+        view.trigger('test2');
+        expect(n).to.equal(3);
+        return expect(view.$el).to.have.text('2');
       });
     });
     return describe('listenElement(), stopListeningElement()', function() {

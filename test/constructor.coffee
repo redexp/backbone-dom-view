@@ -255,8 +255,10 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             View = DomView.extend
                 defaults:
                     view_field: 1
+                    view_field2: 'view'
 
             model.set 'model_field', 0
+            model.set 'model_field2', 'model'
 
             view = new View model: model
 
@@ -271,6 +273,16 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                 num++
                 expect(this).to.equal(view)
                 expect(v).to.equal(1)
+
+            view.bind '/model_field2', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal('model2')
+
+            view.bind '/view_field2', (v) ->
+                num++
+                expect(this).to.equal(view)
+                expect(v).to.equal('view2')
 
             view.bind '!@model_field', (v) ->
                 num++
@@ -301,6 +313,12 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(num).to.equal(6)
             expect(num2).to.equal(6)
+
+            view.set('view_field2', 'view2')
+            expect(num).to.equal(7)
+
+            model.set('model_field2', 'model2')
+            expect(num).to.equal(8)
 
         it 'should bind events to external model', ->
             View = DomView.extend
@@ -393,6 +411,30 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
             view.trigger('view', 1)
 
             expect(num).to.equal(6)
+
+        it 'should handle >', ->
+            n = 0
+
+            View = DomView.extend
+                template:
+                    'root':
+                        text:
+                            '> #test #test2': -> n++
+
+            view = new View
+
+            expect(n).to.equal 1
+            expect(view.$el).to.have.text('0')
+
+            view.trigger('test')
+
+            expect(n).to.equal 2
+            expect(view.$el).to.have.text('1')
+
+            view.trigger('test2')
+
+            expect(n).to.equal 3
+            expect(view.$el).to.have.text('2')
 
     describe 'listenElement(), stopListeningElement()', ->
 

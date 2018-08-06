@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.62.0';
+	DOMView.v = '1.63.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -116,6 +116,11 @@
 			events = events.trim().split(/\s+/);
 
 			for (var i = 0, len = events.length; i < len; i++) {
+				if (events[i] === '>') {
+					callback();
+					continue;
+				}
+
 				parseEvent(events[i]);
 			}
 
@@ -128,24 +133,32 @@
 					event = event.slice(1);
 				}
 
-				if (event.charAt(0) === '=') {
+				switch (event.charAt(0)) {
+				case '=':
 					event = event.slice(1);
 					target = has(view.attributes, event) ? view : model;
 					bindApplyCallback(target.get(event));
 					return;
-				}
 
-				if (event.charAt(0) === '@') {
+				case '@':
 					event = event.slice(1);
 					target = has(view.attributes, event) ? view : model;
 					argNum = 1;
 					bindApplyCallback(target, target.get(event));
 					event = 'change:' + event;
-				}
+					break;
 
-				if (event.charAt(0) === '#') {
+				case '/':
+					event = event.slice(1);
+					target = has(view.attributes, event) ? view : model;
+					argNum = 1;
+					event = 'change:' + event;
+					break;
+
+				case '#':
 					event = event.slice(1);
 					target = view;
+					break;
 				}
 
 				if (!event) {
