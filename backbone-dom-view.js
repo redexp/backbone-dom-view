@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.63.0';
+	DOMView.v = '1.64.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -906,10 +906,13 @@
 		else { // means plain array
 			if (isClass(fieldClass)) {
 				list = new fieldClass();
+
+				view.listenTo(list, options.addEvent, eachAddListener)
+					.listenTo(list, options.resetEvent, eachResetListener)
+					.listenTo(list, options.removeEvent, eachRemoveListener);
+
 				view.bind('@' + fieldName, function (data) {
-					list.each(eachRemoveListener);
-					list.reset(data);
-					list.each(eachAddListener);
+					list.set(data);
 				});
 			}
 			else {
