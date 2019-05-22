@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.64.1';
+	DOMView.v = '1.64.2';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -117,7 +117,7 @@
 
 			for (var i = 0, len = events.length; i < len; i++) {
 				if (events[i] === '>') {
-					callback();
+					callback.call(this);
 					continue;
 				}
 
