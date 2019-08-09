@@ -1031,7 +1031,8 @@ var ListView = Backbone.DOMView.extend({
                 view: ItemView,
                 sort: {
                     event: 'change:order',
-                    field: 'order'
+                    field: 'order',
+                    order: 'desc'
                 }
             }
         }
@@ -1046,11 +1047,11 @@ var list = new Backbone.Collection([
 
 //...
 
-view.$el //= <ul class="items"><li>one</li> <li>two</li> <li>three</li></ul>
+view.$el //= <ul class="items"><li>three</li> <li>two</li> <li>one</li></ul>
 
 list.at(0).set('order', 4);
 
-view.$el //= <ul class="items"><li>two</li> <li>three</li> <li>one</li></ul>
+view.$el //= <ul class="items"><li>one</li> <li>three</li> <li>two</li></ul>
 ```
 
 <a name="each-sort-by-views"></a>**sortByViews:** `{String|Object}` Default: `null`

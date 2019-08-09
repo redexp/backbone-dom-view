@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.64.2';
+	DOMView.v = '1.65.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -1031,8 +1031,9 @@
 		function sortByField(a, b) {
 			a = a.get(sort.field);
 			b = b.get(sort.field);
+			var order = !sort.order || sort.order === 'asc' ? -1 : 1;
 
-			return a < b ? -1 : a === b ? 0 : 1;
+			return a < b ? order : a === b ? 0 : -order;
 		}
 
 		function eachSortListByViewsHandler() {
