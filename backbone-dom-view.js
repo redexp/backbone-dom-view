@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.65.0';
+	DOMView.v = '1.66.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -708,7 +708,7 @@
 			wrapper = ops.wrapper;
 
 		if (_DEV_) {
-			if (node.length === 0) {
+			if (node.length === 0 && !view.ignoreEmptyNodeWarning) {
 				console.warn('Empty node. Be sure that you set correct selector to template of ' + ops.view.constructor.name);
 			}
 		}
