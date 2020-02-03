@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.66.1';
+	DOMView.v = '1.66.2';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -715,7 +715,7 @@
 					ignore === true ||
 					(
 						_.isArray(ignore) &&
-						ignore.indexOf(node.selector) > 0
+						ignore.indexOf(node.selector) > -1
 					)
 				)
 			) {
