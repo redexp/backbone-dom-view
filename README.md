@@ -271,9 +271,11 @@ Backbone.DOMView.extend({
 
 `view.bind('#event', callback)` - will bind to `event` which should be triggered in `view`
 
-`view.bind('@attribute_name', callback)` - will bind to `change:attribute_name` which should be triggered in `view` (if `view` has `attribute_name`) or in `model` (if `view` do not has `attribute_name`). Callback will be called immediately with `attribute_name` value.
+`view.bind('@attribute_name', (attribute_value) => )` - will bind to `change:attribute_name` which should be triggered in `view` (if `view` has `attribute_name`) or in `model` (if `view` do not has `attribute_name`). Callback will be called immediately with `attribute_name` value.
 
-`view.bind('=attribute_name', callback)` - will not bind to any event, it just will call `callback` with `attribute_name` value.
+`view.bind('=attribute_name', (attribute_value) => )` - will not bind to any event, it just will call `callback` with `attribute_name` value.
+
+`view.bind('> /attribute_name_1 /attribute_name_2', (attribute_value_1, attribute_value_2) => )` - will bind to `change:attribute_name_1` and `change:attribute_name_2` same as `@attribute_name_2` and will be called immediately
 
 Also you can add `!` before any event type to get opposite first argument in event callback.
 

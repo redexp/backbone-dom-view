@@ -259,7 +259,7 @@
         view = new View;
         return expect(x).to.equal(1);
       });
-      return it('should create callbacks', function() {
+      it('should create callbacks', function() {
         var test1, test2, view;
         test1 = function() {};
         test2 = function() {};
@@ -271,6 +271,25 @@
         return expect(view.callbacks).to.deep.equal({
           test1: test1,
           test2: test2
+        });
+      });
+      return it('should extend pick(), omit()', function() {
+        var View, view;
+        View = DomView.extend({
+          defaults: {
+            test1: 1,
+            test2: 2,
+            test3: 3
+          }
+        });
+        view = new View;
+        expect(view.pick('test1', 'test2')).to.eql({
+          test1: 1,
+          test2: 2
+        });
+        return expect(view.omit('test1')).to.eql({
+          test2: 2,
+          test3: 3
         });
       });
     });
@@ -475,7 +494,7 @@
         view.trigger('view', 1);
         return expect(num).to.equal(6);
       });
-      return it('should handle >', function() {
+      it('should handle >', function() {
         var View, n, view;
         n = 0;
         View = DomView.extend({
@@ -498,6 +517,35 @@
         view.trigger('test2');
         expect(n).to.equal(3);
         return expect(view.$el).to.have.text('2');
+      });
+      return it('should handle "> /field /field" event pattern', function() {
+        var View, n, view;
+        n = 0;
+        View = DomView.extend({
+          defaults: {
+            test1: 1,
+            test2: 2
+          },
+          template: {
+            'root': {
+              text: {
+                '> /test1 /test2': function(test1, test2) {
+                  n++;
+                  return test1 + '-' + test2;
+                }
+              }
+            }
+          }
+        });
+        view = new View;
+        expect(n).to.equal(1);
+        expect(view.$el).to.have.text('1-2');
+        view.set('test1', 2);
+        expect(n).to.equal(2);
+        expect(view.$el).to.have.text('2-2');
+        view.set('test2', 1);
+        expect(n).to.equal(3);
+        return expect(view.$el).to.have.text('2-1');
       });
     });
     return describe('listenElement(), stopListeningElement()', function() {

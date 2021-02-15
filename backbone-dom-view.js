@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.66.2';
+	DOMView.v = '1.67.0';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -115,6 +115,20 @@
 
 			events = events.trim().split(/\s+/);
 
+			if (events.length > 1 && events.every(function (e) {
+				return e === '>' || e.charAt(0) === '/';
+			})) {
+				var origin = callback;
+				var fields = events.slice(1).map(function (field) {
+					return field.slice(1);
+				});
+				callback = function () {
+					return origin.apply(this, fields.map(function (field) {
+						return has(view.attributes, field) ? view.get(field) : view.model.get(field);
+					}));
+				};
+			}
+
 			for (var i = 0, len = events.length; i < len; i++) {
 				if (events[i] === '>') {
 					callback.call(this);
@@ -213,6 +227,8 @@
 		get: BB.Model.prototype.get,
 		set: BB.Model.prototype.set,
 		has: BB.Model.prototype.has,
+		pick: BB.Model.prototype.pick,
+		omit: BB.Model.prototype.omit,
 		_validate: BB.Model.prototype._validate,
 
 		getViewList: function (selector) {

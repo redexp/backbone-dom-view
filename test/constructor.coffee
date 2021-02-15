@@ -209,6 +209,17 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(view.callbacks).to.deep.equal({test1: test1, test2: test2})
 
+        it 'should extend pick(), omit()', ->
+            View = DomView.extend
+                defaults:
+                    test1: 1
+                    test2: 2
+                    test3: 3
+
+            view = new View
+            expect(view.pick('test1', 'test2')).to.eql({test1: 1, test2: 2})
+            expect(view.omit('test1')).to.eql({test2: 2, test3: 3})
+
     describe 'find()', ->
 
         it 'should return root node', ->
@@ -435,6 +446,35 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
 
             expect(n).to.equal 3
             expect(view.$el).to.have.text('2')
+
+        it 'should handle "> /field /field" event pattern', ->
+            n = 0
+
+            View = DomView.extend
+                defaults:
+                    test1: 1
+                    test2: 2
+                template:
+                    'root':
+                        text:
+                            '> /test1 /test2': (test1, test2) ->
+                                n++
+                                test1 + '-' + test2
+
+            view = new View
+
+            expect(n).to.equal 1
+            expect(view.$el).to.have.text('1-2')
+
+            view.set('test1', 2)
+
+            expect(n).to.equal 2
+            expect(view.$el).to.have.text('2-2')
+
+            view.set('test2', 1)
+
+            expect(n).to.equal 3
+            expect(view.$el).to.have.text('2-1')
 
     describe 'listenElement(), stopListeningElement()', ->
 
