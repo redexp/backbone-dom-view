@@ -461,20 +461,32 @@ define ['chai', 'backbone', 'backbone-dom-view'], ({expect}, Backbone, DomView) 
                                 n++
                                 test1 + '-' + test2
 
-            view = new View
+                        attr:
+                            'test1':
+                                '/test1': (test1) -> 'test1=' + test1
+                            'test2':
+                                '/test1 /test2': (test1, test2) -> 'test2=' + test1 + '+' + test2
+
+            view = new View({el: '<div>'})
 
             expect(n).to.equal 1
             expect(view.$el).to.have.text('1-2')
+            expect(view.el.hasAttribute('test1')).to.equal(false)
+            expect(view.el.hasAttribute('test2')).to.equal(false)
 
             view.set('test1', 2)
 
             expect(n).to.equal 2
             expect(view.$el).to.have.text('2-2')
+            expect(view.$el).to.have.attr('test1', 'test1=2')
+            expect(view.$el).to.have.attr('test2', 'test2=2+2')
 
             view.set('test2', 1)
 
             expect(n).to.equal 3
             expect(view.$el).to.have.text('2-1')
+            expect(view.$el).to.have.attr('test1', 'test1=2')
+            expect(view.$el).to.have.attr('test2', 'test2=2+1')
 
     describe 'listenElement(), stopListeningElement()', ->
 

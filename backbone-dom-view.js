@@ -10,7 +10,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.67.0';
+	DOMView.v = '1.67.1';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -115,11 +115,11 @@
 
 			events = events.trim().split(/\s+/);
 
-			if (events.length > 1 && events.every(function (e) {
+			if (events.every(function (e) {
 				return e === '>' || e.charAt(0) === '/';
 			})) {
 				var origin = callback;
-				var fields = events.slice(1).map(function (field) {
+				var fields = (events[0] === '>' ? events.slice(1) : events).map(function (field) {
 					return field.slice(1);
 				});
 				callback = function () {
