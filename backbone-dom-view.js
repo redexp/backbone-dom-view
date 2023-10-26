@@ -1,11 +1,7 @@
 ;(function (factory) {
 	if (typeof define === 'function' && define.amd) {
 		define(['backbone', 'underscore'], factory);
-	}
-	else if (typeof exports === 'object') {
-		module.exports = factory(require('backbone'), require('underscore'));
-	}
-	else {
+	} else {
 		Backbone.DOMView = factory(Backbone, _);
 	}
 }(function (BB, _) {
@@ -128,7 +124,7 @@
 				});
 				callback = function () {
 					return origin.apply(this, fields.map(function (field) {
-						return has(view.attributes, field) ? view.get(field) : view.model.get(field);
+						return has(view.attributes, field) ? view.get(field) : model.get(field);
 					}));
 				};
 			}
@@ -315,8 +311,8 @@
 	function listenElement(method) {
 		return function (node, events) {
 			if (_DEV_) {
-				if (node instanceof $ === false && node instanceof window.HTMLElement === false) {
-					throw new Error("node should be instance of jQuery or HTMLElement");
+				if (node instanceof $ === false && node instanceof window.HTMLElement === false && node !== window) {
+					throw new Error("node should be instance of jQuery or HTMLElement or Window");
 				}
 			}
 
@@ -495,8 +491,6 @@
 			wrapper: safeHtmlWrapper
 		});
 	}
-
-	safeHtmlHelper.wrapper = safeHtmlWrapper;
 
 	function safeHtmlWrapper(html) {
 		var dangerTagStart = /<(?:script|style|link|meta|iframe|frame)\b/ig,
@@ -1064,12 +1058,20 @@
 
 		function sortViews(prev, model, i) {
 			if (i === 1) {
-				var first = viewList[prev.cid].$el;
-				holder.prepend(first);
-				prev = first;
+				prev = viewList[prev.cid].el;
+
+				if (prev.previousElementSibling) {
+					holder.prepend(prev);
+				}
 			}
 
-			return viewList[model.cid].$el.insertAfter(prev);
+			const view = viewList[model.cid];
+
+			if (view.el.previousElementSibling !== prev) {
+				view.$el.insertAfter(prev);
+			}
+
+			return view.el;
 		}
 
 		function sortByField(a, b) {
@@ -1192,6 +1194,10 @@
 			'max', 'min'],
 		function (name) {
 			EachViewList.prototype[name] = function (cb) {
+				if (arguments.length > 1) {
+					return _[name].apply(_, [this].concat(_.toArray(arguments), [this]));
+				}
+
 				return _[name](this, cb, this);
 			};
 		}
