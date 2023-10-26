@@ -1,7 +1,11 @@
 ;(function (factory) {
 	if (typeof define === 'function' && define.amd) {
 		define(['backbone', 'underscore'], factory);
-	} else {
+	}
+	else if (typeof exports === 'object') {
+		module.exports = factory(require('backbone'), require('underscore'));
+	}
+	else {
 		Backbone.DOMView = factory(Backbone, _);
 	}
 }(function (BB, _) {
@@ -10,7 +14,7 @@
 
 	var _DEV_ = true; // false in min file
 
-	DOMView.v = '1.67.1';
+	DOMView.v = '1.67.2';
 
 	var View = BB.View,
 		$ = BB.$;
@@ -483,69 +487,83 @@
 	}
 
 	function safeHtmlHelper(selector, options) {
-		var dangerTagStart = /<(?:script|style|link|meta|iframe|frame)\b/ig,
-			dangerTagEnd = /<\/(?:script|style|link|meta|iframe|frame)\b/ig,
-			isWord = /\w/;
-
 		callJqueryMethod({
 			view: this,
 			node: this.find(selector),
 			method: 'html',
 			options: options,
-			wrapper: function (html) {
-				html = html
-					.replace(dangerTagStart, '<div style="display: none;"')
-					.replace(dangerTagEnd, '</div');
-
-				/**
-				 * 0 - text
-				 * 1 - tag
-				 * 2 - attribute name start
-				 * 3 - attribute name
-				 * 4 - attribute value start
-				 * 5 - attribute value
-				 */
-				var context = 0;
-				var attr;
-				var char;
-
-				for (var i = 0, len = html.length; i < len; i++) {
-					char = html[i];
-					if (context === 0 && char === '<' && isWord.test(html[i + 1])) {
-						context = 1;
-					}
-					else if (char === '>' && (context !== 5 || attr === ' ')) {
-						context = 0;
-					}
-					else if (char === ' ' && context === 1) {
-						context = 2;
-					}
-					else if (char !== ' ' && context === 2) {
-						context = 3;
-						if (char === 'o' && html[i + 1] === 'n') {
-							html = html.slice(0, i) + 'x-' + html.slice(i + 2);
-						}
-					}
-					else if (char === '=' && context === 3) {
-						context = 4;
-					}
-					else if ((char === '"' || char === "'") && context === 4) {
-						attr = char;
-						context = 5;
-					}
-					else if (char !== ' ' && context === 4) {
-						attr = ' ';
-						context = 5;
-					}
-					else if (char === attr && context === 5) {
-						attr = false;
-						context = 2;
-					}
-				}
-
-				return html;
-			}
+			wrapper: safeHtmlWrapper
 		});
+	}
+
+	safeHtmlHelper.wrapper = safeHtmlWrapper;
+
+	function safeHtmlWrapper(html) {
+		var dangerTagStart = /<(?:script|style|link|meta|iframe|frame)\b/ig,
+			dangerTagEnd = /<\/(?:script|style|link|meta|iframe|frame)\b/ig,
+			isWord = /\w/;
+
+		var equal = /\s*=/y
+
+		html = html
+		.replace(dangerTagStart, '<div style="display: none;"')
+		.replace(dangerTagEnd, '</div');
+
+		/**
+		 * 0 - text
+		 * 1 - tag
+		 * 2 - attribute name start
+		 * 3 - attribute name
+		 * 4 - attribute value start
+		 * 5 - attribute value
+		 */
+		var context = 0;
+		var attr;
+		var char;
+
+		for (var i = 0, len = html.length; i < len; i++) {
+			char = html[i];
+			if (context === 0 && char === '<' && isWord.test(html[i + 1])) {
+				context = 1;
+			}
+			else if (char === '>' && (context !== 5 || attr === ' ')) {
+				context = 0;
+			}
+			else if (char === ' ' && context === 1) {
+				context = 2;
+			}
+			else if (char === ' ' && context === 3) {
+				equal.lastIndex = i;
+
+				if (!equal.test(html)) {
+					context = 1;
+					i--;
+				}
+			}
+			else if (char !== ' ' && context === 2) {
+				context = 3;
+				if (char === 'o' && html[i + 1] === 'n') {
+					html = html.slice(0, i) + 'x-' + html.slice(i + 2);
+				}
+			}
+			else if (char === '=' && context === 3) {
+				context = 4;
+			}
+			else if ((char === '"' || char === "'") && context === 4) {
+				attr = char;
+				context = 5;
+			}
+			else if (char !== ' ' && context === 4) {
+				attr = ' ';
+				context = 5;
+			}
+			else if (char === attr && context === 5) {
+				attr = false;
+				context = 2;
+			}
+		}
+
+		return html;
 	}
 
 	function textHelper(selector, options) {
