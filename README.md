@@ -732,7 +732,7 @@ var list = new Backbone.Collection([
     {title: 'three'}
 ]);
 
-var view = new LsitView({
+var view = new ListView({
     model: list,
     el: '#items'
 });
